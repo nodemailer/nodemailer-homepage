@@ -1,269 +1,204 @@
 ---
 title: Create plugins
-sidebar_position: 30
+sidebar\_position: 30
 ---
 
-There are 3 stages a plugin can hook to:
+Nodemailer exposes three points in the e‑mail delivery pipeline where you can attach **plugins**:
 
-1. **'compile'** is the step where email data is set but nothing has been done with it yet. At this step you can modify mail options, for example modify **html** content, add new headers etc.
-2. **'stream'** is the step where message tree has been compiled and is ready to be streamed. At this step you can modify the generated MIME tree or add a transform stream that the generated raw email will be piped through before passed to the transport object
-3. **Transport** step where the raw email is streamed to destination
+1. **`compile`** – triggered right after the original `sendMail()` input has been received, before any MIME tree has been built. Modify `mail.data` here (e.g. tweak **`html`** contents, add headers, etc.).
+2. **`stream`** – triggered after Nodemailer has generated the complete MIME tree but _before_ it starts streaming the raw message. At this stage you can mutate the `mail.message` object or inject transform streams that the message is piped through.
+3. **Transport** – the final step where the raw message stream is sent to its destination. Custom transports implement this stage themselves.
 
-## Including plugins
+---
 
-'compile' and 'stream' plugins can be attached with `use(plugin)` method
+## Attaching `compile` and `stream` plugins
 
 ```javascript
-transporter.use(step, pluginFunc)
+transporter.use(step, pluginFn);
 ```
 
-Where
+| Parameter     | Type                   | Description                                               |
+| ------------- | ---------------------- | --------------------------------------------------------- |
+| `transporter` | `Object`               | A transporter created with `nodemailer.createTransport()` |
+| `step`        | `String`               | Either `'compile'` or `'stream'`                          |
+| `pluginFn`    | `Function(mail, done)` | Your plugin function (see API below)                      |
 
-- **transporter** is a transport object created with **createTransport()**
-- **step** is a string, either _'compile'_ or _'stream'_ that defines when the plugin should be hooked
-- **pluginFunc** is a function that takes two arguments: the mail object and a callback function
+---
 
 ## Plugin API
 
-All plugins (including transports) get two arguments, the mail object and a callback function.
+Every plugin ‑‑ including custom transports ‑‑ receives two arguments:
 
-Mail object that is passed to the plugin function as the first argument is an object with the following properties:
+1. `mail`  – Details about the message being processed (see below)
+2. `done`  – Callback **`function (err?)`** which **must** be invoked when your plugin finishes (pass an `Error` to abort the send)
 
-- **data** is the mail data object that is passed to the **sendMail()** method
-- **message** is the MimeNode object of the message. This is available for the 'stream' step and for the transport but not for 'compile'.
-- **resolveContent** is a helper function for converting Nodemailer compatible stream objects into Strings or Buffers
+### `mail` object
 
-### resolveContent()
+| Property         | Available at                       | Description                                                                                                                   |
+| ---------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `data`           | `compile`, `stream`, **transport** | Original options object passed to `sendMail()`                                                                                |
+| `message`        | `stream`, **transport**            | [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance of the fully‑built message |
+| `resolveContent` | `compile`, `stream`, **transport** | Helper for converting Nodemailer content objects to a `String` or `Buffer`                                                    |
 
-If your plugin needs to get the full value of a param, for example the String value for the **html** content, you can use **resolveContent()** to convert Nodemailer compatible content objects to Strings or Buffers.
+### `mail.resolveContent(obj, key, callback)`
 
-```javascript
-mail.resolveContent(obj, key, callback)
-```
-
-Where
-
-- **obj** is an object that has a property you want to convert to a String or a Buffer
-- **key** is the name of the property you want to convert
-- **callback** is the callback function with _(err, value)_ where **value** is either a String or Buffer, depending on the input
-
-#### Example
+Convert any [Nodemailer content type](https://nodemailer.com/message/attachments/#possible-content-types) (file path, URL, Stream, Buffer, etc.) into a plain `String` **or** `Buffer`.
 
 ```javascript
-function plugin(mail, callback) {
-    // if mail.data.html is a file or an url, it is returned as a Buffer
-    mail.resolveContent(mail.data, 'html', (err, html) => {
-        if(err){
-            return callback(err);
-        }
-        console.log('HTML contents: %s', html.toString());
-        callback();
-    });
-};
-```
-
-### 'compile'
-
-Compile step plugins get only the **mail.data** object but not **mail.message**. If you need to access the latter as well, use _'stream'_ step instead.
-
-This is really straightforward, your plugin can modify the **mail.data** object at will and once everything is finished run the callback function. If the callback gets an error object as an argument, then the process is terminated and the error is returned to the **sendMail()** callback.
-
-#### Example
-
-The following plugin checks if **text** value is set and if not converts **html** value by removing all html tags.
-
-```javascript
-transporter.use('compile', (mail, callback) => {
-    if(!mail.data.text && mail.data.html){
-        mail.data.text = mail.data.html.replace(/<[^>]*>/g, ' ');
-    }
-    callback();
+mail.resolveContent(sourceObject, propertyName, (err, value) => {
+  if (err) return done(err);
+  // value is String or Buffer depending on the input type
 });
 ```
 
-### 'stream'
-
-Streaming step is invoked once the message structure is built and ready to be streamed to the transport. Plugin function does get **mail.data** as an argument but it is included just for the reference, modifying it should not change anything (unless the transport requires something from the **mail.data**, for example **mail.data.envelope**).
-
-You can modify the **mail.message** object as you like, the message is not yet streaming anything (message starts streaming when the transport calls **mail.message.createReadStream()**).
-
-In most cases you might be interested in the **message.transform()** method for applying transform streams to the raw message.
-
-#### Example
-
-The following plugin replaces all tabs with spaces in the raw message.
+#### Example – log the final HTML string
 
 ```javascript
-let transformer = new (require('stream').Transform)();
-transformer._transform = (chunk, encoding, done) => {
-    // replace all tabs with spaces in the stream chunk
-    for(let i = 0; i < chunk.length; i++){
-        if(chunk[i] === 0x09){
-            chunk[i] = 0x20;
-        }
-    }
-    this.push(chunk);
+function plugin(mail, done) {
+  mail.resolveContent(mail.data, "html", (err, html) => {
+    if (err) return done(err);
+    console.log("HTML contents: %s", html.toString());
     done();
+  });
+}
+```
+
+---
+
+## `compile` plugins
+
+`compile` plugins **only** receive `mail.data`; `mail.message` does **not** yet exist. Mutate `mail.data` freely and call `done()` when finished. Returning an error aborts `sendMail()`.
+
+#### Example – generate `text` from `html` if missing
+
+```javascript
+transporter.use("compile", (mail, done) => {
+  if (!mail.data.text && mail.data.html) {
+    mail.data.text = mail.data.html.replace(/<[^>]*>/g, " ");
+  }
+  done();
+});
+```
+
+---
+
+## `stream` plugins
+
+`stream` plugins are invoked **after** the MIME tree is ready but **before** the first byte is sent. You can:
+
+- Mutate `mail.message` (e.g. add headers)
+- Pipe the output through additional Transform streams via `mail.message.transform()`
+
+> Editing `mail.data` at this stage usually has **no effect** unless your custom transport explicitly reads the changed property.
+
+### Example – replace all tabs with spaces in the outgoing stream
+
+```javascript
+const { Transform } = require("stream");
+
+const tabToSpace = new Transform();
+
+tabToSpace._transform = function (chunk, _enc, cb) {
+  for (let i = 0; i < chunk.length; ++i) {
+    if (chunk[i] === 0x09) chunk[i] = 0x20; // 0x09 = TAB, 0x20 = space
+  }
+  this.push(chunk);
+  cb();
 };
 
-transporter.use('stream', (mail, callback) => {
-    // apply output transformer to the raw message stream
-    mail.message.transform(transformer);
-    callback();
+transporter.use("stream", (mail, done) => {
+  mail.message.transform(tabToSpace);
+  done();
 });
 ```
 
-Additionally you might be interested in the **message.getAddresses()** method that returns the contents for all address fields as structured objects.
-
-#### Example
-
-The following plugin prints address information to console.
+### Example – log all address fields
 
 ```javascript
-transporter.use('stream', function(mail, callback) => {
-    let addresses = mail.message.getAddresses();
-    console.log('From: %s', JSON.stringify(addresses.from));
-    console.log('To: %s', JSON.stringify(addresses.to));
-    console.log('Cc: %s', JSON.stringify(addresses.cc));
-    console.log('Bcc: %s', JSON.stringify(addresses.bcc));
-    callback();
+transporter.use("stream", (mail, done) => {
+  const a = mail.message.getAddresses();
+  console.log("From :", JSON.stringify(a.from));
+  console.log("To   :", JSON.stringify(a.to));
+  console.log("Cc   :", JSON.stringify(a.cc));
+  console.log("Bcc  :", JSON.stringify(a.bcc));
+  done();
 });
 ```
 
-### message.transform()
+---
 
-If you want to modify the created stream, you can add transform streams that the output will be piped through.
+### `mail.message.transform(transformStream)`
 
-```javascript
-mail.message.transform(transformStream)
-```
+Add a [`stream.Transform`](https://nodejs.org/api/stream.html#class-streamtransform) (or a function returning one) through which the raw message is piped **before** it reaches the transport.
 
-Where
+### `mail.message.getAddresses()`
 
-- **transformStream** - _Stream_ or _Function_ Transform stream that the output will go through. If the value is a function the function should return a transform stream object when called.
+Returns an object containing parsed addresses from **From**, **Sender**, **Reply‑To**, **To**, **Cc**, and **Bcc** headers. Each property is an **array** of `{ name, address }`. Absent fields are omitted.
 
-### message.getAddresses()
+---
 
-Returns an address container object. Includes all parsed addresses from _From_, _Sender_, _To_, _Cc_, _Bcc_ and _Reply-To_ fields. All returned values are arrays, including `from`.
+## Writing a custom transport
 
-Possible return values (all arrays in the form of `[{name:'', address:''}]`):
-
-- **from**
-- **sender**
-- **'reply-to'**
-- **to**
-- **cc**
-- **bcc**
-
-If no addresses were found for a particular field, the field is not set in the response object.
-
-## Transports
-
-Transports are objects that have a method **send()** and properies **name** and **version**. A transport object is passed to the `nodemailer.createTransport(transport)` method to create the transporter object.
-
-### transport.name
-
-This is the name of the transport object. For example 'SMTP' or 'SES' etc.
+A transport is simply an object with **`name`**, **`version`**, and a **`send(mail, done)`** method. Provide the object to `nodemailer.createTransport()` to create a usable transporter.
 
 ```javascript
-transport.name = require('package.json').name;
-```
+const nodemailer = require("nodemailer");
 
-### transport.version
+const transport = {
+  name: require("./package.json").name, // e.g. "SMTP"
+  version: require("./package.json").version, // e.g. "1.0.0"
 
-This should be the transport module version. For example '0.1.0'.
+  /**
+   * Actually sends the message.
+   * @param {Object} mail – the same `mail` object plugins receive
+   * @param {Function} done – callback `(err, info)`
+   */
+  send(mail, done) {
+    const input = mail.message.createReadStream();
+    const envelope = mail.message.getEnvelope();
+    const messageId = mail.message.messageId();
 
-```javascript
-transport.version = require('package.json').version;
-```
-
-### transport.send(mail, callback)
-
-This is the method that actually sends out emails. The method is basically the same as 'stream' plugin functions. It gets two arguments: **mail** and a callback. To start streaming the message, create the stream with **mail.message.createReadStream()**
-
-Callback function should return an **info** object as the second argument. This info object should contain and **envelope** object with envelope data and a **messageId** value with the Message-Id header (including the surrounding < & > brackets),
-
-The following example pipes the raw stream from Nodemailer to the console.
-
-```javascript
-transport.send = (mail, callback) => {
-    let input = mail.message.createReadStream();
-    let envelope = mail.message.getEnvelope();
-    let messageId = mail.message.messageId();
+    // For demo purposes we just pipe to stdout
     input.pipe(process.stdout);
-    input.on('end', function() {
-        callback(null, {
-            envelope,
-            messageId
-        });
+    input.on("end", () => {
+      done(null, {
+        envelope,
+        messageId,
+      });
     });
-};
-```
+  },
 
-### transport.close()
+  /* Optional: close long‑lived connections (e.g. pooled SMTP) */
+  close() {
+    // Clean‑up resources here
+  },
 
-If your transport needs to be closed explicitly, you can implement a **close()** method.
-
-This is purely optional feature and only makes sense in special contexts (eg. closing a SMTP pool).
-
-```javascript
-transport.close = () => {
-    transport.pool = null;
-};
-```
-
-### transport.isIdle()
-
-If your transport is able to notify about idling state by issuing _'idle'_ events then this method should return if the transport is still idling or not.
-
-```javascript
-transport.idling = true;
-transport.isIdle = () => transport.idling;
-transport.send = (mail, callback) => {
-    transport.idling = false;
-    sendMail(mail, ()=>{
-        transport.idling = true;
-        transport.emit('idle');
-    });
-};
-```
-
-### Transport Example
-
-This example creates and uses a transport object that pipes the raw message to console
-
-```javascript
-let transport = {
-    name: 'minimal',
-    version: '0.1.0',
-    send: (mail, callback) => {
-        let input = mail.message.createReadStream();
-        input.pipe(process.stdout);
-        input.on('end', function () {
-            callback(null, true);
-        });
-    }
+  /* Optional: report idling state (used by pooling)
+       Should return `true` when the transport has capacity to send more messages. */
+  isIdle() {
+    return true;
+  },
 };
 
-let transporter = nodemailer.createTransport(transport);
-transporter.sendMail({
-    from: 'sender',
-    to: 'receiver',
-    subject: 'hello',
-    text: 'hello world!'
-});
+const transporter = nodemailer.createTransport(transport);
+
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: "receiver@example.com",
+    subject: "Hello",
+    text: "Hello world!",
+  },
+  console.log
+);
 ```
 
-## Wrapping up
+---
 
-Once you have a transport object, you can create a mail transporter out of it.
+## Summary
 
-```javascript
-let transport = require('some-transport-method');
-let transporter = nodemailer.createTransport(transport);
-transporter.sendMail({
-    from: '...',
-    to: '...',
-    message
-});
-```
+1. Decide which stage (`compile`, `stream`, or custom **transport**) best suits your use‑case.
+2. Write a plugin function receiving **`(mail, done)`** and attach it with `transporter.use()` (or implement `transport.send`).
+3. Always invoke `done(err?)` to signal completion or abort the send.
+
+Happy Hacking! 🚀

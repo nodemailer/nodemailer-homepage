@@ -1,62 +1,85 @@
 ---
 title: DKIM
-sidebar_position: 70
+sidebar\_position: 70
 ---
 
 # DKIM Signing
 
-Nodemailer supports DKIM signing, which adds a digital signature to all outgoing messages. This signature is calculated and added as an additional header (or multiple headers, if using multiple keys).
+DomainKeys Identified Mail (DKIM) adds a cryptographic signature to every
+out‑going message, allowing receiving servers to verify that the message
+really originates from **your** domain and has not been altered in transit.
 
-One drawback of DKIM signing is that Nodemailer needs to cache the entire message before it can be sent. Normally, message output is streamed directly to SMTP without caching. For small messages, this difference is negligible, but for larger messages, Nodemailer offers the option to cache messages on disk instead of in memory. In this scenario, Nodemailer buffers the message in memory up to a certain size and then switches to disk caching. After the signature is calculated and sent to SMTP, the cached message is streamed from disk to SMTP.
+Nodemailer can sign messages with one or more DKIM keys **without** any extra
+dependencies. In most cases signing is fast and fully in‑memory. For very large
+messages you can optionally enable on‑disk caching so that only the first
+_cacheTreshold_ bytes are kept in RAM.
 
-In general, DKIM signing is fast and effective for most use cases.
+---
 
-### Setting It Up
+## Configuration
 
-DKIM signing can be configured at the transport level (where all messages are signed with the same keys) or at the message level (where different keys can be used for each message). If both are configured, the message-level DKIM settings will take precedence.
+DKIM can be configured either
 
-To set up DKIM signing, you need to provide a `dkim` object with the following structure:
+- **Transport‑wide** – every message sent through the transporter is signed
+  with the same key(s), **or**
+- **Per‑message** – pass a `dkim` object in the _MailOptions_ to override the
+  transport settings.
 
-- **dkim**: An object with DKIM options
-  - **domainName**: The domain name to use in the signature
-  - **keySelector**: The DKIM key selector
-  - **privateKey**: The private key for the selector in PEM format
-  - **keys**: (Optional) An array of key objects (_domainName_, _keySelector_, _privateKey_) for signing with multiple keys. If this is provided, the default key values are ignored.
-  - **cacheDir**: (Optional) The location for cached messages. If not set, caching is not used.
-  - **cacheTreshold**: (Optional) The size in bytes after which messages are cached to disk (assuming _cacheDir_ is set and writable). Defaults to 131072 (128 kB).
-  - **hashAlgo**: (Optional) The hashing algorithm for the body hash, defaults to 'sha256'.
-  - **headerFieldNames**: (Optional) A colon-separated list of header fields to sign (e.g., `message-id:date:from:to`).
-  - **skipFields**: (Optional) A colon-separated list of header fields not to sign, useful when certain fields (like Message-ID or Date) are modified by the provider.
+If both are present the **message‑level settings win**.
 
-### Examples
+### DKIM options
 
-#### 1. Sign All Messages
+| Option             | Type                                             | Default            | Purpose                                                                                                            |
+| ------------------ | ------------------------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `domainName`       | `string` (required)                              |  —                 | Primary domain used in the `d=` tag.                                                                               |
+| `keySelector`      | `string` (required)                              |  —                 | DNS selector, forms the left‑hand side of the TXT record (`<selector>._domainkey.<domain>`).                       |
+| `privateKey`       | `string \| Buffer` (required)                    |  —                 | PEM‑formatted private key that matches the public key published in DNS.                                            |
+| `keys`             | `Array< {domainName, keySelector, privateKey} >` |  —                 | Sign with multiple keys (key rotation, sub‑domains, etc.). Setting this ignores the three single‑key fields above. |
+| `hashAlgo`         | `'sha256' \| 'sha1'`                             | `'sha256'`         | Body‑hash algorithm.                                                                                               |
+| `headerFieldNames` | `string`                                         | see spec           | Explicit colon‑separated list of header fields to sign.                                                            |
+| `skipFields`       | `string`                                         | —                  | Colon‑separated list of header fields _not_ to sign (e.g. `message-id:date` when your ESP rewrites them).          |
+| `cacheDir`         | `string \| false`                                | `false`            | Folder used for temporary files when streaming large messages.                                                     |
+| `cacheTreshold`    | `number`                                         | `131 072` (128 kB) | Bytes kept in memory before switching to disk when `cacheDir` is enabled.                                          |
 
-Assumes a public key is available for _2017.\_domainkey.example.com_. You can check if the key exists using the _dig_ tool:
+:::warning
+The option `cacheTreshold` is intentionally miss‑spelled to preserve backwards‑compatibility with older Nodemailer versions.
+:::
 
-```bash
-dig TXT 2017._domainkey.example.com
-```
+---
+
+## Usage examples
+
+All snippets assume at least **Node.js v6** and use CommonJS style:
 
 ```javascript
-let transporter = nodemailer.createTransport({
+const nodemailer = require("nodemailer");
+```
+
+### 1 – Sign every message
+
+```javascript
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 465,
   secure: true,
   dkim: {
     domainName: "example.com",
     keySelector: "2017",
-    privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...",
+    privateKey: fs.readFileSync("./dkim-private.pem", "utf8"),
   },
 });
 ```
 
-#### 2. Sign Messages with Multiple Keys
+Check that the TXT record exists:
 
-Assumes public keys are available for _2017.\_domainkey.example.com_ and _2016.\_domainkey.example.com_.
+```bash
+dig TXT 2017._domainkey.example.com
+```
+
+### 2 – Sign with **multiple** keys
 
 ```javascript
-let transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 465,
   secure: true,
@@ -65,76 +88,81 @@ let transporter = nodemailer.createTransport({
       {
         domainName: "example.com",
         keySelector: "2017",
-        privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...",
+        privateKey: fs.readFileSync("./dkim-2017.pem", "utf8"),
       },
       {
         domainName: "example.com",
         keySelector: "2016",
-        privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...",
+        privateKey: fs.readFileSync("./dkim-2016.pem", "utf8"),
       },
     ],
-    cacheDir: false,
+    cacheDir: false, // disable disk caching
   },
 });
 ```
 
-#### 3. Sign a Specific Message
-
-This example shows how to sign a specific message without signing all messages by default.
+### 3 – Sign **one** specific message
 
 ```javascript
-let transporter = nodemailer.createTransport({
-  host: "smtp.example.com",
-  port: 465,
-  secure: true,
+const transporter = nodemailer.createTransport({
+  /* no global DKIM */
 });
 
-let message = {
+const info = await transporter.sendMail({
   from: "sender@example.com",
   to: "recipient@example.com",
-  subject: "Message",
+  subject: "Hello w/ DKIM",
   text: "I hope this message gets read!",
   dkim: {
     domainName: "example.com",
     keySelector: "2017",
-    privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...",
-  },
-};
-```
-
-#### 4. Cache Large Messages for Signing
-
-Messages larger than 100kB are cached to disk before signing.
-
-```javascript
-let transporter = nodemailer.createTransport({
-  host: "smtp.example.com",
-  port: 465,
-  secure: true,
-  dkim: {
-    domainName: "example.com",
-    keySelector: "2017",
-    privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...",
-    cacheDir: "/tmp",
-    cacheTreshold: 100 * 1024, // 100kB
+    privateKey: fs.readFileSync("./dkim-private.pem", "utf8"),
   },
 });
 ```
 
-#### 5. Do Not Sign Specific Header Keys
-
-Useful when sending mail through SES, which generates its own Message-ID and Date.
+### 4 – Cache large messages on disk
 
 ```javascript
-let transporter = nodemailer.createTransport({
-  host: "smtp.example.com",
-  port: 465,
-  secure: true,
+const transporter = nodemailer.createTransport({
+  /* …SMTP details… */
   dkim: {
     domainName: "example.com",
     keySelector: "2017",
-    privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...",
+    privateKey: fs.readFileSync("./dkim.pem", "utf8"),
+    cacheDir: "/tmp",
+    cacheTreshold: 100 * 1024, // 100 kB
+  },
+});
+```
+
+### 5 – Skip mutable headers
+
+When sending through services such as **Amazon SES**, `Message‑ID`
+and `Date` are often replaced. Exclude these fields so the signature
+survives:
+
+```javascript
+const transporter = nodemailer.createTransport({
+  /* …SMTP details… */
+  dkim: {
+    domainName: "example.com",
+    keySelector: "2017",
+    privateKey: fs.readFileSync("./dkim.pem", "utf8"),
     skipFields: "message-id:date",
   },
 });
 ```
+
+---
+
+## Troubleshooting
+
+- **Signature fails** – Ensure the public key is published at
+  `<keySelector>._domainkey.<domainName>` and is **under 1024 chars**
+  (some DNS providers truncate long TXT records).
+- **Header fields mismatched** – Add them to `skipFields` or re‑order your
+  headers to match exactly what is sent on the wire.
+- **Still stuck?** Run a full test with tools such as
+  [`dkimvalidator.com`](https://dkimvalidator.com) or
+  [`mail-tester.com`](https://www.mail-tester.com).

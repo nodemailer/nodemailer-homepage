@@ -58,9 +58,9 @@ export default {
             label: "Documentation",
           },
           {
-            href: "/docs/about",
+            href: "https://emailengine.app",
             position: "left",
-            label: "About",
+            label: "EmailEngine",
           },
           {
             href: "https://www.npmjs.com/package/nodemailer",

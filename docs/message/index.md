@@ -1,9 +1,7 @@
 ---
 title: Message configuration
-sidebar_position: 30
+sidebar\_position: 30
 ---
-
-# Message configuration
 
 The following are the possible fields of an email message:
 
@@ -30,10 +28,6 @@ var message = {
 };
 ```
 
-:::note
-All text fields (email addresses, plaintext body, html body, attachment filenames) use UTF-8 as the encoding. Attachments are streamed as binary.
-:::
-
 ### More advanced fields
 
 ##### Routing options
@@ -50,15 +44,11 @@ All text fields (email addresses, plaintext body, html body, attachment filename
 - **watchHtml** - Apple Watch specific HTML version of the message. Latest watches have no problems rendering text/html content so watchHtml is most probably never seen by the recipient
 - **amp** - AMP4EMAIL specific HTML version of the message, same usage as with `text` and `html`. See AMP example [below](#amp-example) for usage or [this blogpost](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for sending and rendering
 
-:::info
-When using `amp` then make sure it is a full and valid AMP4EMAIL document, otherwise the displaying email client most probably falls back to `html` and ignores the `amp` part. Validate your AMP4EMAIL content [here](https://validator.ampproject.org/#htmlFormat=AMP4EMAIL)
-:::
-
-- **icalEvent** – iCalendar event to use as an alternative. See details [here](/message/calendar-events/)
-- **alternatives** - An array of alternative text contents (in addition to text and html parts) (see [Using alternative content](/message/alternatives/) for details)
-- **encoding** - identifies encoding for text/html strings (defaults to 'utf-8', other values are 'hex' and 'base64')
-- **raw** - existing MIME message to use instead of generating a new one. See details [here](/message/custom-source/)
-- **textEncoding** - force content-transfer-encoding for text values (either _quoted-printable_ or _base64_). By default the best option is detected (for lots of ascii use _quoted-printable_, otherwise _base64_)
+* **icalEvent** – iCalendar event to use as an alternative. See details [here](/message/calendar-events/)
+* **alternatives** - An array of alternative text contents (in addition to text and html parts) (see [Using alternative content](/message/alternatives/) for details)
+* **encoding** - identifies encoding for text/html strings (defaults to 'utf-8', other values are 'hex' and 'base64')
+* **raw** - existing MIME message to use instead of generating a new one. See details [here](/message/custom-source/)
+* **textEncoding** - force content-transfer-encoding for text values (either _quoted-printable_ or _base64_). By default the best option is detected (for lots of ascii use _quoted-printable_, otherwise _base64_)
 
 ##### Header options
 
@@ -83,10 +73,6 @@ var message = {
 };
 ```
 
-:::info
-**Memory leak warning!** When using readable streams as content and sending fails then Nodemailer does not abort the already opened but not yet finished stream, you need to do this yourself. Nodemailer only closes the streams it has opened itself (eg. file paths, URLs)
-:::
-
 ```javascript
 var htmlstream = fs.createReadStream("content.html");
 transport.sendMail({ html: htmlstream }, function (err) {
@@ -98,14 +84,14 @@ transport.sendMail({ html: htmlstream }, function (err) {
 
 ##### AMP example
 
-```
+```javascript
 let message = {
-    from: 'Nodemailer <example@nodemailer.com>',
-    to: 'Nodemailer <example@nodemailer.com>',
-    subject: 'AMP4EMAIL message',
-    text: 'For clients with plaintext support only',
-    html: '<p>For clients that do not support AMP4EMAIL or amp content is not valid</p>',
-    amp: `<!doctype html>
+  from: "Nodemailer <example@nodemailer.com>",
+  to: "Nodemailer <example@nodemailer.com>",
+  subject: "AMP4EMAIL message",
+  text: "For clients with plaintext support only",
+  html: "<p>For clients that do not support AMP4EMAIL or amp content is not valid</p>",
+  amp: `<!doctype html>
     <html ⚡4email>
       <head>
         <meta charset="utf-8">
@@ -118,6 +104,6 @@ let message = {
         <p>GIF (requires "amp-anim" script in header):<br/>
           <amp-anim src="https://cldup.com/D72zpdwI-i.gif" width="500" height="350"/></p>
       </body>
-    </html>`
-}
+    </html>`,
+};
 ```

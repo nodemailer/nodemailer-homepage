@@ -1,275 +1,275 @@
 ---
 title: Mailcomposer
-sidebar_position: 4
+sidebar\_position: 4
 ---
 
-Generate RFC822 formatted e-mail messages that can be streamed to SMTP or file.
+Generate RFC 822–formatted email messages that you can stream directly to an SMTP connection or save to disk.
+
+:::info
+Mailcomposer is shipped with Nodemailer – you do **not** have to install anything else.
+:::
 
 ## Usage
 
-#### Step 1. Install Nodemailer with npm
-
-_mailcomposer_ is exposed as a submodule of Nodemailer
+### 1 · Install Nodemailer
 
 ```bash
-npm install nodemailer --save
+npm install nodemailer
 ```
 
-#### Step 2. Require _mailcomposer_ in your script
+### 2 · Require **mailcomposer** in your code
 
-```javascript
+```js
 const MailComposer = require("nodemailer/lib/mail-composer");
 ```
 
-#### Step 3. Create a new _MailComposer_ instance
+### 3 · Create a **MailComposer** instance
 
-```javascript
-var mail = new MailComposer(mailOptions);
+```js
+const mail = new MailComposer(mailOptions);
 ```
 
-Where `mailOptions` is an object that defines the components of the message, see below
+`mailOptions` is an object that describes your message. See the full option reference below.
+
+---
 
 ## API
 
-### createReadStream
+### `createReadStream()`
 
-To create a stream that outputs a raw rfc822 message from the defined input, use `createReadStream()`
+Create a readable stream that emits the raw RFC 822 message:
 
-```javascript
-var mail = new MailComposer({from: '...', ...});
-var stream = mail.compile().createReadStream();
+```js
+const mail = new MailComposer({ from: "you@example.com" /* … */ });
+
+const stream = mail.compile().createReadStream();
 stream.pipe(process.stdout);
 ```
 
-### build
+### `build(callback)`
 
-To generate the message and return it with a callback use `build()`
+Generate the message and receive it as a `Buffer` in a callback:
 
-```javascript
-var mail = new MailComposer({from: '...', ...});
-mail.compile().build(function(err, message){
-    process.stdout.write(message);
+```js
+const mail = new MailComposer({ from: "you@example.com" /* … */ });
+
+mail.compile().build((err, message) => {
+  if (err) throw err;
+  process.stdout.write(message);
 });
 ```
 
-### E-mail message fields
+---
 
-The following are the possible fields of an e-mail message:
+## Message fields
 
-- **from** - The e-mail address of the sender. All e-mail addresses can be plain `'sender@server.com'` or formatted `'Sender Name <sender@server.com>'`, see [here](#address-formatting) for details
-- **sender** - An e-mail address that will appear on the _Sender:_ field
-- **to** - Comma separated list or an array of recipients e-mail addresses that will appear on the _To:_ field
-- **cc** - Comma separated list or an array of recipients e-mail addresses that will appear on the _Cc:_ field
-- **bcc** - Comma separated list or an array of recipients e-mail addresses that will appear on the _Bcc:_ field, see [here](#bcc) on how to compile with BCC shown
-- **replyTo** - An e-mail address that will appear on the _Reply-To:_ field
-- **inReplyTo** - The message-id this message is replying
-- **references** - Message-id list (an array or space separated string)
-- **subject** - The subject of the e-mail
-- **text** - The plaintext version of the message as an Unicode string, Buffer, Stream or an object `{path: '...'}`
-- **html** - The HTML version of the message as an Unicode string, Buffer, Stream or an object `{path: '...'}`
-- **watchHtml** - Apple Watch specific HTML version of the message, same usage as with `text` and `html`. Latest watches have no problems rendering text/html content so watchHtml is most probably never seen by the recipient
-- **amp** - AMP4EMAIL specific HTML version of the message, same usage as with `text` and `html`. Make sure it is a full and valid AMP4EMAIL document, otherwise the displaying email client falls back to `html` and ignores the `amp` part. See [this blogpost](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for sending and rendering
-- **icalEvent** - iCalendar event, same usage as with `text` and `html`. Event `method` attribute defaults to 'PUBLISH' or define it yourself: `{method: 'REQUEST', content: iCalString}`. This value is added as an additional alternative to html or text. Only utf-8 content is allowed
-- **headers** - An object or array of additional header fields (e.g. `{"X-Key-Name": "key value"}` or `[{key: "X-Key-Name", value: "val1"}, {key: "X-Key-Name", value: "val2"}]`)
-- **attachments** - An array of attachment objects (see [below](#attachments) for details)
-- **alternatives** - An array of alternative text contents (in addition to text and html parts) (see [below](#alternatives) for details)
-- **envelope** - optional SMTP envelope, if auto generated envelope is not suitable (see [below](#smtp-envelope) for details)
-- **messageId** - optional Message-Id value, random value will be generated if not set
-- **date** - optional Date value, current UTC string will be used if not set
-- **encoding** - optional transfer encoding for the textual parts
-- **raw** - if set then overwrites entire message output with this value. The value is not parsed, so you should still set address headers or the envelope value for the message to work
-- **textEncoding** - set explicitly which encoding to use for text parts (_quoted-printable_ or _base64_). If not set then encoding is detected from text content (mostly ascii means _quoted-printable_, otherwise _base64_)
-- **disableUrlAccess** - if set to true then fails with an error when a node tries to load content from URL
-- **disableFileAccess** - if set to true then fails with an error when a node tries to load content from a file
-- **newline**- either `\r\n` for windows/network newlines, `\n` for unix newlines or do not set to keep as is
+| Field                 | Description                                                                                                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **from**              | Sender address. Accepts plain email (`'sender@server.com'`) or formatted (`'Sender Name <sender@server.com>'`). See [Address formatting](#address-formatting).                                                               |
+| **sender**            | The address that goes into the _Sender:_ header.                                                                                                                                                                             |
+| **to**                | Primary recipients (comma‑separated string or array).                                                                                                                                                                        |
+| **cc**                | Carbon‑copy recipients.                                                                                                                                                                                                      |
+| **bcc**               | Blind carbon‑copy recipients (see [BCC](#bcc) for showing the header).                                                                                                                                                       |
+| **replyTo**           | Address that goes into the _Reply‑To:_ header.                                                                                                                                                                               |
+| **inReplyTo**         | The `Message‑ID` this message replies to.                                                                                                                                                                                    |
+| **references**        | Space‑separated or array of `Message‑ID`s.                                                                                                                                                                                   |
+| **subject**           | Message subject.                                                                                                                                                                                                             |
+| **text**              | Plain‑text body. Accepts `string`, `Buffer`, `Stream`, or `{ path: '…' }`.                                                                                                                                                   |
+| **html**              | HTML body. Same input formats as **text**.                                                                                                                                                                                   |
+| **watchHtml**         | Apple Watch–specific HTML. Most modern watches render regular `text/html`, so this is rarely used.                                                                                                                           |
+| **amp**               | AMP4EMAIL HTML version. Must be a complete, valid AMP email document. Clients that cannot render AMP fall back to **html**. [See this blog post](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/). |
+| **icalEvent**         | iCalendar event. Same input formats as **text**/**html**. Provide `{ method: 'REQUEST', content: icsString }` to override the default `PUBLISH` method. UTF‑8 only.                                                          |
+| **headers**           | Additional headers – object or array. `{ 'X-Key': 'value' }` or `[{ key: 'X-Key', value: 'v1' }]`.                                                                                                                           |
+| **attachments**       | Array of [attachment objects](#attachments).                                                                                                                                                                                 |
+| **alternatives**      | Array of [alternatives](#alternatives) to include in a `multipart/alternative` part.                                                                                                                                         |
+| **envelope**          | Custom SMTP envelope (see [SMTP envelope](#smtp-envelope)).                                                                                                                                                                  |
+| **messageId**         | Custom `Message‑ID`. Autogenerated if omitted.                                                                                                                                                                               |
+| **date**              | Custom `Date` header. Defaults to current UTC time.                                                                                                                                                                          |
+| **encoding**          | Transfer encoding for text parts.                                                                                                                                                                                            |
+| **raw**               | Provide the **entire** raw message yourself. Set headers/envelope manually.                                                                                                                                                  |
+| **textEncoding**      | Force `quoted‑printable` or `base64` for text parts. If omitted, encoding is detected.                                                                                                                                       |
+| **disableUrlAccess**  | `true` → error if a part tries to fetch a URL.                                                                                                                                                                               |
+| **disableFileAccess** | `true` → error if a part tries to read the file system.                                                                                                                                                                      |
+| **newline**           | Line break style – `\r\n`, `\n`, or leave undefined to keep input unchanged.                                                                                                                                                 |
 
-All text fields (e-mail addresses, plaintext body, html body) use UTF-8 as the encoding.
-Attachments are streamed as binary.
+All textual content is treated as UTF‑8. Attachments are streamed as binary.
 
-### Attachments
+---
 
-Attachment object consists of the following properties:
+## Attachments
 
-- **filename** - filename to be reported as the name of the attached file, use of unicode is allowed. If you do not want to use a filename, set this value as `false`, otherwise a filename is generated automatically
-- **cid** - optional content id for using inline images in HTML message source. Using `cid` sets the default `contentDisposition` to `'inline'` and moves the attachment into a _multipart/related_ mime node, so use it only if you actually want to use this attachment as an embedded image
-- **content** - String, Buffer or a Stream contents for the attachment
-- **encoding** - If set and `content` is string, then encodes the content to a Buffer using the specified encoding. Example values: `base64`, `hex`, `binary` etc. Useful if you want to use binary attachments in a JSON formatted e-mail object
-- **path** - path to a file or an URL (data uris are allowed as well) if you want to stream the file instead of including it (better for larger attachments)
-- **contentType** - optional content type for the attachment, if not set will be derived from the `filename` property
-- **contentTransferEncoding** - optional transfer encoding for the attachment, if not set it will be derived from the `contentType` property. Example values: `quoted-printable`, `base64`
-- **contentDisposition** - optional content disposition type for the attachment, defaults to 'attachment'
-- **headers** is an object of additional headers, similar to _message.headers_ option `{'X-My-Header': 'value'}`
-- **raw** is an optional value that overrides entire node content in the mime message. If used then all other options set for this node are ignored. The value is either a string, a buffer, a stream or an attachment-like object (eg. provides `path` or `content`)
+Attachment objects support the following properties:
 
-Attachments can be added as many as you want.
+| Property                    | Description                                                                                                                                                                |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **filename**                | File name reported to the recipient. Unicode allowed. Set `false` to omit.                                                                                                 |
+| **cid**                     | Content‑ID used for embedding inline images (`cid:` URLs). Setting **cid** automatically sets `contentDisposition: 'inline'` and moves the part under `multipart/related`. |
+| **content**                 | `string`, `Buffer`, or `Stream` with the attachment data.                                                                                                                  |
+| **encoding**                | Encoding to convert a **string** `content` into a `Buffer` – e.g. `base64`, `hex`.                                                                                         |
+| **path**                    | File path or HTTP(S)/data URI to stream from instead of including data directly. Great for large files.                                                                    |
+| **contentType**             | MIME type. Auto‑detected from **filename** if absent.                                                                                                                      |
+| **contentTransferEncoding** | Transfer encoding (`quoted-printable`, `base64`, …). Auto‑detected if absent.                                                                                              |
+| **contentDisposition**      | `attachment` (default) or `inline`.                                                                                                                                        |
+| **headers**                 | Extra headers for this part – `{ 'X-My-Header': 'value' }`.                                                                                                                |
+| **raw**                     | Provide raw MIME for the part; all other options are ignored. Accepts `string`, `Buffer`, `Stream`, or another attachment‑like object.                                     |
 
-```javascript
-var mailOptions = {
-    ...
-    attachments: [
-        {   // utf-8 string as an attachment
-            filename: 'text1.txt',
-            content: 'hello world!'
-        },
-        {   // binary buffer as an attachment
-            filename: 'text2.txt',
-            content: new Buffer('hello world!','utf-8')
-        },
-        {   // file on disk as an attachment
-            filename: 'text3.txt',
-            path: '/path/to/file.txt' // stream this file
-        },
-        {   // filename and content type is derived from path
-            path: '/path/to/file.txt'
-        },
-        {   // stream as an attachment
-            filename: 'text4.txt',
-            content: fs.createReadStream('file.txt')
-        },
-        {   // define custom content type for the attachment
-            filename: 'text.bin',
-            content: 'hello world!',
-            contentType: 'text/plain'
-        },
-        {   // use URL as an attachment
-            filename: 'license.txt',
-            path: 'https://raw.github.com/andris9/Nodemailer/master/LICENSE'
-        },
-        {   // encoded string as an attachment
-            filename: 'text1.txt',
-            content: 'aGVsbG8gd29ybGQh',
-            encoding: 'base64'
-        },
-        {   // data uri as an attachment
-            path: 'data:text/plain;base64,aGVsbG8gd29ybGQ='
-        }
-    ]
-}
+### Example
+
+```js
+const fs = require("fs");
+
+const mailOptions = {
+  /* …other fields… */
+  attachments: [
+    // UTF‑8 string
+    { filename: "hello.txt", content: "hello world!" },
+
+    // Binary Buffer
+    { filename: "buffer.txt", content: Buffer.from("hello world!", "utf‑8") },
+
+    // File on disk (streams the file)
+    { filename: "file.txt", path: "/path/to/file.txt" },
+
+    // Derive filename & contentType from path
+    { path: "/path/to/logo.png" },
+
+    // Readable stream
+    { filename: "stream.txt", content: fs.createReadStream("file.txt") },
+
+    // Custom content type
+    { filename: "data.bin", content: "hello world!", contentType: "application/octet-stream" },
+
+    // Remote URL
+    { filename: "license.txt", path: "https://raw.githubusercontent.com/nodemailer/nodemailer/master/LICENSE" },
+
+    // Base64‑encoded string
+    { filename: "base64.txt", content: "aGVsbG8gd29ybGQh", encoding: "base64" },
+
+    // Data URI
+    { path: "data:text/plain;base64,aGVsbG8gd29ybGQ=" },
+  ],
+};
 ```
 
-### Alternatives
+---
 
-In addition to text and HTML, any kind of data can be inserted as an alternative content of the main body - for example a word processing document with the same text as in the HTML field. It is the job of the e-mail client to select and show the best fitting alternative to the reader. Usually this field is used for calendar events and such.
+## Alternatives
 
-Alternative objects use the same options as [attachment objects](#attachments). The difference between an attachment and an alternative is the fact that attachments are placed into _multipart/mixed_ or _multipart/related_ parts of the message white alternatives are placed into _multipart/alternative_ part.
+Besides **text** and **html**, you can include any data as an _alternative_ part – for example, a Markdown or OpenDocument version of the same content. The email client picks the best‑suited alternative to display. Calendar events are commonly attached this way.
 
-**Usage example:**
+Alternative objects use the **same options** as [attachments](#attachments), but are placed into the `multipart/alternative` section of the message instead of `multipart/mixed`/`multipart/related`.
 
-```javascript
-var mailOptions = {
-    ...
-    html: '<b>Hello world!</b>',
-    alternatives: [
-        {
-            contentType: 'text/x-web-markdown',
-            content: '**Hello world!**'
-        }
-    ]
-}
+```js
+const mailOptions = {
+  html: "<b>Hello world!</b>",
+  alternatives: [
+    {
+      contentType: "text/x-web-markdown",
+      content: "**Hello world!**",
+    },
+  ],
+};
 ```
 
-Alternatives can be added as many as you want.
+---
 
-### Address Formatting
+## Address formatting
 
-All the e-mail addresses can be plain e-mail addresses
-
-```
-foobar@example.com
-```
-
-or with formatted name (includes unicode support)
+You can supply addresses in any of the following forms:
 
 ```
-"Ноде Майлер" <foobar@example.com>
+recipient@example.com
+"Display Name" <recipient@example.com>
 ```
 
-> Notice that all address fields (even `from`) are comma separated lists, so if you want to use a comma in the name part, make sure you enclose the name in double quotes: `"Майлер, Ноде" <foobar@example.com>`
+Or as an object (no need to quote anything):
 
-or as an address object (in this case you do not need to worry about the formatting, no need to use quotes etc.)
-
-```
+```js
 {
-    name: 'Майлер, Ноде',
-    address: 'foobar@example.com'
+  name: 'Display Name',
+  address: 'recipient@example.com'
 }
 ```
 
-All address fields accept comma separated list of e-mails or an array of
-e-mails or an array of comma separated list of e-mails or address objects - use it as you like.
-Formatting can be mixed.
+Every address field – even **from** – accepts **one or many** addresses, in any mix of formats:
 
-```
-...,
-to: 'foobar@example.com, "Ноде Майлер" <bar@example.com>, "Name, User" <baz@example.com>',
-cc: ['foobar@example.com', '"Ноде Майлер" <bar@example.com>, "Name, User" <baz@example.com>'],
-bcc: ['foobar@example.com', {name: 'Майлер, Ноде', address: 'foobar@example.com'}]
-...
-```
-
-You can even use unicode domains, these are automatically converted to punycode
-
-```
-'"Unicode Domain" <info@müriaad-polüteism.info>'
-```
-
-### SMTP envelope
-
-SMTP envelope is usually auto generated from `from`, `to`, `cc` and `bcc` fields but
-if for some reason you want to specify it yourself, you can do it with `envelope` property.
-
-`envelope` is an object with the following params: `from`, `to`, `cc` and `bcc` just like
-with regular mail options. You can also use the regular address format, unicode domains etc.
-
-```javascript
-mailOptions = {
-    ...,
-    from: 'mailer@kreata.ee',
-    to: 'daemon@kreata.ee',
-    envelope: {
-        from: 'Daemon <deamon@kreata.ee>',
-        to: 'mailer@kreata.ee, Mailer <mailer2@kreata.ee>'
-    }
+```js
+{
+  to: 'user1@example.com, "User Two" <user2@example.com>',
+  cc: [
+    'user3@example.com',
+    '"User Four" <user4@example.com>',
+    { name: 'User Five', address: 'user5@example.com' }
+  ]
 }
 ```
 
-> Not all transports can use the `envelope` object, for example SES ignores it and uses the data from the From:, To: etc. headers.
+Internationalized domain names (IDN) are automatically converted to punycode:
 
-### Using Embedded Images
-
-Attachments can be used as embedded images in the HTML body. To use this feature, you need to set additional property of the attachment - `cid` (unique identifier of the file) which is a reference to the attachment file. The same `cid` value must be used as the image URL in HTML (using `cid:` as the URL protocol, see example below).
-
-**NB!** the cid value should be as unique as possible!
-
-```javascript
-var mailOptions = {
-    ...
-    html: 'Embedded image: <img src="cid:unique@kreata.ee"/>',
-    attachments: [{
-        filename: 'image.png',
-        path: '/path/to/file',
-        cid: 'unique@kreata.ee' //same cid value as in the html img src
-    }]
-}
+```
+"Unicode Domain" <info@müriaad-polüteism.info>
 ```
 
-### BCC
+---
 
-By default, MailComposer drops the BCC header when built. If you need to BCC header to be shown when built, you'll need to include the `keepBcc` option like so.
+## SMTP envelope
 
-```javascript
-var mailOptions = {
-   ...
-   bcc: 'bcc@example.com'
-}
+By default the SMTP envelope is generated from the address headers. If you need something different – for example, VERP or black‑hole `from` – you can set **envelope** explicitly:
 
-var mail = new MailComposer(mailOptions).compile()
-mail.keepBcc = true
-mail.build(function(err, message){
-    process.stdout.write(message);
+```js
+const mailOptions = {
+  from: "mailer@example.com",
+  to: "daemon@example.com",
+  envelope: {
+    from: "Daemon <daemon@example.com>",
+    to: 'mailer@example.com, "Mailer Two" <mailer2@example.com>',
+  },
+};
+```
+
+> Some transports (e.g. AWS SES) ignore `envelope` and instead use the header addresses.
+
+---
+
+## Using embedded images
+
+Set `cid` on an attachment and reference it in the HTML with the `cid:` protocol:
+
+```js
+const mailOptions = {
+  html: 'Embedded image: <img src="cid:unique@nodemailer" />',
+  attachments: [
+    {
+      filename: "image.png",
+      path: "/path/to/image.png",
+      cid: "unique@nodemailer", // must match the src above
+    },
+  ],
+};
+```
+
+---
+
+## BCC
+
+MailComposer removes the _Bcc:_ header by default to keep recipient addresses private. If you need the header to remain, enable `keepBcc` **after** calling `compile()`:
+
+```js
+const mail = new MailComposer({
+  /* … */
+  bcc: "bcc@example.com",
+}).compile();
+
+mail.keepBcc = true;
+
+mail.build((err, message) => {
+  if (err) throw err;
+  process.stdout.write(message);
 });
 ```
+
+---
 
 ## License
 
-**MIT**
+[MIT](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)

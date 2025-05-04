@@ -1,75 +1,109 @@
 ---
 title: Attachments
-sidebar_position: 11
+sidebar\_position: 11
 ---
 
-**attachments** option in the message object that contains an array of attachment objects.
+Use the `attachments` option of the [message object](/message) to attach files.
 
-Attachment object consists of the following properties:
+An attachment is an object inside the `attachments` array. You can attach **as many files as you need**.
 
--   **filename** - filename to be reported as the name of the attached file. Use of unicode is allowed.
--   **content** - String, Buffer or a Stream contents for the attachment
--   **path** - path to the file if you want to stream the file instead of including it (better for larger attachments)
--   **href** – an URL to the file (data uris are allowed as well)
--   **httpHeaders** - optional HTTP headers to pass on with the _href_ request, eg. `{authorization: "bearer ..."}`
--   **contentType** - optional content type for the attachment, if not set will be derived from the _filename_ property
--   **contentDisposition** - optional content disposition type for the attachment, defaults to 'attachment'
--   **cid** - optional content id for using inline images in HTML message source
--   **encoding** - If set and _content_ is string, then encodes the content to a Buffer using the specified encoding. Example values: _'base64'_, _'hex'_, _'binary'_ etc. Useful if you want to use binary attachments in a JSON formatted email object.
--   **headers** - custom headers for the attachment node. Same usage as with message headers
--   **raw** - is an optional special value that overrides entire contents of current mime node including mime headers. Useful if you want to prepare node contents yourself
+| Property             | Type                         | Description                                                                                                                                       |
+| -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filename`           | `string`                     | Name that will be displayed to the recipient. Unicode is allowed.                                                                                 |
+| `content`            | `string \| Buffer \| Stream` | Contents of the file.                                                                                                                             |
+| `path`               | `string`                     | Filesystem path or URL (including data URIs). Nodemailer streams the file instead of reading it fully into memory—recommended for large files.    |
+| `href`               | `string`                     | HTTP(s) URL that Nodemailer should fetch and attach.                                                                                              |
+| `httpHeaders`        | `object`                     | Custom HTTP headers for `href`, for example `{ authorization: 'Bearer …' }`.                                                                      |
+| `contentType`        | `string`                     | Explicit [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types). Defaults to the type inferred from `filename`. |
+| `contentDisposition` | `string`                     | Content‑Disposition header. Defaults to `'attachment'`.                                                                                           |
+| `cid`                | `string`                     | Content‑ID for embedding the attachment inline in the HTML body (`<img src="cid:my-logo"/>`).                                                     |
+| `encoding`           | `string`                     | Encoding applied when `content` is a string (e.g. `'base64'`, `'hex'`).                                                                           |
+| `headers`            | `object`                     | Custom headers for the individual MIME node.                                                                                                      |
+| `raw`                | `string`                     | **Advanced**: Full pre‑built MIME node including headers. Overrides every other field.                                                            |
 
-Attachments can be added as many as you want.
+:::tip Streaming vs. in‑memory
+Prefer `path`, `href`, or a `Stream` when attaching large files so that Nodemailer can stream data without loading it all into memory.
+:::
 
-**Example**
+## Examples
 
 ```javascript
-let message = {
-    ...
-    attachments: [
-        {   // utf-8 string as an attachment
-            filename: 'text1.txt',
-            content: 'hello world!'
-        },
-        {   // binary buffer as an attachment
-            filename: 'text2.txt',
-            content: new Buffer('hello world!','utf-8')
-        },
-        {   // file on disk as an attachment
-            filename: 'text3.txt',
-            path: '/path/to/file.txt' // stream this file
-        },
-        {   // filename and content type is derived from path
-            path: '/path/to/file.txt'
-        },
-        {   // stream as an attachment
-            filename: 'text4.txt',
-            content: fs.createReadStream('file.txt')
-        },
-        {   // define custom content type for the attachment
-            filename: 'text.bin',
-            content: 'hello world!',
-            contentType: 'text/plain'
-        },
-        {   // use URL as an attachment
-            filename: 'license.txt',
-            path: 'https://raw.github.com/nodemailer/nodemailer/master/LICENSE'
-        },
-        {   // encoded string as an attachment
-            filename: 'text1.txt',
-            content: 'aGVsbG8gd29ybGQh',
-            encoding: 'base64'
-        },
-        {   // data uri as an attachment
-            path: 'data:text/plain;base64,aGVsbG8gd29ybGQ='
-        },
-        {
-            // use pregenerated MIME node
-            raw: 'Content-Type: text/plain\r\n' +
-                 'Content-Disposition: attachment;\r\n' +
-                 '\r\n' +
-                 'Hello world!'
-        }
-    ]
-}
+const fs = require("fs");
+
+// inside a message object
+attachments: [
+  // 1. Plain text
+  {
+    filename: "hello.txt",
+    content: "Hello world!",
+  },
+
+  // 2. Binary (Buffer)
+  {
+    filename: "buffer.txt",
+    content: Buffer.from("Hello world!", "utf8"),
+  },
+
+  // 3. Local file (streamed)
+  {
+    filename: "report.pdf",
+    path: "/absolute/path/to/report.pdf",
+  },
+
+  // 4. Implicit filename & type (derived from path)
+  {
+    path: "/absolute/path/to/image.png",
+  },
+
+  // 5. Readable stream
+  {
+    filename: "notes.txt",
+    content: fs.createReadStream("./notes.txt"),
+  },
+
+  // 6. Custom content‑type
+  {
+    filename: "data.bin",
+    content: Buffer.from("deadbeef", "hex"),
+    contentType: "application/octet-stream",
+  },
+
+  // 7. Remote file
+  {
+    filename: "license.txt",
+    href: "https://raw.githubusercontent.com/nodemailer/nodemailer/master/LICENSE",
+  },
+
+  // 8. Base64‑encoded string
+  {
+    filename: "photo.jpg",
+    content: "/9j/4AAQSkZJRgABAQAAAQABAAD…", // truncated
+    encoding: "base64",
+  },
+
+  // 9. Data URI
+  {
+    path: "data:text/plain;base64,SGVsbG8gd29ybGQ=",
+  },
+
+  // 10. Pre‑built MIME node
+  {
+    raw: ["Content-Type: text/plain; charset=utf-8", 'Content-Disposition: attachment; filename="greeting.txt"', "", "Hello world!"].join("\r\n"),
+  },
+];
+```
+
+## Embedding images
+
+To embed an image inside the HTML part of the email, set a `cid` on the attachment and reference that CID in the HTML:
+
+```javascript
+attachments: [
+  {
+    filename: 'logo.png',
+    path: './assets/logo.png',
+    cid: 'logo@nodemailer'
+  }
+],
+html: '<p><img src="cid:logo@nodemailer" alt="Nodemailer logo"></p>'
 ```

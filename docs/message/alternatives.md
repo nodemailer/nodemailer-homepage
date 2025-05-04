@@ -1,29 +1,36 @@
 ---
 title: Alternatives
-sidebar_position: 12
+sidebar\_position: 12
 ---
 
-In addition to text and HTML, any kind of data can be inserted as an alternative content of the main body - for example a word processing document with the same text as in the HTML field. It is the job of the email client to select and show the best fitting alternative to the reader. Usually this field is used for calendar events and such.
+In addition to plain‑text and HTML bodies, you can embed **alternative representations** of the same content—for example, Markdown or a calendar invite. The email client chooses the representation that best fits the recipient’s environment. Alternatives are most often used for calendar events and other machine‑readable formats.
 
-:::tip
-If you want to use a calendar event as the alternative, the consider using the **icalEvent** option instead. See details [here](/message/calendar-events/).
+:::tip Prefer `icalEvent` for calendar invites
+If you want to send a calendar event, consider the **`icalEvent`** option instead. See [Calendar events](/message/calendar-events/) for details.
 :::
 
-Alternative objects use the same options as [attachment objects](/attachments/). The difference between an attachment and an alternative is the fact that attachments are placed into _multipart/mixed_ or _multipart/related_ parts of the message white alternatives are placed into _multipart/alternative_ part.
+## How alternatives differ from attachments
 
-**Usage example:**
+Alternative objects accept exactly the same fields as [attachment objects](/message/attachments/). The only difference is where Nodemailer places them in the MIME tree:
+
+| Purpose          | MIME container                           |
+| ---------------- | ---------------------------------------- |
+| Attachments      | `multipart/mixed` or `multipart/related` |
+| **Alternatives** | `multipart/alternative`                  |
+
+## Usage
 
 ```javascript
-let message = {
-    ...
-    html: '<b>Hello world!</b>',
-    alternatives: [
-        {
-            contentType: 'text/x-web-markdown',
-            content: '**Hello world!**'
-        }
-    ]
-}
+const message = {
+  // ...
+  html: "<b>Hello world!</b>",
+  alternatives: [
+    {
+      contentType: "text/x-web-markdown",
+      content: "**Hello world!**",
+    },
+  ],
+};
 ```
 
-Alternatives can be added as many as you want.
+You can include **as many** alternative bodies as you need. Place the most preferred version last—the majority of clients read the list from top to bottom and render the last format they understand.

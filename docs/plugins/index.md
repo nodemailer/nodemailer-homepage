@@ -1,22 +1,67 @@
 ---
 title: Plugins
-sidebar_position: 60
+sidebar\_position: 60
 ---
 
-# Plugins
+Nodemailer is designed to be **extensible**. You can inject custom logic at three well‑defined phases of a message’s lifecycle:
 
-Nodemailer can be extended with plugins. In most cases there are 3 different kind of plugins.
+| Phase              | Keyword     | When it runs                                                                   | Typical uses                                                      |
+| ------------------ | ----------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| **Pre‑processing** | `compile`   | Right after the message object is built, _before_ the MIME source is generated | Templating, automatic plain‑text alternatives, address validation |
+| **Processing**     | `stream`    | While the MIME stream is being generated                                       | DKIM signing, inlining images, transforming HTML                  |
+| **Sending**        | `transport` | After the message source is ready, to actually deliver it                      | SMTP, SES, SparkPost, custom HTTP APIs                            |
 
-1. Plugins that operate on the mail object (for example extend it or change existing values). This is the pre-processing step
-2. Plugins that operate on mail stream (for example to calculate message signatures). This is the processing step
-3. Plugins that operate as transports (for example to send the message using an API of some delivery provider). This is the sending step
+:::tip
+Prefer _compile_ and _stream_ plugins for portability. Transport plugins are only required when you need complete control over delivery.
+:::
 
-### Available plugins
+## Writing a plugin
 
-These are some existing public plugins for Nodemailer
+```js
+// commonjs — works on Node.js ≥ 6.0.0
+module.exports = function myCompilePlugin(mail, callback) {
+  // `mail` is the Nodemailer Mail object
+  // Add or adjust properties before the MIME source is generated
+  if (!mail.data.text && mail.data.html) {
+    mail.data.text = require("html-to-text").htmlToText(mail.data.html);
+  }
 
-- [express-handlebars](https://github.com/yads/nodemailer-express-handlebars) – this plugin uses the express-handlebars view engine to generate html emails
-- [inline-base64](https://github.com/mixmaxhq/nodemailer-plugin-inline-base64) – This plugin will convert base64-encoded images in your nodemailer email to be inline ("CID-referenced") attachments within the email
-- [html-to-text](https://github.com/andris9/nodemailer-html-to-text) – The plugin checks if there is no text option specified and populates it based on the html value
+  callback(); // Always invoke the callback (or pass an Error)
+};
+```
 
-For a more extensive list [search for nodemailer](https://www.npmjs.com/search?q=nodemailer) in npm.
+Register the plugin on a transport instance:
+
+```js
+const nodemailer = require("nodemailer");
+const transport = nodemailer.createTransport({ sendmail: true });
+
+transport.use("compile", require("./myCompilePlugin"));
+```
+
+### Error handling
+
+If your plugin encounters a fatal problem, pass an `Error` object to the callback:
+
+```js
+callback(new Error("Template not found"));
+```
+
+The message will **not** be sent and the error will propagate to the caller’s `sendMail()` callback/promise.
+
+## Public plugins
+
+A curated selection of community‑maintained plugins:
+
+- **express‑handlebars** – Render Handlebars templates from your Express views directory.
+  [https://github.com/yads/nodemailer-express-handlebars](https://github.com/yads/nodemailer-express-handlebars)
+- **inline‑base64** – Convert inline base64‑encoded images to CID attachments.
+  [https://github.com/mixmaxhq/nodemailer-plugin-inline-base64](https://github.com/mixmaxhq/nodemailer-plugin-inline-base64)
+- **html‑to‑text** – Automatically generate a plain‑text version when one is missing.
+  [https://github.com/andris9/nodemailer-html-to-text](https://github.com/andris9/nodemailer-html-to-text)
+
+Looking for something else? Try [searching npm for “nodemailer plugin”](https://www.npmjs.com/search?q=keywords:nodemailer%20plugin).
+
+---
+
+Need more power? See **[Creating plugins »](/plugins/create)** for a deep dive into the plugin API.

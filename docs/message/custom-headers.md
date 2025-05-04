@@ -1,68 +1,98 @@
 ---
 title: Custom headers
-sidebar_position: 17
+sidebar\_position: 17
 ---
 
-Most messages do not need any kind of tampering with the headers. If you do need to add custom headers either to the message or to an attachment/alternative, you can add these values with the **headers** option. Values are processed automatically, non-ascii strings are encoded as mime-words and long lines are folded.
+Nodemailer generates all mandatory headers for you, so in day‑to‑day usage you rarely need to touch them.
+When you _do_ have to add or override headers—either at the **message level** or for a single **attachment / alternative**—use the **`headers`** property.
 
-* **headers** – is an object of key-value pairs, where key names are converted into message header keys
+- **`headers`** — an object whose key–value pairs become raw message headers.
 
-### Examples
+  - Keys are converted to their canonical header name (`x-my-key` ➜ `X-My-Key`).
+  - Values are encoded (non‑ASCII → _mime‑word_) and long lines are wrapped to max‑78 bytes unless you opt out with `prepared`.
 
-#### 1\. Set custom headers
+:::warning
+Do **not** set [**protected headers**](https://nodemailer.com/message/headers#protected) such as `From`, `To`, `Subject`, `Date`, `Message-ID`, or MIME boundary headers—Nodemailer will ignore or overwrite them.
+:::
+
+---
+
+## Examples
+
+### 1. Add simple custom headers
 
 ```javascript
-let message = {
-    ...,
-    headers: {
-        'x-my-key': 'header value',
-        'x-another-key': 'another value'
-    }
-}
+const message = {
+  // other fields …
+  headers: {
+    "x-my-key": "header value",
+    "x-another-key": "another value",
+  },
+};
 
-// Becomes:
-//   X-My-Key: header value
-//   X-Another-Key: another value
+/*
+Results in:
+X-My-Key: header value
+X-Another-Key: another value
+*/
 ```
 
-#### 2\. Multiple rows with the same key
+### 2. Repeat the same header key
 
-The same header key can be used multiple times if the header value is an Array
+Provide an `Array` to create multiple header lines with the **same key**:
 
 ```javascript
-let message = {
-    ...,
-    headers: {
-        'x-my-key': [
-            'value for row 1',
-            'value for row 2',
-            'value for row 3'
-        ]
-    }
-}
+const message = {
+  // …
+  headers: {
+    "x-my-key": ["value for row 1", "value for row 2", "value for row 3"],
+  },
+};
 
-// X-My-Key: value for row 1
-// X-My-Key: value for row 2
-// X-My-Key: value for row 3
+/*
+X-My-Key: value for row 1
+X-My-Key: value for row 2
+X-My-Key: value for row 3
+*/
 ```
 
-#### 3\. Prepared headers
+### 3. Bypass Nodemailer’s encoding & folding
 
-Normally all headers are encoded and folded to meet the requirement of having plain-ASCII messages with lines no longer than 78 bytes. Sometimes it is preferable to not modify header values and pass these as provided. This can be achieved with the **prepared** option:
+Set `prepared: true` if you already took care of encoding / line‑wrapping yourself and want Nodemailer to pass the value through _verbatim_.
 
 ```javascript
-let message = {
-    ...,
-    headers: {
-        'x-processed': 'a really long header or value with non-ascii characters 👮',
-        'x-unprocessed': {
-            prepared: true,
-            value: 'a really long header or value with non-ascii characters 👮'
-        }
-    }
-}
+const message = {
+  // …
+  headers: {
+    "x-processed": "a really long header or value with non‑ascii 🚀",
+    "x-unprocessed": {
+      prepared: true,
+      value: "a really long header or value with non‑ascii 🚀",
+    },
+  },
+};
 
-// X-Processed: a really long header or value with non-ascii characters
-//  =?UTF-8?Q?=F0=9F=91=AE?=
-// X-Unprocessed: a really long header or value with non-ascii characters ?
+/*
+X-Processed: a really long header or value with non‑ascii =?UTF-8?Q?=F0=9F=9A=80?=
+X-Unprocessed: a really long header or value with non‑ascii 🚀
+*/
+```
+
+### 4. Headers on an attachment
+
+`headers` is available inside any attachment or alternative object:
+
+```javascript
+const message = {
+  // …
+  attachments: [
+    {
+      filename: "report.csv",
+      content: csvBuffer,
+      headers: {
+        "x-report-id": "2025‑Q1",
+      },
+    },
+  ],
+};
 ```

@@ -1,63 +1,71 @@
 ---
 title: Custom source
-sidebar_position: 18
+sidebar\_position: 18
+description: Provide your own pre‑built RFC822/EML source instead of letting Nodemailer generate it.
 ---
 
-If you want to use your own custom generated RFC822 formatted message source, instead of letting Nodemailer to generate it from the message options, use option **raw**. This can be used both for the entire message or alternatively per-attachment or per-alternative.
+When you already have a fully‑formatted RFC 822/EML message—perhaps because it was composed elsewhere or fetched from storage—you can hand it to Nodemailer verbatim with the **raw** option. Nodemailer will bypass its normal MIME generation and deliver exactly what you supply.
 
-:::note
-Don't forget to set the **envelope** option when using **raw** as the message source
+You can use **raw** at three levels:
+
+1. **Whole message** — supply a single RFC 822 document.
+2. **Per alternative** — supply a `text/plain`, `text/html`, or other MIME alternative that you built yourself.
+3. **Per attachment** — supply an attachment body, complete with its own headers.
+
+:::tip Always set an envelope
+When you use **raw** for the _entire_ message, you must also set `envelope.from` and `envelope.to` so that the SMTP transaction has the correct sender and recipients. These values are _not_ extracted from the raw source.
 :::
 
-### Examples
+## Examples
 
-#### 1\. Use string as a message body
-
-This example loads the entire message source from a string value. You don't have to worry about proper newlines, these are handled by Nodemailer.
+### 1. String as the entire message
 
 ```javascript
-let message = {
-    envelope: {
-        from: 'sender@example.com',
-        to: ['recipient@example.com']
-    },
-    raw: `From: sender@example.com
+const message = {
+  envelope: {
+    from: "sender@example.com",
+    to: ["recipient@example.com"],
+  },
+  raw: `From: sender@example.com
 To: recipient@example.com
-Subject: test message
+Subject: Hello world
 
-Hello world!`
+Hello world!`,
 };
 ```
 
-#### 2\. Set EML file as message body
+> Nodemailer will normalise new‑lines for you, so plain `\n` is fine.
 
-This example loads the entire message source from a file
+### 2. EML file as the entire message
 
 ```javascript
-let message = {
-    envelope: {
-        from: 'sender@example.com',
-        to: ['recipient@example.com']
+const message = {
+  envelope: {
+    from: "sender@example.com",
+    to: ["recipient@example.com"],
+  },
+  raw: {
+    path: "/path/to/message.eml", // absolute or relative to process.cwd()
+  },
+};
+```
+
+### 3. String as an attachment
+
+When **raw** is used inside `attachments[]`, include **all** of the MIME headers yourself. Nodemailer **does not** add `Content‑Type`, `Content‑Disposition`, or any other headers.
+
+```javascript
+const message = {
+  from: "sender@example.com",
+  to: "recipient@example.com",
+  subject: "Custom attachment",
+  attachments: [
+    {
+      raw: `Content-Type: text/plain
+Content-Disposition: attachment; filename="notes.txt"
+
+Attached text file`,
     },
-    raw: {
-        path: '/path/to/message.eml'
-    }
-};
-```
-
-#### 3\. Set string as attachment body
-
-When using **raw** for attachments then you need to provide all content headers youself, Nodemailer does not process it in any way (besides newline processing), it is inserted into the MIME tree as is.
-
-```javascript
-let message = {
-    from: 'sender@example.com',
-    to: 'recipient@example.com',
-    subject: 'Custom attachment',
-    attachments: [{
-        raw: `Content-Type: text/plain
-Content-Disposition: attachment
-
-Attached text file`}]
+  ],
 };
 ```
