@@ -39,6 +39,13 @@ export default {
     ],
   ],
 
+  scripts: [
+    {
+      src: "https://plausible.emailengine.dev/js/script.js",
+      defer: true,
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
