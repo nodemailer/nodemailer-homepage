@@ -1,6 +1,6 @@
 ---
 title: DKIM
-sidebar\_position: 70
+sidebar_position: 7
 ---
 
 # DKIM Signing

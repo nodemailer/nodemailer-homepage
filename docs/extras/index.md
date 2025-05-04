@@ -1,9 +1,7 @@
 ---
 title: Extra modules
-sidebar\_position: 80
+sidebar_position: 8
 ---
-
-# Extra modules
 
 Beyond Nodemailer itself, a collection of companion libraries can help you receive, compose, parse, and preview e‑mail inside your Node.js applications.
 

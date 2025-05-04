@@ -1,6 +1,6 @@
 ---
 title: Message configuration
-sidebar\_position: 30
+sidebar_position: 3
 ---
 
 The following are the possible fields of an email message:

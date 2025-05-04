@@ -1,6 +1,6 @@
 ---
 title: Plugins
-sidebar\_position: 60
+sidebar_position: 6
 ---
 
 Nodemailer is designed to be **extensible**. You can inject custom logic at three well‑defined phases of a message’s lifecycle:

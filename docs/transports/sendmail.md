@@ -3,59 +3,88 @@ title: Sendmail transport
 sidebar_position: 27
 ---
 
-Sendmail transport pipes the generated RFC822 message to the standard input of the **sendmail** command, so it's the same thing what the **mail()** function in PHP does.
+The **Sendmail transport** hands the generated RFC 822 message off to the local **sendmail** (or compatible) binary by piping it to _stdin_. Functionally, this is the same mechanism used by PHP's `mail()` helper.
 
-To use Sendmail transport, set **sendmail** in Nodemailer transport options to _true_.
+## Usage
 
-The additional options to use with this transport are the following:
+```javascript
+// CommonJS
+const nodemailer = require("nodemailer");
 
-- **path** - path to the **sendmail** command (defaults to _'sendmail'_)
-- **newline** - either _'windows'_ or _'unix'_ (default). Forces all newlines in the output to either use Windows syntax &lt;CR&gt;&lt;LF&gt; or Unix syntax &lt;LF&gt;
-- **args** - an optional array of command line options to pass to the **sendmail** command (ie. `["-f", "foo@example.com"]`). This overrides all default arguments except for _'-i'_ and recipient list so you need to make sure you have all required arguments set (ie. the '-f' flag).
-
-The command to be spawned by default looks like this:
-
-```sh
-sendmail -i -f from_addr to_addr[]
+const transporter = nodemailer.createTransport({
+  sendmail: true, // enable Sendmail transport
+});
 ```
 
-If **args** property was provided then the command looks like this:
+Setting `sendmail: true` activates the transport. Nodemailer will try to locate the binary automatically (defaults to `sendmail` in your `PATH`). If necessary, you can point Nodemailer to a different binary with the `path` option (see below).
+
+### Transport options
+
+| Option    | Type                   | Default      | Description                                                                                                                                                                                                                                                                   |
+| --------- | ---------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `path`    | `String`               | `'sendmail'` | Absolute or relative path to the **sendmail** binary.                                                                                                                                                                                                                         |
+| `newline` | `'unix'` / `'windows'` | `'unix'`     | Forces all line‑breaks in the generated message body to Unix (`\n`) or Windows (`\r\n`) style.                                                                                                                                                                                |
+| `args`    | `String[]`             | _none_       | Additional **sendmail** CLI flags. Supplied flags completely replace Nodemailer's defaults **except** `-i` (do not treat a single dot on a line as message end) and the recipient list. Make sure to include every flag your installation requires—especially **-f \<from>**. |
+
+When no custom `args` array is passed Nodemailer will execute
 
 ```sh
-sendmail -i args[] to_addr[]
+sendmail -i -f <from> <to…>
 ```
 
-The **info** argument for **sendMail()** callback includes the following properties:
+With `args` provided the command becomes
 
-- **envelope** – is an envelope object `{from:'address', to:['address']}`
-- **messageId** – is the Message-ID header value
+```sh
+sendmail -i <args…> <to…>
+```
 
-#### Not Able to send Mail using sendmail transport ?
+### Response
 
-If `createTransport` function is not taking up the path which by default is '/usr/bin/sendmail', make sure you have sendmail configured in your system. Take a look at [Source](https://www.computerhope.com/unix/usendmai.htm) (for linux/unix).
+The `info` object that `transporter.sendMail()` yields contains only two properties—`sendmail` writes nothing to stdout/stderr:
+
+- `envelope` – `{ from: 'address', to: ['address', …] }`
+- `messageId` – value of the generated **Message‑ID** header
+
+### Troubleshooting
+
+If Nodemailer cannot find **/usr/bin/sendmail** (the default on most Unix systems) make sure the binary is installed and available on your `PATH`. Consult your distribution's documentation or the [Computer Hope sendmail reference](https://www.computerhope.com/unix/usendmai.htm) for installation instructions.
 
 ### Examples
 
-#### 1\. Send a message using specific binary
-
-This example pipes message to a custom command using unix-style newlines. Sendmail does not produce any output besides the exit code, so there's nothing else to return with the callback.
+#### Pipe to a specific binary
 
 ```javascript
-let transporter = nodemailer.createTransport({
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
   sendmail: true,
   newline: "unix",
   path: "/usr/sbin/sendmail",
 });
+
 transporter.sendMail(
   {
     from: "sender@example.com",
     to: "recipient@example.com",
-    subject: "Message",
+    subject: "Test message",
     text: "I hope this message gets delivered!",
   },
   (err, info) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
     console.log(info.envelope);
     console.log(info.messageId);
   }
 );
+```
+
+If you need to pass custom flags—for example, to override the envelope sender—include them via the `args` option:
+
+```javascript
+const transporter = nodemailer.createTransport({
+  sendmail: true,
+  args: ["-f", "bounce@example.com"],
+});
 ```

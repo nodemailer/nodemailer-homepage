@@ -3,24 +3,80 @@ title: SMTP envelope
 sidebar_position: 20
 ---
 
-SMTP envelope is usually auto generated from **from**, **to**, **cc** and **bcc** fields in the message object but if for some reason you want to specify it yourself (custom envelopes are usually used for VERP addresses), you can do it with the **envelope** property in the message object.
+When Nodemailer delivers an email over SMTP it sends **two distinct layers** of information:
 
-- **envelope** – is an object with the following address params that behave just like with regular mail options. You can also use the regular address format, unicode domains etc.
-  - **from** – the first address gets used as MAIL FROM address in SMTP
-  - **to** – addresses from this value get added to RCPT TO list
-  - **cc** – addresses from this value get added to RCPT TO list
-  - **bcc** – addresses from this value get added to RCPT TO list
+1. **Message headers** that your email client shows (`From:`, `To:`, etc.).
+2. **SMTP envelope commands** (`MAIL FROM`, `RCPT TO`) that the SMTP server actually uses to route and return the message.
 
-```javascript
-let message = {
-    ...,
-    from: 'mailer@nodemailer.com', // listed in rfc822 message header
-    to: 'daemon@nodemailer.com', // listed in rfc822 message header
-    envelope: {
-        from: 'Daemon <deamon@nodemailer.com>', // used as MAIL FROM: address for SMTP
-        to: 'mailer@nodemailer.com, Mailer <mailer2@nodemailer.com>' // used as RCPT TO: address for SMTP
-    }
+By default, Nodemailer **builds the envelope automatically** from the `from`, `to`, `cc`, and `bcc` header fields. 
+If you need fine‑grained control—for example to implement [VERP](https://en.wikipedia.org/wiki/Variable_envelope_return_path), to set a dedicated bounce address, or to send a message to recipients that you do **not** reveal in the headers—you can override the defaults with the `envelope` property.
+
+## The `envelope` property
+
+```js
+{
+  envelope: {
+    from: 'bounce+12345@example.com',          // becomes MAIL FROM:
+    to:   [                                    // becomes RCPT TO:
+      'alice@example.com',
+      'Bob <bob@example.net>'
+    ]
+  }
 }
 ```
 
-The envelope object returned by **sendMail()** includes just **from** (address string) and **to** (an array of address strings) fields as all addresses from **to**, **cc** and **bcc** get merged into **to** when sending.
+| Field  | Type                 | Description                                              |
+| ------ | -------------------- | -------------------------------------------------------- |
+| `from` | `string`             | Used for the **`MAIL FROM`** command (return‑path).      |
+| `to`   | `string \| string[]` | Added to the **`RCPT TO`** list.                         |
+| `cc`   | `string \| string[]` | _Optional._ Merged into `to` when Envelope is generated. |
+| `bcc`  | `string \| string[]` | _Optional._ Merged into `to` when Envelope is generated. |
+
+Any address format that Nodemailer supports—plain, `Name <address>` pairs, or international (UTF‑8) domains—can be used here.
+
+### Complete example
+
+```js
+const nodemailer = require("nodemailer");
+
+async function main() {
+  // Create a transport. Replace with your own transport options.
+  const transport = nodemailer.createTransport({
+    sendmail: true,
+  });
+
+  const info = await transport.sendMail({
+    from: "Mailer <mailer@example.com>", // Header From:
+    to: "Daemon <daemon@example.com>", // Header To:
+    envelope: {
+      from: "bounce+12345@example.com", // MAIL FROM:
+      to: [
+        // RCPT TO:
+        "daemon@example.com",
+        "mailer@example.com",
+      ],
+    },
+    subject: "Custom SMTP envelope",
+    text: "Hello!",
+  });
+
+  console.log("Envelope used:", info.envelope);
+  // => { from: 'bounce+12345@example.com', to: [ 'daemon@example.com', 'mailer@example.com' ] }
+}
+
+main().catch(console.error);
+```
+
+:::tip
+The object returned by `sendMail()` always includes an `envelope` property. It contains `from` (a string) and `to` (an array). When sending, Nodemailer merges **all** recipients from `to`, `cc`, and `bcc` into that single `to` array.
+:::
+
+---
+
+### When should I override the envelope?
+
+- **VERP or bounce management** – route bounces to a unique per‑message address.
+- **Mailing lists** – deliver the same message to many recipients while hiding the list in the header.
+- **Different return‑path** – use one domain in the headers but another for bounce processing.
+
+If you do not have a specific reason, let Nodemailer generate the envelope automatically.

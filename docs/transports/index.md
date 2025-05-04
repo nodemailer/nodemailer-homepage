@@ -1,47 +1,76 @@
 ---
 title: Other transports
-sidebar_position: 50
+sidebar_position: 5
 ---
 
 # Other transports
 
-In addition to the default [SMTP transport](/smtp/) you can use other kind of transports as well with Nodemailer. Some transports are built-in, some need an external plugin. See _Available Transports_ below for known transports.
+Nodemailer ships with a fully‑featured [SMTP transport](/smtp/) enabled by default, but you’re by **no means** limited to SMTP. A _transport_ is simply the mechanism Nodemailer uses to hand off a fully‑constructed email message—whether that’s piping into `sendmail`, posting to an HTTPS API, or any other delivery strategy.
 
-The following example uses [SES transport](/transports/ses/) (Amazon SES).
+This page lists the transports that are bundled with Nodemailer as well as popular community transports. You can also roll your own by following the [transport API documentation](/plugins/create/#transports).
 
-```javascript
-let nodemailer = require("nodemailer");
-let aws = require("@aws-sdk/client-ses");
-process.env.AWS_ACCESS_KEY_ID = "....";
-process.env.AWS_SECRET_ACCESS_KEY = "....";
-const ses = new aws.SES({
-  apiVersion: "2010-12-01",
-  region: "us-east-1",
-});
-let transporter = nodemailer.createTransport({
-  SES: { ses, aws },
-});
+---
+
+## Example: Amazon SES transport
+
+Below is a minimal example that delivers mail through [Amazon SES](https://aws.amazon.com/ses/) using the built‑in SES transport. It wraps the official **AWS SDK v3** client under the hood.
+
+```bash title="Install dependencies"
+npm install nodemailer @aws-sdk/client-sesv2
 ```
+
+```javascript title="send‑with‑ses.js"
+const nodemailer = require("nodemailer");
+const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
+
+const sesClient = new SESv2Client({});
+
+const transporter = nodemailer.createTransport({
+  SES: { sesClient, SendEmailCommand },
+});
+
+(async () => {
+  await transporter.sendMail({
+    from: "you@example.com",
+    to: "friend@example.net",
+    subject: "Hello from SES",
+    text: "This message was sent with Nodemailer & Amazon SES!",
+  });
+})();
+```
+
+---
 
 ## Available transports
 
-### Built-in transports
+### Bundled (built‑in) transports
 
-- **[sendmail](/transports/sendmail/)** – for piping messages to the _sendmail_ command
-- **[SES](/transports/ses/)** – is a Nodemailer wrapper around _aws-sdk_ to send mail using AWS SES
-- **[stream](/transports/stream/)** – is just for returning messages, most probably for testing
+| Transport    | Purpose                                                                     | Reference                     |
+| ------------ | --------------------------------------------------------------------------- | ----------------------------- |
+| **SMTP**     | Default transport that speaks the SMTP protocol                             | [Docs](/smtp/)                |
+| **sendmail** | Pipes the generated message to a local `sendmail`‑compatible binary         | [Docs](/transports/sendmail/) |
+| **SES**      | Sends mail via the AWS SES API using the AWS SDK                            | [Docs](/transports/ses/)      |
+| **stream**   | Returns the generated rfc822 stream instead of sending (useful for testing) | [Docs](/transports/stream/)   |
 
-### External transports
+### Community transports
 
-- **[Mailtrap](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport)** – integration with the official API for Mailtrap
-- **[Mailgun](https://www.npmjs.com/package/nodemailer-mailgun-transport)** – send emails with Mailgun API
-- **your own** (see transport api documentation [here](/plugins/create/#transports))
+These transports live in separate NPM packages maintained by the community. Install them with `npm install` and pass their exported function to `nodemailer.createTransport()`.
 
-### General options for transports
+- **Mailtrap** – Deliver messages to your Mailtrap inbox for safe testing ([npm](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport))
+- **Mailgun** – Send via Mailgun’s HTTP API ([npm](https://www.npmjs.com/package/nodemailer-mailgun-transport))
+- **Custom** – Implement business‑specific logic by authoring [your own transport](/plugins/create/#transports)
 
-Even though every transport has its own set of configuration options there are a few that can be used for every transport type
+> **Heads‑up** Third‑party transports are not maintained by the Nodemailer team. Check each project’s README for installation and usage instructions.
 
-- **attachDataUrls** – if true, then converts _data:_ images in the HTML content in every message to embedded attachments
-- **disableFileAccess** – if true, then does not allow to use files as content. Use it when you want to use JSON data from untrusted source as the email. If an attachment or message node tries to fetch something from a file the sending returns an error
-- **disableUrlAccess** – if true, then does not allow to use Urls as content
-- **normalizeHeaderKey(key)** – a method that is applied to every header key before inserting to generated rfc822 message. [Example](https://github.com/nodemailer/nodemailer/blob/3e3ba4f30ad5a73f037f45d3e36a9361ca43a318/examples/custom-headers.js#L13-L14)
+---
+
+## Transport‑agnostic options
+
+While each transport defines its own configuration object, the following options are recognised by **all** transports:
+
+| Option                    | Type       | Description                                                                                                                                                                                                                    |
+| ------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `attachDataUrls`          | `Boolean`  | Convert inline `data:` URIs in HTML content to embedded attachments.                                                                                                                                                           |
+| `disableFileAccess`       | `Boolean`  | Disallow reading files from disk when resolving attachments or HTML images. Useful when the message source is untrusted.                                                                                                       |
+| `disableUrlAccess`        | `Boolean`  | Disallow HTTP/HTTPS requests when resolving attachments or HTML images.                                                                                                                                                        |
+| `normalizeHeaderKey(key)` | `Function` | Callback invoked for every header key before it’s added to the generated RFC 822 message. [Example](https://github.com/nodemailer/nodemailer/blob/3e3ba4f30ad5a73f037f45d3e36a9361ca43a318/examples/custom-headers.js#L13-L14) |

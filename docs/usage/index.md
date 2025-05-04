@@ -1,65 +1,105 @@
 ---
 title: Usage
-sidebar_position: 20
+sidebar_position: 2
 ---
 
 # Usage
 
-## Setting it up
+This page shows how to get Nodemailer up and running quickly, then walks through the most common tasks you’ll perform: creating a **transporter** and sending a message.
 
-Install Nodemailer from [npm](https://www.npmjs.com/package/nodemailer)
+## Installation
+
+Add Nodemailer to your project:
 
 ```bash
 npm install nodemailer
 ```
 
-To send emails you need a transporter object
+## Create a transporter
+
+Every email you send goes through a **transporter**—an object that knows how to deliver messages to your chosen email service.
 
 ```javascript
-let transporter = nodemailer.createTransport(transport[, defaults])
+const nodemailer = require("nodemailer");
+
+// Create a transporter for SMTP
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 587,
+  secure: false, // upgrade later with STARTTLS
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 ```
 
-Where
+`createTransport(transport[, defaults])` returns a reusable transporter instance.
 
-- **transporter** is going to be an object that is able to send mail
-- **transport** is the transport configuration object, connection url or a transport plugin instance
-- **defaults** is an object that defines default values for mail options
+| Parameter     | Type / Description                                                                                 |          |                                                                                                                                                                                        |
+| ------------- | -------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **transport** | \*\*Object                                                                                         |  String  |  Plugin\*\*. Either a configuration object (like the SMTP example above), a connection URL (`"smtp://user:pass@smtp.example.com:587"`), or a pre‑configured transport plugin instance. |
+| **defaults**  | _Object (optional)_. Values that will be merged into every message you send with this transporter. |          |                                                                                                                                                                                        |
 
-:::tip
-You have to create the transporter object only once. If you already have a transporter object you can use it to send mail as much as you like.
+:::tip Keep the transporter
+Create the transporter **once** and reuse it. Transporter creation opens network sockets and performs authentication; doing this for every email adds needless overhead.
 :::
 
-### Send using SMTP
+### Other transport types
 
-See the details about setting up a SMTP based transporter [here](/smtp/).
+- **SMTP** – see the [SMTP guide](/smtp/) for all available options.
+- **Plugins** – Nodemailer can deliver through anything that exposes a [`send(mail, callback)`](https://nodemailer.com/transports/) interface. See the [transport plugin docs](/transports/).
 
-### Send using a transport plugin
+## Verify the connection (optional)
 
-See the details about setting up a plugin based transporter [here](/transports/).
-
-## Sending mail
-
-Once you have a transporter object you can send mail with it:
+Before you start sending, you can check that Nodemailer can connect to your SMTP server:
 
 ```javascript
-transporter.sendMail(data[, callback])
+await transporter.verify();
+console.log("Server is ready to take our messages");
 ```
 
-Where
+## Send a message {#quick-example}
 
-- **data** defines the mail content (see [Message Configuration](/message/) for possible options)
-- **callback** is an optional callback function to run once the message is delivered or it failed
-  - **err** is the error object if message failed
-  - **info** includes the result, the exact format depends on the transport mechanism used
-    - **info.messageId** most transports _should_ return the final Message-Id value used with this property
-    - **info.envelope** includes the envelope object for the message
-    - **info.accepted** is an array returned by SMTP transports (includes recipient addresses that were accepted by the server)
-    - **info.rejected** is an array returned by SMTP transports (includes recipient addresses that were rejected by the server)
-    - **info.pending** is an array returned by Direct SMTP transport. Includes recipient addresses that were temporarily rejected together with the server response
-    - **response** is a string returned by SMTP transports and includes the last SMTP response from the server
+Once you have a transporter, send an email with `transporter.sendMail(message[, callback])`.
 
-:::info
-If the message includes several recipients then the message is considered sent if at least one recipient is accepted
+```javascript
+(async () => {
+  try {
+    const info = await transporter.sendMail({
+      from: '"Example Team" <team@example.com>', // sender address
+      to: "alice@example.com, bob@example.com", // list of receivers
+      subject: "Hello", // Subject line
+      text: "Hello world?", // plain text body
+      html: "<b>Hello world?</b>", // html body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  } catch (err) {
+    console.error("Error while sending mail", err);
+  }
+})();
+```
+
+### Parameters
+
+| Parameter    | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| **message**  | Email content and headers. See [Message configuration](/message/) for all options. |
+| **callback** | _(optional)_ `(err, info) => {}`. If omitted, `sendMail` returns a Promise.        |
+
+The `info` object returned by most transports contains:
+
+| Property    | Description                                                               |
+| ----------- | ------------------------------------------------------------------------- |
+| `messageId` | The final **Message‑ID** value assigned to the email.                     |
+| `envelope`  | Object with the SMTP envelope (FROM, TO).                                 |
+| `accepted`  | Array of addresses accepted by the server.                                |
+| `rejected`  | Array of addresses rejected by the server.                                |
+| `pending`   | With the _direct_ transport: addresses that received a temporary failure. |
+| `response`  | The last response string received from the SMTP server.                   |
+
+:::info Partial success
+If a message has multiple recipients it is considered **sent** as long as **at least one** address was accepted.
 :::
-
-If `callback` argument is not set then the method returns a Promise object. Nodemailer itself does not use Promises internally but it wraps the return into a Promise for convenience.

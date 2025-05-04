@@ -1,6 +1,6 @@
 ---
 title: Address object
-sidebar\_position: 13
+sidebar_position: 13
 ---
 
 Email address values in Nodemailer can be provided in **three interchangeable formats**. You can freely mix these formats in any address field (`from`, `to`, `cc`, `bcc`, `replyTo`, etc.).

@@ -1,6 +1,6 @@
 ---
 title: Create plugins
-sidebar\_position: 30
+sidebar_position: 30
 ---
 
 Nodemailer exposes three points in the e‑mail delivery pipeline where you can attach **plugins**:
@@ -137,7 +137,7 @@ Returns an object containing parsed addresses from **From**, **Sender**, **Reply
 
 ---
 
-## Writing a custom transport
+## Writing a custom transport {#transports}
 
 A transport is simply an object with **`name`**, **`version`**, and a **`send(mail, done)`** method. Provide the object to `nodemailer.createTransport()` to create a usable transporter.
 

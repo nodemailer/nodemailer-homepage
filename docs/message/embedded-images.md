@@ -1,6 +1,6 @@
 ---
 title: Embedded images
-sidebar\_position: 15
+sidebar_position: 15
 ---
 
 You can embed images directly inside the HTML body by attaching them and referring to them with the `cid:` URL scheme.

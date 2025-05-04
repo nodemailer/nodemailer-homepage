@@ -1,6 +1,6 @@
 ---
 title: Custom headers
-sidebar\_position: 17
+sidebar_position: 17
 ---
 
 Nodemailer generates all mandatory headers for you, so in day‑to‑day usage you rarely need to touch them.

@@ -1,6 +1,6 @@
 ---
 title: Custom source
-sidebar\_position: 18
+sidebar_position: 18
 description: Provide your own pre‑built RFC822/EML source instead of letting Nodemailer generate it.
 ---
 

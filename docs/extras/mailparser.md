@@ -1,6 +1,6 @@
 ---
 title: MailParser
-sidebar\_position: 3
+sidebar_position: 3
 ---
 
 Streaming e‑mail parser for Node.js that can handle very large messages with minimal memory overhead.
@@ -132,7 +132,7 @@ sourceStream.pipe(parser);
    The `content` property is a **Readable stream**.
 3. **`{ type: 'text', html, text, textAsHtml }`** – once, containing the message bodies.
 
-### Stream options
+### Stream options {#options}
 
 | Option                 | Default      | Description                                                |
 | ---------------------- | ------------ | ---------------------------------------------------------- |

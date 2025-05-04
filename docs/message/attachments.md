@@ -1,6 +1,6 @@
 ---
 title: Attachments
-sidebar\_position: 11
+sidebar_position: 11
 ---
 
 Use the `attachments` option of the [message object](/message) to attach files.

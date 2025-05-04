@@ -1,124 +1,115 @@
 ---
 title: Proxy support
 sidebar_position: 25
+description: Use HTTP, SOCKS or custom proxy handlers with Nodemailer SMTP transports.
 ---
 
-Nodemailer is able to use proxies for connecting to SMTP servers. HTTP proxy support is built in, Socks proxy support can be enabled by providing [socks](https://www.npmjs.com/package/socks) module to Nodemailer, other proxies need custom handling.
+Nodemailer can connect to an SMTP server **through an outbound proxy**. Out of the box it understands **HTTP CONNECT** proxies. For **SOCKS4/4a/5** and any other schemes you can either:
 
-To enable proxying, define a **proxy** option for the transporter.
+1. Install the community‑maintained [`socks`](https://www.npmjs.com/package/socks) package and let Nodemailer do the rest.
+2. Provide your own proxy handler function.
 
-- **proxy** – is a proxy URL
-
-### Examples
-
-#### 1\. Using HTTP proxy
-
-Set HTTP proxy url for the _proxy_ option. That's it, everything required to handle it is built into Nodemailer.
+## Quick start
 
 ```javascript
-let transporter = nodemailer.createTransport({
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 465,
   secure: true,
-  proxy: "http://proxy-host:1234",
+  proxy: "http://proxy.example.test:3128", // ← HTTP proxy URL
 });
 ```
 
-Or if you want to use some environment defined variable like _http_proxy_:
+Set the `proxy` option to a valid URL string. Nodemailer parses the URL and decides how to tunnel the connection.
+
+## HTTP CONNECT proxies
+
+HTTP proxies are fully supported **without additional dependencies**. Just pass their URL in the `proxy` option:
 
 ```javascript
-let transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 465,
   secure: true,
-  proxy: process.env.http_proxy,
+  proxy: process.env.HTTP_PROXY, // or HTTPS_PROXY
 });
 ```
 
-:::info
-Make sure that your HTTP proxy supports CONNECT protocol and allows connecting to the SMTP port you want to use.
-:::
+## SOCKS proxies
 
-#### 2\. Using Socks proxy
+Support for SOCKS4, SOCKS4a and SOCKS5 is **not bundled** to keep Nodemailer lean. Install the `socks` package in your project and register it with the transporter:
 
-Set Socks proxy url for the **proxy** option. Additionally you need to provide the [socks](https://www.npmjs.com/package/socks) module for the transporter as it is not bundled with Nodemailer. Both versions 1.x.x and 2.x.x of the socks module are supported
-
-Possible protocol values for the SOCKS proxy:
-
-- _'socks4:'_ or _'socks4a:'_ for a SOCKS4 proxy
-- _'socks5:'_ or _'socks:'_ for a SOCKS5 proxy
+```bash
+npm install socks --save
+```
 
 ```javascript
-let transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 465,
   secure: true,
-  proxy: "socks5://socks-host:1234",
+  proxy: "socks5://127.0.0.1:1080",
 });
-// enable support for socks URLs
+
 transporter.set("proxy_socks_module", require("socks"));
 ```
 
-##### Testing Socks proxies
+### Supported URL protocols
 
-For testing you can use ssh to create a SOCKS5 proxy. The following command connects to your remote server and sets up a proxy on port 1080 that routes connections through that server.
+| Protocol   | Proxy type |
+| ---------- | ---------- |
+| `socks4:`  | SOCKS4     |
+| `socks4a:` | SOCKS4a    |
+| `socks5:`  | SOCKS5     |
+| `socks:`   | SOCKS5     |
 
+### Local testing with SSH
+
+Create an ad‑hoc SOCKS5 proxy that forwards all traffic through an SSH server:
+
+```bash
+ssh -N -D 0.0.0.0:1080 user@remote.host
 ```
-ssh -N -D 0.0.0.0:1080 username@remote.host`
-```
 
-**proxy** url for that server would be `socks5://localhost:1080`
+Then set `proxy: "socks5://localhost:1080"`.
 
-#### 3\. Using a custom proxy handler
+## Custom proxy handlers
 
-Additionally you can create your own proxy handler. To do this you would need to register a protocol handler callback with the name `proxy_handler_{protocol}` where `{protocol}` would be the protocol from proxy URL. If the URL looks like _'yyy://localhost'_ then you would need to set callback for `proxy_handler_yyy`.
+Need a special authentication flow or a corporate proxy that speaks a proprietary protocol? Provide your own socket‑creation logic:
 
 ```javascript
-transporter.set("proxy_handler_myproxy", handler);
-```
-
-Where
-
-- **handler** is the function to run to create a proxied socket. It gets the following arguments:
-  - **proxy** is the proxy url in a parsed form
-  - **options** is transport configuration object
-  - **callback** is the function to return the socket
-
-```javascript
-let transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 465,
   secure: true,
-  proxy: "myproxy://localhost:1234",
+  proxy: "myproxy://127.0.0.1:9999",
 });
-// enable support for socks URLs
-transporter.set("proxy_handler_myproxy", (proxy, options, callback) => {
-  console.log("Proxy host=% port=%", proxy.hostname, proxy.port);
-  let socket = require("net").connect(options.port, options.host, () => {
-    callback(null, {
-      connection: socket,
-    });
+
+// Register a handler for the "myproxy:" URL scheme
+transporter.set("proxy_handler_myproxy", (proxy, options, done) => {
+  const net = require("net");
+
+  console.log(`Proxy host=%s port=%s`, proxy.hostname, proxy.port);
+
+  const socket = net.connect(proxy.port, proxy.hostname, () => {
+    // ...hand‑shake with your proxy here...
+
+    // Return the socket to Nodemailer
+    done(null, { connection: socket });
   });
 });
 ```
 
-If your proxy uses an encrypted connection then you can mark the proxied socket to be already secure. This prevents Nodemailer from upgrading the provided connection using TLS.
+If the proxy socket is **already encrypted** (e.g. you connected with `tls.connect()`), set `secured: true` so Nodemailer skips its own STARTTLS upgrade:
 
 ```javascript
-let transporter = nodemailer.createTransport({
-  host: "smtp.example.com",
-  port: 465,
-  secure: true,
-  proxy: "myproxys://localhost:1234",
-});
-// enable support for socks URLs
-transporter.set("proxy_handler_myproxys", (proxy, options, callback) => {
-  console.log("Proxy host=% port=%", proxy.hostname, proxy.port);
-  let socket = require("tls").connect(options.port, options.host, () => {
-    callback(null, {
-      connection: socket,
-      secured: true,
-    });
+const tls = require("tls");
+
+transporter.set("proxy_handler_myproxys", (proxy, options, done) => {
+  const socket = tls.connect(proxy.port, proxy.hostname, () => {
+    done(null, { connection: socket, secured: true });
   });
 });
 ```

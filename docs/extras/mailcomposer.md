@@ -1,6 +1,6 @@
 ---
 title: Mailcomposer
-sidebar\_position: 4
+sidebar_position: 4
 ---
 
 Generate RFC 822–formatted email messages that you can stream directly to an SMTP connection or save to disk.

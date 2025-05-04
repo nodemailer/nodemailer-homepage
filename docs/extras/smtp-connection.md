@@ -1,185 +1,130 @@
 ---
-title: SMTP Connection
-sidebar\_position: 2
+title: Testing SMTP
+sidebar_position: 22
 ---
 
-**SMTPConnection** is Nodemailer's low‑level SMTP/LMTP client for establishing and managing SMTP sessions.
-Use it when you need fine‑grained control over the SMTP conversation—for example, if you're building a custom transport, doing connection pooling, or testing SMTP servers.
+When you need to exercise the email‑sending paths of your application in a development or continuous‑integration environment, you **must not** accidentally spam real inboxes. Instead of routing all mail to a single hard‑coded test address, point your code at a _mail‑catcher_ service: it accepts messages over SMTP exactly like a production provider, but **never** delivers them. It just stores the messages so that you can open or download them later.
 
-:::Tip
-If you just want to send email, use [`nodemailer.createTransport()`](/usage) instead. It's simpler and automatically handles connection management.
-:::
+Nodemailer ships with first‑class support for [Ethereal Email](https://ethereal.email/) —a free, open‑source mail‑catcher designed for test environments. You can either
 
-## Prerequisites
+- **provision an account on the fly** with `createTestAccount`, or
+- **create a persistent test mailbox** from the Ethereal dashboard.
 
-- **Node.js ≥ 6.0.0** (all examples below use CommonJS and work all the way back to v6)
-- Access to an SMTP (or LMTP) service.
+If you would rather stay completely offline you can preview messages locally with [forwardemail/email‑templates](https://github.com/forwardemail/email-templates) (it renders every message in your browser and iOS simulator via [preview-email](https://github.com/forwardemail/preview-email)).
 
-## 1. Install
+## Quick‑start
 
-```bash title="Terminal"
-npm install nodemailer --save
+Install Nodemailer if you have not done so yet:
+
+```bash
+npm install nodemailer
 ```
 
-`smtp-connection` ships with Nodemailer, so you only need the one dependency.
-
-## 2. Import
-
-```javascript title="index.js"
-const SMTPConnection = require("nodemailer/lib/smtp-connection");
-```
-
-## 3. Create a connection
-
-```javascript title="index.js"
-const connection = new SMTPConnection({
-  host: "smtp.example.com",
-  port: 587, // 465 for implicit TLS
-  secure: false, // upgrade later with STARTTLS
-  name: "my-app.local", // client hostname (EHLO)
-});
-```
-
-### Connection options
-
-| Option              | Type                | Default                            | Description                                                                                                                          |
-| ------------------- | ------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `host`              | `string`            | `'localhost'`                      | Hostname or IP address of the SMTP/LMTP server.                                                                                      |
-| `port`              | `number`            | `25` (`465` if `secure` is `true`) | Port to connect to. Modern submission ports are `587` (STARTTLS) or `465` (implicit TLS).                                            |
-| `secure`            | `boolean`           | `false`                            | If `true`, use TLS from the start (port 465). If `false`, upgrade later with STARTTLS if the server supports it.                     |
-| `name`              | `string`            | OS hostname                        | Hostname to announce to the server in the `EHLO`/`HELO` command.                                                                     |
-| `ignoreTLS`         | `boolean`           | `false`                            | Skip STARTTLS even if the server supports it.                                                                                        |
-| `requireTLS`        | `boolean`           | `false`                            | Fail the connection if STARTTLS is not offered or fails.                                                                             |
-| `opportunisticTLS`  | `boolean`           | `false`                            | Try STARTTLS—continue in plaintext if it fails.                                                                                      |
-| `localAddress`      | `string`            |                                    | Local interface to bind for the outbound connection.                                                                                 |
-| `connectionTimeout` | `number`            |  `2 * 60 000` (2 min)              | How long to wait for the TCP connection to be established (ms).                                                                      |
-| `greetingTimeout`   | `number`            |  `30 000`                          | How long to wait for the server greeting after connecting (ms).                                                                      |
-| `socketTimeout`     | `number`            |  `10 * 60 000` (10 min)            | Idle timeout for an established socket (ms).                                                                                         |
-| `dnsTimeout`        | `number`            |  `30 000`                          | Time to wait for DNS resolution (ms).                                                                                                |
-| `authMethod`        | `string`            |                                    | Preferred auth mechanism (e.g. `'PLAIN'`).                                                                                           |
-| `logger`            | `boolean \| object` |  `false`                           | If `true`, log to console. Pass a [Bunyan](https://github.com/trentm/node-bunyan)‑compatible logger to integrate with your own logs. |
-| `transactionLog`    | `boolean`           |  `false`                           | Log SMTP commands and responses (masking message data).                                                                              |
-| `debug`             | `boolean`           |  `false`                           | Log everything, including message content—**do not enable in production**.                                                           |
-| `tls`               | `object`            |                                    | Extra options for `tls.connect()` (e.g. `rejectUnauthorized`).                                                                       |
-| `socket`            | `net.Socket`        |                                    | Pre‑initialised socket (unconnected).                                                                                                |
-| `connection`        | `net.Socket`        |                                    | Already‑connected socket (plaintext or TLS). When `secure: true`, the socket is automatically upgraded.                              |
-
-## Events
-
-SMTPConnection is an [`EventEmitter`](https://nodejs.org/api/events.html):
-
-| Event     | Arguments   | When it fires                                                        |
-| --------- | ----------- | -------------------------------------------------------------------- |
-| `connect` | –           | After the SMTP greeting has been received.                           |
-| `error`   | `Error err` | Any connection‑level error (the connection is closed automatically). |
-| `end`     | –           | After the connection has been closed and the instance destroyed.     |
-
-## API
-
-### `connection.connect(callback)`
-
-Open the network connection.
-
-| Param      | Type       | Description                        |
-| ---------- | ---------- | ---------------------------------- |
-| `callback` | `function` | Invoked after the `connect` event. |
-
-After `connect`, check `connection.secure` to see whether the socket is encrypted.
-
----
-
-### `connection.login(auth, callback)`
-
-Authenticate with the server.
+### 1. Spin up a throw‑away Ethereal account
 
 ```javascript
-connection.login(
-  {
-    user: "alice",
-    pass: "s3cret", // or
-    // oauth2: { ... }
-  },
-  (err) => {
-    if (err) {
-      console.error("AUTH failed", err);
-      return;
-    }
-    // ready to send
-  }
-);
-```
+// ./mail.js
+const nodemailer = require("nodemailer");
 
-`auth` supports either **credentials** (`user`, `pass`) _or_ **oauth2**:
-
-| Field          | Required         | Description               |
-| -------------- | ---------------- | ------------------------- |
-| `user`         | ✔︎               | Username                  |
-| `pass`         | ✔︎ (credentials) | Password                  |
-| `clientId`     | ✔︎ (OAuth2)      | OAuth Client ID           |
-| `clientSecret` | ✔︎ (OAuth2)      | OAuth Client Secret       |
-| `refreshToken` | ✔︎ (OAuth2)      | OAuth refresh token       |
-| `accessToken`  |                  | Pre‑obtained access token |
-
----
-
-### `connection.send(envelope, message, callback)`
-
-Send a message once authenticated (or immediately if the server is open‑relay—rare).
-
-```javascript
-const envelope = {
-  from: "alice@example.com",
-  to: ["bob@example.com"],
-  size: Buffer.byteLength(message),
-  dsn: {
-    ret: "FULL",
-    envid: "487188",
-    notify: ["FAILURE", "DELAY"],
-  },
-};
-
-connection.send(envelope, message, (err, info) => {
+nodemailer.createTestAccount((err, account) => {
   if (err) {
-    console.error("Envelope rejected", err);
+    console.error("Failed to create a testing account. " + err.message);
     return;
   }
-  console.log("Accepted recipients:", info.accepted);
-  console.log("Rejected recipients:", info.rejected);
+
+  // 1️⃣  Configure a transporter that talks to Ethereal
+  const transporter = nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: account.user, // generated user
+      pass: account.pass, // generated password
+    },
+  });
+
+  // 2️⃣  Send a message
+  transporter
+    .sendMail({
+      from: "Example app <no-reply@example.com>",
+      to: "user@example.com",
+      subject: "Hello from tests ✔",
+      text: "This message was sent from a Node.js integration test.",
+    })
+    .then((info) => {
+      console.log("Message sent: %s", info.messageId);
+      // Preview the stored message in Ethereal’s web UI
+      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    })
+    .catch(console.error);
 });
 ```
 
-`message` can be a `String`, `Buffer`, or any `Stream`. Newlines are automatically normalized to `\r\n` and dots escaped as required by the SMTP protocol.
+:::tip
+Ethereal automatically deletes an account after **48 hours of inactivity**. Save the generated credentials somewhere if you want to inspect the messages later via the dashboard.
+:::
 
-The callback receives:
+### 2. Switch transports per environment
 
-| Param  | Type     | Description                                                                                 |
-| ------ | -------- | ------------------------------------------------------------------------------------------- |
-| `err`  | `Error`  | Populated if _any_ recipient was rejected (`err.code` is `'EAUTH'`, `'ECONNECTION'`, etc.). |
-| `info` | `object` | Only if _all_ recipients were accepted.                                                     |
+You only need one place in your code base that knows which SMTP credentials to use. Everything else just calls `createTransport()`.
 
-`info` fields:
+```javascript
+// ./mail‑transport.js
+const nodemailer = require("nodemailer");
 
-- `accepted` — array of accepted addresses.
-- `rejected` — array of rejected addresses (LMTP can return this **after** the message is streamed).
-- `rejectedErrors` — one `Error` object per rejected address.
-- `response` — last line of the server response.
+function createTransport() {
+  if (process.env.NODE_ENV === "production") {
+    // 🚀  Real emails
+    return nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USERNAME,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
+
+  // 🧪  Captured by Ethereal
+  return nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.ETHEREAL_USERNAME,
+      pass: process.env.ETHEREAL_PASSWORD,
+    },
+  });
+}
+
+module.exports = createTransport;
+```
+
+Your application code can treat the transporter as a black box:
+
+```javascript
+const createTransport = require('./mail-transport');
+const transporter = createTransport();
+
+await transporter.sendMail({...});
+```
+
+### 3. Inspect the message
+
+When `sendMail` resolves (or its callback fires), the returned `info` object contains everything you need to locate the message inside Ethereal:
+
+```javascript
+const info = await transporter.sendMail(message);
+
+console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+// → https://ethereal.email/message/WaQKMgKddxQDoou
+```
+
+You can also open **Messages → Inbox** in Ethereal’s dashboard and browse around.
 
 ---
 
-### `connection.quit()`
+Below is what a captured message looks like in the Ethereal UI.
 
-Send `QUIT` and close the connection gracefully.
-
-### `connection.close()`
-
-Destroy the socket without waiting for `QUIT`.
-
-### `connection.reset(callback)`
-
-Issue `RSET` to reset the current SMTP session.
-
----
-
-## License
-
-[MIT](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)
+![Screenshot of the Ethereal message preview](https://cldup.com/D5Cj_C1Vw3.png)

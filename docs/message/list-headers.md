@@ -1,6 +1,6 @@
 ---
 title: List headers
-sidebar\_position: 16
+sidebar_position: 16
 ---
 
 Adding [RFC 2369](https://www.rfc-editor.org/rfc/rfc2369) **`List-*` headers** (such as `List‑Help`, `List‑Unsubscribe`, etc.) lets mailing‑list recipients quickly discover helpful actions provided by email clients. Nodemailer exposes a **`list`** message option so you can define these headers declaratively instead of hand‑crafting raw header lines.

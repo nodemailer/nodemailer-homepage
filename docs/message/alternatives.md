@@ -1,6 +1,6 @@
 ---
 title: Alternatives
-sidebar\_position: 12
+sidebar_position: 12
 ---
 
 In addition to plain‑text and HTML bodies, you can embed **alternative representations** of the same content—for example, Markdown or a calendar invite. The email client chooses the representation that best fits the recipient’s environment. Alternatives are most often used for calendar events and other machine‑readable formats.

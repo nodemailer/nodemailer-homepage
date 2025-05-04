@@ -3,115 +3,119 @@ title: Custom authentication
 sidebar_position: 24
 ---
 
-Nodemailer SMTP client can be extended to use custom authentication mechanisms that Nodemailer does not support by default.
+Nodemailer’s SMTP transport can be extended with _custom authentication mechanisms_ that are not supported out of the box.
 
-To use one you should define a custom authentication handler with `customAuth` in the transporter options. Multiple handlers can be defined. Use authentication identifier as the handler name. For example if the server responds with "AUTH LOGIN PLAIN MY-CUSTOM-METHOD" then it supports "LOGIN", "PLAIN" and "MY-CUSTOM-METHOD". Nodemailer has built in support form "LOGIN" and "PLAIN" but it knows nothing about "MY-CUSTOM-METHOD", to add support use this identifier as the handler name.
+## When do I need a custom handler?
 
-If SMTP server supports multiple authentication mechanisms then Nodemailer defaults to some well known mechanism like LOGIN or PLAIN. If you want to make sure that Nodemailer specifically uses your custom mechanism, then set `method` property in the `auth` section, use method identifier as the value.
+If the server advertises an authentication keyword that Nodemailer does not recognise, you need to teach Nodemailer how to complete the exchange. For example, when the server replies with:
 
-The following snippet defines MY-CUSTOM-METHOD handler and forces Nodemailer to use it:
+```
+250‑AUTH LOGIN PLAIN MY‑CUSTOM‑METHOD
+```
+
+Nodemailer already understands **LOGIN** and **PLAIN**, but has no idea what **MY‑CUSTOM‑METHOD** is. By providing a handler named exactly after that keyword you enable Nodemailer to use it.
+
+If several mechanisms are available you can _force_ Nodemailer to use yours by setting `auth.method` to the same identifier.
+
+---
+
+## Defining a handler
+
+Add a `customAuth` map to the transporter options. Each key is the mechanism name and each value is a function that performs the exchange.
 
 ```javascript
-let transporter = nodemailer.createTransport({
-    host: 'smtp.example.com',
-    port: 465,
-    secure: true,
-    auth: {
-        type: 'custom',
-        method: 'MY-CUSTOM-METHOD', // forces Nodemailer to use your custom handler
-        user: 'username',
-        pass: 'verysecret'
-    },
-    customAuth: {
-        'MY-CUSTOM-METHOD': ctx => {
-            ...
-        }
-    }
-});
-```
+const nodemailer = require("nodemailer");
 
-### Handler context
+async function myCustomMethod(ctx) {
+  // Build and send a single AUTH command (dummy example – adapt to your spec)
+  const response = await ctx.sendCommand("AUTH MY-CUSTOM-METHOD " + Buffer.from(ctx.auth.credentials.pass).toString("base64"));
 
-Handler method gets handler context as the only argument. Handler method can return a Promise (using an `async` function as the handler is also supported). If promises are not used then the method must explicitly run `ctx.reject(err)` to indicate an error or `ctx.resolve()` to indicate successful auth. In case of Promises if the handler does not throw then the user is considered authenticated once Promise resolves.
-
-#### `ctx.auth`
-
-Authentication options can be found from the `auth` property and credentials from `auth.credentials` (eg. `ctx.auth.credentials.pass` for the password)
-
-#### `ctx.sendCommand(cmd, (err, cmd)=>{...})`
-
-The most useful method of the context object is `sendCommand` that takes a full SMTP command as an argument. Second argument can be a callback function. If callback is not defined, then a Promise is returned instead.
-
-Resulting `cmd` response object includes the following properties:
-
-- **status** is the numeric status code of the response (eg 250 or 334 etc.)
-- **code** is the enchanced status code (eg "5.7.0")
-- **text** is the readable part of server response ("Authentication successful")
-- **response** is the full response from the server ("235 Authentication successful")
-
-```
-async function myCustomMethod(ctx){
-    let cmd = await ctx.sendCommand(
-        'AUTH PLAIN ' +
-            Buffer.from(
-                '\u0000' + ctx.auth.credentials.user + '\u0000' + ctx.auth.credentials.pass,
-                'utf-8'
-            ).toString('base64')
-    );
-
-    if(cmd.status < 200 || cmd.status >=300){
-        throw new Error('Failed to authenticate user: ' + cmd.text);
-    }
+  // Check server reply
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error("Authentication failed: " + response.text);
+  }
 }
 
-let transporter = nodemailer.createTransport({
-    host: 'smtp.example.com',
-    port: 465,
-    secure: true,
-    auth: {
-        type: 'custom',
-        method: 'MY-CUSTOM-METHOD', // forces Nodemailer to use your custom handler
-        user: 'username',
-        pass: 'verysecret'
-    },
-    customAuth: {
-        'MY-CUSTOM-METHOD': myCustomMethod
-    }
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  auth: {
+    type: "custom", // tells Nodemailer we are using a custom handler
+    method: "MY-CUSTOM-METHOD", // forces this exact mechanism
+    user: "username",
+    pass: "verysecret",
+  },
+  customAuth: {
+    "MY-CUSTOM-METHOD": myCustomMethod,
+  },
 });
 ```
 
-### Custom options
+### Handler signature
 
-If your authentication mechanism requires additional configuration besides the usual username and password, then you can use the `options` field to provide the details.
-
+```ts
+(ctx: HandlerContext) => Promise<void> | void
 ```
-let transporter = nodemailer.createTransport({
-    host: 'smtp.example.com',
-    port: 465,
-    secure: true,
-    auth: {
-        type: 'custom',
-        method: 'MY-CUSTOM-METHOD', // forces Nodemailer to use your custom handler
-        user: 'username',
-        pass: 'verysecret',
-        options: {
-            clientId: 'verysecret',
-            applicationId: 'my-app'
-        }
+
+You get a **context object** (`ctx`) and you either:
+
+- return a Promise that resolves on success or rejects on error, **or**
+- call `ctx.resolve()` / `ctx.reject(err)` manually.
+
+### `ctx.auth`
+
+- `ctx.auth` – the full `auth` object you passed to `createTransport()`
+- `ctx.auth.credentials` – convenient alias for `{ user, pass, options }`
+
+### `ctx.sendCommand(command)`
+
+Sends a raw SMTP command and returns a Promise with the parsed reply:
+
+| Property   | Example                               | Description                      |
+| ---------- | ------------------------------------- | -------------------------------- |
+| `status`   | `235`                                 | SMTP status code                 |
+| `code`     | `2.7.0`                               | Enhanced status code             |
+| `text`     | _Authentication successful_           | Human‑readable part              |
+| `response` | `235 2.7.0 Authentication successful` | Full line returned by the server |
+
+A callback style is also supported: `ctx.sendCommand(cmd, (err, info) => { … })`.
+
+---
+
+## Passing additional parameters
+
+Need more than _user_ and _pass_? Add an `options` object – it will be available via `ctx.auth.credentials.options`.
+
+```javascript
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  auth: {
+    type: "custom",
+    method: "MY-CUSTOM-METHOD",
+    user: "username",
+    pass: "verysecret",
+    options: {
+      clientId: "verysecret",
+      applicationId: "my-app",
     },
-    customAuth: {
-        'MY-CUSTOM-METHOD': async ctx => {
-            let token = await generateSecretTokenSomehow(
-                ctx.auth.credentials.options.clientId,
-                ctx.auth.credentials.options.applicationId
-            );
-            ...
-        }
-    }
+  },
+  customAuth: {
+    "MY-CUSTOM-METHOD": async (ctx) => {
+      const token = await generateSecretTokenSomehow(ctx.auth.credentials.options.clientId, ctx.auth.credentials.options.applicationId);
+      await ctx.sendCommand("AUTH MY-CUSTOM-METHOD " + token);
+    },
+  },
 });
 ```
 
-### Examples
+---
 
-- **[NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth)** to authenticate using NTLM
-- **[CRAM-MD5 handler](https://github.com/nodemailer/nodemailer-cram-md5)** to authenticate using CRAM-MD5
+## Community‑provided handlers
+
+| Mechanism | Package                                                                      | Notes                   |
+| --------- | ---------------------------------------------------------------------------- | ----------------------- |
+| NTLM      | [`nodemailer‑ntlm‑auth`](https://github.com/nodemailer/nodemailer-ntlm-auth) | Windows integrated auth |
+| CRAM‑MD5  | [`nodemailer‑cram‑md5`](https://github.com/nodemailer/nodemailer-cram-md5)   | Challenge‑response      |

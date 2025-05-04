@@ -1,81 +1,103 @@
 ---
 title: SMTP transport
-sidebar_position: 40
+sidebar_position: 4
 ---
 
 # SMTP transport
 
-SMTP is the main transport in Nodemailer for delivering messages. SMTP is also the protocol used between different email hosts, so it's truly universal. Almost every email delivery provider supports SMTP-based sending, even if they mainly push their API-based sending. APIs might have more features, but using these also means vendor lock-in. In the case of SMTP, you only need to change the configuration options to replace one provider with another, and you're good to go.
+SMTP is the main transport in Nodemailer for delivering messages. SMTP is also the protocol used between different email hosts, so it's truly universal. Almost every email delivery provider supports SMTP-based sending, even when they advertise API‑based sending as the primary option. APIs can offer more features, but they also introduce vendor lock‑in. With SMTP you can usually swap providers by changing only the configuration object or connection URL.
+
+## Creating a transport
 
 ```javascript
-let transporter = nodemailer.createTransport(options[, defaults])
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport(options[, defaults]);
 ```
 
-Where
+- **`options`** – object that defines the connection (detailed below).
+- **`defaults`** – object merged into every message object (for example, you can set a common **from** address).
 
-- **options** – is an object that defines connection data (see below for details)
-- **defaults** – is an object that is going to be merged into every message object. This allows you to specify shared options, for example to set the same _from_ address for every message
-
-Alternatively, you could use a connection url instead of an object for the options. Use _'smtp:'_ or _'smtps:'_ as the protocol in the url.
+You can also pass a connection URL instead of an options object. Use the **smtp:** or **smtps:** protocol in the URL.
 
 ```javascript
-let poolConfig = "smtps://username:password@smtp.example.com/?pool=true";
+const poolConfig = "smtps://username:password@smtp.example.com/?pool=true";
+const transporter = nodemailer.createTransport(poolConfig);
 ```
 
-##### General options
+### General options
 
-- **port** – is the port to connect to (defaults to 587 if is _secure_ is _false_ or 465 if _true_)
-- **host** – is the hostname or IP address to connect to (defaults to _'localhost'_)
-- **auth** – defines authentication data (see [authentication](#authentication) section below)
-- **authMethod** – defines preferred authentication method, defaults to 'PLAIN'
+| Name         | Type      | Default                         | Description                                                                    |
+| ------------ | --------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| `host`       | `string`  | `"localhost"`                   | Hostname or IP address of the SMTP server.                                     |
+| `port`       | `number`  | `587` (`465` if `secure: true`) | Port to connect to.                                                            |
+| `secure`     | `boolean` | `false`                         | If `true`, the connection will use TLS immediately (recommended for port 465). |
+| `auth`       | `object`  | –                               | Authentication data (see [Authentication](#authentication)).                   |
+| `authMethod` | `string`  | `"PLAIN"`                       | Preferred authentication method.                                               |
 
-Hostnames for the **host** field are resolved using `dns.resolve()`. If you are using a non-resolvable hostname (eg. something listed in _/etc/hosts_ or you are using different resolver for your Node apps), then provide the IP address of the SMTP server as **host** and use the actual hostname in the **tls.servername** parameter. This way, no hostname resolving is attempted, but TLS validation still works.
+:::info
+Nodemailer resolves the `host` value with `dns.resolve()`. If you point `host` to an IP address that is _not_ resolvable (for example, it is defined in **/etc/hosts**), also set `tls.servername` to the real hostname. TLS validation continues to work even though a DNS lookup is skipped.
+:::
 
-##### TLS options
+### TLS options
 
-- **secure** – if _true_ the connection will use TLS when connecting to server. If _false_ (the default) then TLS is used if server supports the STARTTLS extension. In most cases set this value to _true_ if you are connecting to port 465. For port 587 or 25 keep it _false_
-- **tls** – defines additional [node.js TLSSocket options](https://nodejs.org/api/tls.html#tls_class_tls_tlssocket) to be passed to the socket constructor, eg. `{rejectUnauthorized: true`.
-- **tls.servername** - is optional hostname for TLS validation if `host` was set to an IP address
-- **ignoreTLS** – if this is _true_ and _secure_ is false then TLS is not used even if the server supports STARTTLS extension
-- **requireTLS** – if this is _true_ and _secure_ is false then Nodemailer tries to use STARTTLS even if the server does not advertise support for it. If the connection can not be encrypted then message is not sent
+| Name             | Type      | Default | Description                                                                                                                    |
+| ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `secure`         | `boolean` | `false` | See **General options**.                                                                                                       |
+| `tls`            | `object`  | –       | [Node.js `TLSSocket`](https://nodejs.org/api/tls.html#class-tlstlssocket) options, for example `{ rejectUnauthorized: true }`. |
+| `tls.servername` | `string`  | –       | Optional hostname for TLS validation when `host` is an IP.                                                                     |
+| `ignoreTLS`      | `boolean` | `false` | Disable STARTTLS even if the server supports it.                                                                               |
+| `requireTLS`     | `boolean` | `false` | Force STARTTLS. If the server does not support it the message is **not** sent.                                                 |
 
-Setting **secure** to **false** does not mean that you would not use an encrypted connection. Most SMTP servers allow connection upgrade via the [STARTTLS](https://tools.ietf.org/html/rfc3207#section-2) command, but to use this, you have to connect using plaintext first.
+:::info
+Setting **`secure: false`** does **not** necessarily mean you are sending in plaintext—most servers automatically upgrade to TLS via the [STARTTLS](https://datatracker.ietf.org/doc/html/rfc3207) command. Nodemailer follows the server’s lead unless `ignoreTLS` is set.
+:::
 
-##### Connection options
+### Connection options
 
-- **name** – optional hostname of the client, used for identifying to the server, defaults to hostname of the machine
-- **localAddress** – is the local interface to bind to for network connections
-- **connectionTimeout** – how many milliseconds to wait for the connection to establish (default is 2 minutes)
-- **greetingTimeout** – how many milliseconds to wait for the greeting after connection is established (default is 30 seconds)
-- **socketTimeout** – how many milliseconds of inactivity to allow (default is 10 minutes)
-- **dnsTimeout** - Time to wait in ms for the DNS requests to be resolved (defaults to 30 seconds)
+| Name                | Default        | Description                                      |
+| ------------------- | -------------- | ------------------------------------------------ |
+| `name`              | local hostname | Hostname to use in the `HELO`/`EHLO` greeting.   |
+| `localAddress`      | –              | Local interface to bind for network connections. |
+| `connectionTimeout` | 120 000 ms     | How long to wait for the initial TCP connect.    |
+| `greetingTimeout`   | 30 000 ms      | How long to wait for the server greeting.        |
+| `socketTimeout`     | 600 000 ms     | Idle timeout after the greeting.                 |
+| `dnsTimeout`        | 30 000 ms      | Maximum time allowed for DNS lookups.            |
 
-##### Debug options
+### Debug options
 
-- **logger** – optional [bunyan](https://github.com/trentm/node-bunyan) compatible logger instance. If set to `true` then logs to console. If value is not set or is `false` then nothing is logged
-- **debug** – if set to true, then logs SMTP traffic, otherwise logs only transaction events
+| Name     | Type                 | Description                                                                                                                       |
+| -------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `logger` | `object` / `boolean` | A [Bunyan](https://github.com/trentm/node-bunyan) logger instance, `true` for console logging, or `false` / unset for no logging. |
+| `debug`  | `boolean`            | Log SMTP traffic when `true`, otherwise only transaction events.                                                                  |
 
-##### Security options
+### Security options
 
-- **disableFileAccess** – if true, then does not allow to use files as content. Use it when you want to use JSON data from untrusted source as the email. If an attachment or message node tries to fetch something from a file the sending returns an error
-- **disableUrlAccess** – if true, then does not allow to use Urls as content
+| Name                | Type      | Description                                   |
+| ------------------- | --------- | --------------------------------------------- |
+| `disableFileAccess` | `boolean` | Disallow reading content from the filesystem. |
+| `disableUrlAccess`  | `boolean` | Disallow fetching content from remote URLs.   |
 
-##### Pooling options
+### Pooling options
 
-- **pool** – see [Pooled SMTP](/smtp/pooled/) for details about connection pooling
+See [Pooled SMTP](/smtp/pooled/) for the complete list. The most important flag is:
 
-##### Proxy options
+| Name   | Type      | Description                |
+| ------ | --------- | -------------------------- |
+| `pool` | `boolean` | Enable connection pooling. |
 
-- **proxy** – all SMTP based transports allow to use proxies for making TCP connections to servers. Read about proxy support in Nodemailer from [here](/smtp/proxies/)
+### Proxy options
 
-### Examples {#examples}
+All SMTP transports support proxies. Read more in [Using proxies](/smtp/proxies/).
 
-#### 1\. Single connection
+## Examples {#examples}
 
-This example would connect to a SMTP server separately for every single message
+### 1. Single connection
+
+A new SMTP connection is created for every message:
 
 ```javascript
-nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 587,
   secure: false, // upgrade later with STARTTLS
@@ -86,12 +108,12 @@ nodemailer.createTransport({
 });
 ```
 
-#### 2\. Pooled connections
+### 2. Pooled connections
 
-This example would set up pooled connections against an SMTP server on port 465.
+Keep a pool of connections open against an SMTP server on port 465:
 
 ```javascript
-nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   pool: true,
   host: "smtp.example.com",
   port: 465,
@@ -103,15 +125,15 @@ nodemailer.createTransport({
 });
 ```
 
-#### 3\. Allow self-signed certificates
+### 3. Allow self‑signed certificates
 
-This config would open a connection to a TLS server with self-signed or invalid TLS certificate.
+Connect to a TLS server that uses a self‑signed or otherwise invalid certificate:
 
 ```javascript
-nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "my.smtp.host",
   port: 465,
-  secure: true, // use TLS
+  secure: true,
   auth: {
     user: "username",
     pass: "pass",
@@ -125,31 +147,59 @@ nodemailer.createTransport({
 
 ## Authentication {#authentication}
 
-If authentication data is not present, the connection is considered authenticated from the start. Otherwise you would need to provide the authentication options object.
-
-- **auth** is the authentication object
-
-  - **type** indicates the authetication type, defaults to 'login', other option is 'oauth2'
-  - **user** is the username
-  - **pass** is the password for the user if normal login is used
-
-For authenticating using OAuth2 instead of normal auth, see OAuth2 options for the **auth** object [here](/smtp/oauth2/).
-
-You can also define [custom authentication handlers](/smtp/customauth/) for protocols that are not natively supported by Nodemailer, see [NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth) as an example of such custom handler.
-
-## Verify SMTP connection configuration
-
-You can verify your SMTP configuration with **verify(callback)** call (also works as a Promise). If it returns an error, then something is not correct, otherwise the server is ready to accept messages.
+If the **auth** object is omitted, Nodemailer treats the connection as already authenticated.
 
 ```javascript
-// verify connection configuration
-transporter.verify(function (error, success) {
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 587,
+});
+```
+
+### Login
+
+```javascript
+auth: {
+  type: "login", // default
+  user: "username",
+  pass: "password",
+}
+```
+
+### OAuth 2.0
+
+```javascript
+auth: {
+  type: "oauth2",
+  user: "user@example.com",
+  accessToken: "generated_access_token",
+  expires: 1484314697598,
+}
+```
+
+See the dedicated [OAuth 2.0 guide](/smtp/oauth2/) for details, or implement a [custom authentication handler](/smtp/customauth/) if your protocol is not natively supported (see the [NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth) for an example).
+
+## Verifying the configuration
+
+Use **`transporter.verify()`** to make sure the SMTP configuration works.
+
+```javascript
+// Promise style (Node.js 8+)
+try {
+  await transporter.verify();
+  console.log("Server is ready to take our messages");
+} catch (err) {
+  console.error("Verification failed", err);
+}
+
+// Callback style
+transporter.verify((error, success) => {
   if (error) {
-    console.log(error);
+    console.error(error);
   } else {
     console.log("Server is ready to take our messages");
   }
 });
 ```
 
-Be aware though that this call only tests connection and authentication, but it does not check if the service allows you to use a specific envelope "From" address or not.
+`verify()` checks DNS resolution, the TCP handshake, and authentication. It does **not** validate whether the service allows a specific envelope **From** address—that depends on the server configuration.
