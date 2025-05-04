@@ -46,7 +46,7 @@ export default {
         redirects: [
           {
             to: "/",
-            from: ["/about", "/about/"],
+            from: ["/about"],
           },
         ],
       },
