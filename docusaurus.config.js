@@ -39,6 +39,20 @@ export default {
     ],
   ],
 
+  plugins: [
+    [
+      "@docusaurus/plugin-client-redirects",
+      {
+        redirects: [
+          {
+            to: "/",
+            from: ["/about", "/about/"],
+          },
+        ],
+      },
+    ],
+  ],
+
   scripts: [
     {
       src: "https://plausible.emailengine.dev/js/script.js",
