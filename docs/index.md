@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # Nodemailer
 
-**The de‑facto email solution for Node.js.**
+**Send e-mails with Node.JS – easy as cake! ✉️**
 
 Nodemailer makes sending email from a Node.js application straightforward and secure, without pulling in a single runtime dependency.
 

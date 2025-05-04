@@ -11,7 +11,7 @@ export default {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "nodemailer", // Usually your GitHub org/user name.
-  projectName: "nodemailer-docu", // Usually your repo name.
+  projectName: "nodemailer-web-docu", // Usually your repo name.
 
   deploymentBranch: "master",
 
@@ -45,7 +45,7 @@ export default {
       // Replace with your project's social card
       image: "img/social-card.png",
       navbar: {
-        title: "Send e-mails with Node.JS, easy as cake!",
+        title: "Nodemailer",
         logo: {
           alt: "Nodemailer",
           src: "img/nm_logo_200x136.png",
