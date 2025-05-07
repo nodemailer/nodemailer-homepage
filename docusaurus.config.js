@@ -11,7 +11,7 @@ export default {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "nodemailer", // Usually your GitHub org/user name.
-  projectName: "nodemailer-web-docu", // Usually your repo name.
+  projectName: "nodemailer-homepage", // Usually your repo name.
 
   deploymentBranch: "master",
 
