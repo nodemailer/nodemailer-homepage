@@ -129,7 +129,7 @@ transporter.sendMail(
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "ses:SendEmail",
+      "Action": "ses:SendRawEmail",
       "Resource": "*"
     }
   ]
