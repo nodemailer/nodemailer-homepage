@@ -14,7 +14,7 @@ npm install nodemailer
 ```
 
 :::tip Looking for a full mail gateway?
-[**EmailEngine**](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=tip-link) is a self‑hosted email gateway that lets you make REST calls to IMAP & SMTP accounts, receive webhooks for mailbox changes, and send email with extras such as OAuth2, delayed delivery, open‑ & click‑tracking, bounce detection, and more — no external MTA required.
+[**EmailEngine**](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=tip-link) is a self‑hosted email gateway that lets you make REST calls to IMAP & SMTP accounts, receive webhooks for mailbox changes, and send email with extras such as OAuth2, delayed delivery, open‑ & click‑tracking, bounce detection, and more.
 :::
 
 ## Why Nodemailer?
