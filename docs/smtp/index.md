@@ -3,8 +3,6 @@ title: SMTP transport
 sidebar_position: 4
 ---
 
-# SMTP transport
-
 SMTP is the main transport in Nodemailer for delivering messages. SMTP is also the protocol used between different email hosts, so it's truly universal. Almost every email delivery provider supports SMTP-based sending, even when they advertise API‑based sending as the primary option. APIs can offer more features, but they also introduce vendor lock‑in. With SMTP you can usually swap providers by changing only the configuration object or connection URL.
 
 ## Creating a transport
@@ -27,13 +25,14 @@ const transporter = nodemailer.createTransport(poolConfig);
 
 ### General options
 
-| Name         | Type      | Default                         | Description                                                                    |
-| ------------ | --------- | ------------------------------- | ------------------------------------------------------------------------------ |
-| `host`       | `string`  | `"localhost"`                   | Hostname or IP address of the SMTP server.                                     |
-| `port`       | `number`  | `587` (`465` if `secure: true`) | Port to connect to.                                                            |
-| `secure`     | `boolean` | `false`                         | If `true`, the connection will use TLS immediately (recommended for port 465). |
-| `auth`       | `object`  | –                               | Authentication data (see [Authentication](#authentication)).                   |
-| `authMethod` | `string`  | `"PLAIN"`                       | Preferred authentication method.                                               |
+| Name         | Type      | Default                         | Description                                                                                                                                                                             |
+| ------------ | --------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`       | `string`  | `"localhost"`                   | Hostname or IP address of the SMTP server.                                                                                                                                              |
+| `port`       | `number`  | `587` (`465` if `secure: true`) | Port to connect to.                                                                                                                                                                     |
+| `secure`     | `boolean` | `false`                         | If `true`, the connection will use TLS immediately (recommended for port 465).                                                                                                          |
+| `service`    | `string`  | –                               | Connection preset for a well‑known email service, for example `"gmail"`. Overrides `host`, `port`, and `secure` if set. See the [well‑known services list](/smtp/well-known-services/). |
+| `auth`       | `object`  | –                               | Authentication data (see [Authentication](#authentication)).                                                                                                                            |
+| `authMethod` | `string`  | `"PLAIN"`                       | Preferred authentication method.                                                                                                                                                        |
 
 :::info
 Nodemailer resolves the `host` value with `dns.resolve()`. If you point `host` to an IP address that is _not_ resolvable (for example, it is defined in **/etc/hosts**), also set `tls.servername` to the real hostname. TLS validation continues to work even though a DNS lookup is skipped.
