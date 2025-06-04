@@ -61,6 +61,7 @@ server.close(callback);
 | **socketTimeout**                                                            | `Number`            | `60_000`             | Idle timeout (ms) before disconnect.                                                                                             |
 | **closeTimeout**                                                             | `Number`            | `30_000`             | Wait (ms) for pending connections on `close()`.                                                                                  |
 | **onAuth / onConnect / onSecure / onMailFrom / onRcptTo / onData / onClose** | `Function`          |  –                   | Lifecycle callbacks detailed below.                                                                                              |
+| **resolver**                                                                 | `Object`            |  –                   | Custom DNS resolver with `.reverse` function, defaults to Node.js native `dns` module and its `dns.reverse` function.            |
 
 You may also pass any [`net.createServer`](https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener) options and, when `secure` is `true`, any [`tls.createServer`](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) options.
 
