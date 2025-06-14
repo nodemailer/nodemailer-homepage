@@ -69,7 +69,7 @@ await transporter.sendMail({
 });
 ```
 
-### 3. Opting‑out of DSN entirely
+### 3. Opting out of DSN entirely
 
 If you explicitly do **not** want DSN reports, pass `notify: 'never'`.
 

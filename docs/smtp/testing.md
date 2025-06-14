@@ -5,7 +5,7 @@ sidebar_position: 22
 
 When you need to exercise the email‑sending paths of your application in a development or continuous‑integration environment, you **must not** accidentally spam real inboxes. Instead of routing all mail to a single hard‑coded test address, point your code at a _mail‑catcher_ service: it accepts messages over SMTP exactly like a production provider, but **never** delivers them. It just stores the messages so that you can open or download them later.
 
-Nodemailer ships with first‑class support for [Ethereal Email](https://ethereal.email/) —a free, open‑source mail‑catcher designed for test environments. You can either
+Nodemailer ships with first‑class support for [Ethereal Email](https://ethereal.email/) — a free, open‑source mail‑catcher designed for test environments. You can either
 
 - **provision an account on the fly** with `createTestAccount`, or
 - **create a persistent test mailbox** from the Ethereal dashboard.

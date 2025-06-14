@@ -86,7 +86,7 @@ No sanitisation is performed. If you display `html`, make sure to run it through
 - `text` – formatted for plaintext context
 - `html` – formatted for HTML context
 
-For a deep‑dive into address objects see the [Message → Addresses](/message/addresses) section.
+For a deep dive into address objects see the [Message → Addresses](/message/addresses) section.
 
 #### `headers` Map quirks
 
@@ -102,17 +102,17 @@ Most headers resolve to **strings** (single header) or **string\[]** (multiple o
 
 ### Attachment object (simpleParser)
 
-| Property             | Notes                                               |
-| -------------------- | --------------------------------------------------- |
-| `filename`           | File name (may be `undefined`)                      |
-| `contentType`        | MIME type                                           |
-| `contentDisposition` | Usually `"attachment"`                              |
-| `checksum`           | MD5 hash of `content`                               |
-| `size`               | Bytes                                               |
-| `headers`            | `Map` of MIME headers for this node                 |
-| `content`            | `Buffer` with the entire attachment                 |
-| `contentId` / `cid`  | Content‑ID (without angle brackets)                 |
-| `related`            | `true` if the part is _inline_ (eg. embedded image) |
+| Property             | Notes                                                |
+| -------------------- | ---------------------------------------------------- |
+| `filename`           | File name (may be `undefined`)                       |
+| `contentType`        | MIME type                                            |
+| `contentDisposition` | Usually `"attachment"`                               |
+| `checksum`           | MD5 hash of `content`                                |
+| `size`               | Bytes                                                |
+| `headers`            | `Map` of MIME headers for this node                  |
+| `content`            | `Buffer` with the entire attachment                  |
+| `contentId` / `cid`  | Content‑ID (without angle brackets)                  |
+| `related`            | `true` if the part is _inline_ (e.g. embedded image) |
 
 ---
 

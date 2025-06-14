@@ -42,7 +42,7 @@ If both are present the **message‑level settings win**.
 | `cacheTreshold`    | `number`                                         | `131 072` (128 kB) | Bytes kept in memory before switching to disk when `cacheDir` is enabled.                                          |
 
 :::warning
-The option `cacheTreshold` is intentionally miss‑spelled to preserve backwards‑compatibility with older Nodemailer versions.
+The option `cacheTreshold` is intentionally misspelled to preserve backwards‑compatibility with older Nodemailer versions.
 :::
 
 ---

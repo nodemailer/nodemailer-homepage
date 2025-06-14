@@ -12,8 +12,8 @@ The following are the possible fields of an email message:
 - **cc** - Comma separated list or an array of recipients email addresses that will appear on the _Cc:_ field
 - **bcc** - Comma separated list or an array of recipients email addresses that will appear on the _Bcc:_ field
 - **subject** - The subject of the email
-- **text** - The plaintext version of the message as an Unicode string, Buffer, Stream or an attachment-like object (`{path: '/var/data/...'}`)
-- **html** - The HTML version of the message as an Unicode string, Buffer, Stream or an attachment-like object (`{path: 'http://...'}`)
+- **text** - The plaintext version of the message as a Unicode string, Buffer, Stream or an attachment-like object (`{path: '/var/data/...'}`)
+- **html** - The HTML version of the message as a Unicode string, Buffer, Stream or an attachment-like object (`{path: 'http://...'}`)
 - **attachments** - An array of attachment objects (see [Using attachments](/message/attachments/) for details). Attachments can be used for [embedding images](/message/embedded-images/) as well.
 
 A large majority of emails sent look a lot like this, using only a few basic fields:
@@ -36,7 +36,7 @@ var message = {
 - **replyTo** - An email address that will appear on the _Reply-To:_ field
 - **inReplyTo** - The Message-ID this message is replying to
 - **references** - Message-ID list (an array or space separated string)
-- **envelope** - optional SMTP envelope, if auto generated envelope is not suitable (see [SMTP envelope](/smtp/envelope/) for details)
+- **envelope** - optional SMTP envelope, if auto-generated envelope is not suitable (see [SMTP envelope](/smtp/envelope/) for details)
 
 ##### Content options
 
@@ -61,7 +61,7 @@ var message = {
 ##### Security options
 
 - **disableFileAccess** if true, then does not allow to use files as content. Use it when you want to use JSON data from untrusted source as the email. If an attachment or message node tries to fetch something from a file the sending returns an error. If this field is also set in the transport options, then the value in mail data is ignored
-- **disableUrlAccess** if true, then does not allow to use Urls as content. If this field is also set in the transport options, then the value in mail data is ignored
+- **disableUrlAccess** if true, then does not allow to use URLs as content. If this field is also set in the transport options, then the value in mail data is ignored
 
 ```javascript
 var message = {
