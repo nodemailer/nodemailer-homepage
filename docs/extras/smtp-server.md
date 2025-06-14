@@ -3,7 +3,7 @@ title: SMTP Server
 sidebar_position: 1
 ---
 
-Create SMTP and LMTP server instances on‑the‑fly. _smtp‑server_ is **not** a full‑blown server application like [Haraka](https://haraka.github.io/) but a convenient way to add custom SMTP or LMTP listeners to your app. It is the successor of the server part of the now‑deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [smtp‑connection](/extras/smtp-connection/).
+Create SMTP and LMTP server instances on the fly. _smtp‑server_ is **not** a full‑blown server application like [Haraka](https://haraka.github.io/) but a convenient way to add custom SMTP or LMTP listeners to your app. It is the successor of the server part of the now‑deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [smtp‑connection](/extras/smtp-connection/).
 
 ## Usage
 
