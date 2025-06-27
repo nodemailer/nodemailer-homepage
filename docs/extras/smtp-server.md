@@ -43,24 +43,25 @@ server.close(callback);
 | ---------------------------------------------------------------------------- | ------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **secure**                                                                   | `Boolean`           | `false`              | Start in TLS mode. Can still be upgraded with `STARTTLS` if you leave this `false`.                                              |
 | **name**                                                                     | `String`            | `os.hostname()`      | Hostname announced in banner.                                                                                                    |
-| **banner**                                                                   | `String`            |  –                   | Greeting appended to the standard ESMTP banner.                                                                                  |
-| **size**                                                                     | `Number`            |  `0`                 | Maximum accepted message size in bytes. `0` means unlimited.                                                                     |
+| **banner**                                                                   | `String`            |  –                   | Greeting appended to the standard ESMTP banner.                                                                                  |
+| **size**                                                                     | `Number`            |  `0`                 | Maximum accepted message size in bytes. `0` means unlimited.                                                                     |
 | **hideSize**                                                                 | `Boolean`           | `false`              | Hide the SIZE limit from clients but still track `stream.sizeExceeded`.                                                          |
 | **authMethods**                                                              | `String[]`          | `['PLAIN', 'LOGIN']` | Allowed auth mechanisms. Add `'XOAUTH2'` and/or `'CRAM-MD5'` as needed.                                                          |
 | **authOptional**                                                             | `Boolean`           | `false`              | Allow but do **not** require auth.                                                                                               |
-| **disabledCommands**                                                         | `String[]`          |  –                   | Commands to disable, e.g. `['AUTH']`.                                                                                            |
-| **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8 / hideENHANCEDSTATUSCODES** | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
+| **disabledCommands**                                                         | `String[]`          |  –                   | Commands to disable, e.g. `['AUTH']`.                                                                                            |
+| **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8**              | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
+| **hideENHANCEDSTATUSCODES**                                                  | `Boolean`           | `true`               | Enable or disable the `ENHANCEDSTATUSCODES` capability in `EHLO` response.  **Enhanced status codes are disabled by default.**   |
 | **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication before TLS.                                                                                                 |
 | **disableReverseLookup**                                                     | `Boolean`           | `false`              | Skip reverse DNS lookup of the client.                                                                                           |
-| **sniOptions**                                                               | `Map \| Object`     |  –                   | TLS options per SNI hostname.                                                                                                    |
-| **logger**                                                                   | `Boolean \| Object` | `false`              | `true` → log to `console`, or supply a Bunyan instance.                                                                          |
+| **sniOptions**                                                               | `Map \| Object`     |  –                   | TLS options per SNI hostname.                                                                                                    |
+| **logger**                                                                   | `Boolean \| Object` | `false`              | `true` → log to `console`, or supply a Bunyan instance.                                                                          |
 | **maxClients**                                                               | `Number`            | `Infinity`           | Max concurrent clients.                                                                                                          |
 | **useProxy**                                                                 | `Boolean`           | `false`              | Expect an HAProxy [PROXY header](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt).                                    |
 | **useXClient / useXForward**                                                 | `Boolean`           | `false`              | Enable Postfix [XCLIENT](http://www.postfix.org/XCLIENT_README.html) or [XFORWARD](http://www.postfix.org/XFORWARD_README.html). |
 | **lmtp**                                                                     | `Boolean`           | `false`              | Speak LMTP instead of SMTP.                                                                                                      |
 | **socketTimeout**                                                            | `Number`            | `60_000`             | Idle timeout (ms) before disconnect.                                                                                             |
 | **closeTimeout**                                                             | `Number`            | `30_000`             | Wait (ms) for pending connections on `close()`.                                                                                  |
-| **onAuth / onConnect / onSecure / onMailFrom / onRcptTo / onData / onClose** | `Function`          |  –                   | Lifecycle callbacks detailed below.                                                                                              |
+| **onAuth / onConnect / onSecure / onMailFrom / onRcptTo / onData / onClose** | `Function`          |  –                   | Lifecycle callbacks detailed below.                                                                                              |
 | **resolver**                                                                 | `Object`            |  –                   | Custom DNS resolver with `.reverse` function, defaults to Node.js native `dns` module and its `dns.reverse` function.            |
 
 You may also pass any [`net.createServer`](https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener) options and, when `secure` is `true`, any [`tls.createServer`](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) options.
@@ -330,20 +331,33 @@ The `session.envelope` object contains transaction-specific data:
 
 ## Enhanced Status Codes (RFC 2034/3463)
 
-_smtp‑server_ supports **Enhanced Status Codes** as defined in RFC 2034 and RFC 3463. When enabled (default), all SMTP responses include enhanced status codes in the format `X.Y.Z`:
+_smtp‑server_ supports **Enhanced Status Codes** as defined in RFC 2034 and RFC 3463. When enabled, all SMTP responses include enhanced status codes in the format `X.Y.Z`:
 
 ```
 250 2.1.0 Accepted        ← Enhanced status code: 2.1.0
 550 5.1.1 Mailbox unavailable ← Enhanced status code: 5.1.1
 ```
 
-### Disabling Enhanced Status Codes
+### Enabling Enhanced Status Codes
 
-For backward compatibility, you can disable enhanced status codes:
+To enable enhanced status codes (they are disabled by default):
 
 ```javascript
 const server = new SMTPServer({
-  hideENHANCEDSTATUSCODES: true, // Disable enhanced status codes
+  hideENHANCEDSTATUSCODES: false, // Enable enhanced status codes
+  onMailFrom(address, session, callback) {
+    callback(); // Response: "250 2.1.0 Accepted" (with enhanced code)
+  },
+});
+```
+
+### Disabling Enhanced Status Codes
+
+Enhanced status codes are disabled by default, but you can explicitly disable them:
+
+```javascript
+const server = new SMTPServer({
+  hideENHANCEDSTATUSCODES: true, // Explicitly disable enhanced status codes (default behavior)
   onMailFrom(address, session, callback) {
     callback(); // Response: "250 Accepted" (no enhanced code)
   },
@@ -367,6 +381,8 @@ const server = new SMTPServer({
 ## DSN (Delivery Status Notification) Support
 
 _smtp‑server_ fully supports **DSN parameters** as defined in RFC 3461, allowing clients to request delivery status notifications.
+
+DSN functionality requires **Enhanced Status Codes** to be enabled. Since enhanced status codes are disabled by default, you must set `hideENHANCEDSTATUSCODES: false` to use DSN features.
 
 ### DSN Parameters
 
@@ -394,6 +410,7 @@ DSN parameters are available in your callback handlers:
 
 ```javascript
 const server = new SMTPServer({
+  hideENHANCEDSTATUSCODES: false, // Required for DSN functionality
   onMailFrom(address, session, callback) {
     // Access DSN parameters from MAIL FROM
     const ret = session.envelope.dsn.ret;        // 'FULL' or 'HDRS'
@@ -427,6 +444,7 @@ _smtp‑server_ automatically validates DSN parameters:
 
 ```javascript
 const server = new SMTPServer({
+  hideENHANCEDSTATUSCODES: false, // Required for DSN functionality
   onMailFrom(address, session, callback) {
     const { ret, envid } = session.envelope.dsn;
     console.log(`Mail from ${address.address}, RET=${ret}, ENVID=${envid}`);
@@ -538,6 +556,7 @@ const dsnNotifier = new DSNNotifier(dsnTransporter);
 
 // SMTP Server with DSN support
 const server = new SMTPServer({
+  hideENHANCEDSTATUSCODES: false, // Required for DSN functionality
   name: 'mail.example.com',
 
   onMailFrom(address, session, callback) {
