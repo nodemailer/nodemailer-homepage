@@ -49,7 +49,7 @@ server.close(callback);
 | **authMethods**                                                              | `String[]`          | `['PLAIN', 'LOGIN']` | Allowed auth mechanisms. Add `'XOAUTH2'` and/or `'CRAM-MD5'` as needed.                                                          |
 | **authOptional**                                                             | `Boolean`           | `false`              | Allow but do **not** require auth.                                                                                               |
 | **disabledCommands**                                                         | `String[]`          |  –                   | Commands to disable, e.g. `['AUTH']`.                                                                                            |
-| **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8**              | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
+| **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8 / hideENHANCEDSTATUSCODES** | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
 | **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication before TLS.                                                                                                 |
 | **disableReverseLookup**                                                     | `Boolean`           | `false`              | Skip reverse DNS lookup of the client.                                                                                           |
 | **sniOptions**                                                               | `Map \| Object`     |  –                   | TLS options per SNI hostname.                                                                                                    |
@@ -246,17 +246,50 @@ const server = new SMTPServer({
 
 ## Session object
 
-| Property              | Type                              | Description                                                     |
-| --------------------- | --------------------------------- | --------------------------------------------------------------- |
-| **id**                | `String`                          | Random connection ID.                                           |
-| **remoteAddress**     | `String`                          | Client IP address.                                              |
-| **clientHostname**    | `String`                          | Reverse‑DNS of `remoteAddress` (unless `disableReverseLookup`). |
-| **openingCommand**    | `"HELO" \| "EHLO" \| "LHLO"`      | First command sent by the client.                               |
-| **hostNameAppearsAs** | `String`                          | Hostname the client gave in HELO/EHLO.                          |
-| **envelope**          | `Object`                          | Contains `mailFrom` and `rcptTo` arrays (see below).            |
-| **user**              | `any`                             | Value you returned from `onAuth`.                               |
-| **transaction**       | `Number`                          | 1 for the first message, 2 for the second, …                    |
-| **transmissionType**  | `"SMTP" \| "ESMTP" \| "ESMTPA" …` | Calculated for `Received:` headers.                             |
+| Property              | Type                              | Description                                                       |
+| --------------------- | --------------------------------- | ----------------------------------------------------------------- |
+| **id**                | `String`                          | Random connection ID.                                             |
+| **remoteAddress**     | `String`                          | Client IP address.                                                |
+| **clientHostname**    | `String`                          | Reverse‑DNS of `remoteAddress` (unless `disableReverseLookup`).   |
+| **openingCommand**    | `"HELO" \| "EHLO" \| "LHLO"`      | First command sent by the client.                                 |
+| **hostNameAppearsAs** | `String`                          | Hostname the client gave in HELO/EHLO.                            |
+| **envelope**          | `Object`                          | Contains `mailFrom`, `rcptTo` arrays, and `dsn` data (see below). |
+| **user**              | `any`                             | Value you returned from `onAuth`.                                 |
+| **transaction**       | `Number`                          | 1 for the first message, 2 for the second, …                      |
+| **transmissionType**  | `"SMTP" \| "ESMTP" \| "ESMTPA" …` | Calculated for `Received:` headers.                               |
+
+---
+
+## Envelope object
+
+The `session.envelope` object contains transaction-specific data:
+
+```jsonc
+{
+  "mailFrom": {
+    "address": "sender@example.com",
+    "args": { "SIZE": "12345", "RET": "HDRS" },
+    "dsn": { "ret": "HDRS", "envid": "abc123" }
+  },
+  "rcptTo": [
+    {
+      "address": "user1@example.com",
+      "args": { "NOTIFY": "SUCCESS,FAILURE" },
+      "dsn": { "notify": ["SUCCESS", "FAILURE"], "orcpt": "rfc822;user1@example.com" }
+    }
+  ],
+  "dsn": {
+    "ret": "HDRS",
+    "envid": "abc123"
+  }
+}
+```
+
+| Property     | Type       | Description                                    |
+| ------------ | ---------- | ---------------------------------------------- |
+| **mailFrom** | `Object`   | Sender address object (see Address object)    |
+| **rcptTo**   | `Object[]` | Array of recipient address objects            |
+| **dsn**      | `Object`   | DSN parameters from MAIL FROM command         |
 
 ---
 
@@ -268,6 +301,12 @@ const server = new SMTPServer({
   "args": {
     "SIZE": "12345",
     "RET": "HDRS"
+  },
+  "dsn": {
+    "ret": "HDRS",
+    "envid": "abc123",
+    "notify": ["SUCCESS", "FAILURE"],
+    "orcpt": "rfc822;original@example.com"
   }
 }
 ```
@@ -276,6 +315,142 @@ const server = new SMTPServer({
 | ----------- | ----------------------------------------------------- |
 | **address** | The literal address given in `MAIL FROM:`/`RCPT TO:`. |
 | **args**    | Additional arguments (uppercase keys).                |
+| **dsn**     | DSN parameters (when ENHANCEDSTATUSCODES is enabled). |
+
+### DSN Object Properties
+
+| Property    | Type       | Description                                    |
+| ----------- | ---------- | ---------------------------------------------- |
+| **ret**     | `String`   | Return type: `'FULL'` or `'HDRS'` (MAIL FROM) |
+| **envid**   | `String`   | Envelope identifier (MAIL FROM)                |
+| **notify**  | `String[]` | Notification types (RCPT TO)                   |
+| **orcpt**   | `String`   | Original recipient (RCPT TO)                   |
+
+---
+
+## Enhanced Status Codes (RFC 2034/3463)
+
+_smtp‑server_ supports **Enhanced Status Codes** as defined in RFC 2034 and RFC 3463. When enabled (default), all SMTP responses include enhanced status codes in the format `X.Y.Z`:
+
+```
+250 2.1.0 Accepted        ← Enhanced status code: 2.1.0
+550 5.1.1 Mailbox unavailable ← Enhanced status code: 5.1.1
+```
+
+### Disabling Enhanced Status Codes
+
+For backward compatibility, you can disable enhanced status codes:
+
+```javascript
+const server = new SMTPServer({
+  hideENHANCEDSTATUSCODES: true, // Disable enhanced status codes
+  onMailFrom(address, session, callback) {
+    callback(); // Response: "250 Accepted" (no enhanced code)
+  },
+});
+```
+
+### Enhanced Status Code Examples
+
+| Response Code | Enhanced Code | Description |
+|---------------|---------------|-------------|
+| `250` | `2.0.0` | General success |
+| `250` | `2.1.0` | MAIL FROM accepted |
+| `250` | `2.1.5` | RCPT TO accepted |
+| `250` | `2.6.0` | Message accepted |
+| `501` | `5.5.4` | Syntax error in parameters |
+| `550` | `5.1.1` | Mailbox unavailable |
+| `552` | `5.2.2` | Storage exceeded |
+
+---
+
+## DSN (Delivery Status Notification) Support
+
+_smtp‑server_ fully supports **DSN parameters** as defined in RFC 3461, allowing clients to request delivery status notifications.
+
+### DSN Parameters
+
+#### MAIL FROM Parameters
+
+- **`RET=FULL`** or **`RET=HDRS`** — Return full message or headers only in DSN
+- **`ENVID=<envelope-id>`** — Envelope identifier for tracking
+
+```javascript
+// Client sends: MAIL FROM:<sender@example.com> RET=FULL ENVID=abc123
+```
+
+#### RCPT TO Parameters
+
+- **`NOTIFY=SUCCESS,FAILURE,DELAY,NEVER`** — When to send DSN
+- **`ORCPT=<original-recipient>`** — Original recipient for tracking
+
+```javascript
+// Client sends: RCPT TO:<user@example.com> NOTIFY=SUCCESS,FAILURE ORCPT=rfc822;user@example.com
+```
+
+### Accessing DSN Parameters
+
+DSN parameters are available in your callback handlers:
+
+```javascript
+const server = new SMTPServer({
+  onMailFrom(address, session, callback) {
+    // Access DSN parameters from MAIL FROM
+    const ret = session.envelope.dsn.ret;        // 'FULL' or 'HDRS'
+    const envid = session.envelope.dsn.envid;    // Envelope ID
+
+    console.log(`RET: ${ret}, ENVID: ${envid}`);
+    callback();
+  },
+
+  onRcptTo(address, session, callback) {
+    // Access DSN parameters from RCPT TO
+    const notify = address.dsn.notify;   // ['SUCCESS', 'FAILURE', 'DELAY']
+    const orcpt = address.dsn.orcpt;     // Original recipient
+
+    console.log(`NOTIFY: ${notify.join(',')}, ORCPT: ${orcpt}`);
+    callback();
+  },
+});
+```
+
+### DSN Parameter Validation
+
+_smtp‑server_ automatically validates DSN parameters:
+
+- **`RET`** must be `FULL` or `HDRS`
+- **`NOTIFY`** must be `SUCCESS`, `FAILURE`, `DELAY`, or `NEVER`
+- **`NOTIFY=NEVER`** cannot be combined with other values
+- Invalid parameters return appropriate error responses with enhanced status codes
+
+### Complete DSN Example
+
+```javascript
+const server = new SMTPServer({
+  onMailFrom(address, session, callback) {
+    const { ret, envid } = session.envelope.dsn;
+    console.log(`Mail from ${address.address}, RET=${ret}, ENVID=${envid}`);
+    callback();
+  },
+
+  onRcptTo(address, session, callback) {
+    const { notify, orcpt } = address.dsn;
+    console.log(`Rcpt to ${address.address}, NOTIFY=${notify.join(',')}, ORCPT=${orcpt}`);
+    callback();
+  },
+
+  onData(stream, session, callback) {
+    // Process message with DSN context
+    const { dsn } = session.envelope;
+    console.log(`Processing message with DSN: ${JSON.stringify(dsn)}`);
+
+    stream.on('end', () => {
+      callback(null, 'Message accepted for delivery');
+    });
+    stream.resume();
+  },
+});
+```
 
 ---
 
@@ -298,8 +473,9 @@ const server = new SMTPServer({
 - `8BITMIME`
 - `SMTPUTF8`
 - `SIZE`
+- `ENHANCEDSTATUSCODES` (RFC 2034/3463)
 
-> The `ENHANCEDSTATUSCODES` and `CHUNKING` extensions are **not** implemented.
+> The `CHUNKING` extension is **not** implemented.
 
 ---
 
