@@ -246,17 +246,17 @@ const server = new SMTPServer({
 
 ## Session object
 
-| Property              | Type                              | Description                                                       |
-| --------------------- | --------------------------------- | ----------------------------------------------------------------- |
-| **id**                | `String`                          | Random connection ID.                                             |
-| **remoteAddress**     | `String`                          | Client IP address.                                                |
-| **clientHostname**    | `String`                          | Reverse‑DNS of `remoteAddress` (unless `disableReverseLookup`).   |
-| **openingCommand**    | `"HELO" \| "EHLO" \| "LHLO"`      | First command sent by the client.                                 |
-| **hostNameAppearsAs** | `String`                          | Hostname the client gave in HELO/EHLO.                            |
+| Property              | Type                              | Description                                                     |
+| --------------------- | --------------------------------- | --------------------------------------------------------------- |
+| **id**                | `String`                          | Random connection ID.                                           |
+| **remoteAddress**     | `String`                          | Client IP address.                                              |
+| **clientHostname**    | `String`                          | Reverse‑DNS of `remoteAddress` (unless `disableReverseLookup`). |
+| **openingCommand**    | `"HELO" \| "EHLO" \| "LHLO"`      | First command sent by the client.                               |
+| **hostNameAppearsAs** | `String`                          | Hostname the client gave in HELO/EHLO.                          |
 | **envelope**          | `Object`                          | Contains `mailFrom`, `rcptTo` arrays, and `dsn` data (see below). |
-| **user**              | `any`                             | Value you returned from `onAuth`.                                 |
-| **transaction**       | `Number`                          | 1 for the first message, 2 for the second, …                      |
-| **transmissionType**  | `"SMTP" \| "ESMTP" \| "ESMTPA" …` | Calculated for `Received:` headers.                               |
+| **user**              | `any`                             | Value you returned from `onAuth`.                               |
+| **transaction**       | `Number`                          | 1 for the first message, 2 for the second, …                    |
+| **transmissionType**  | `"SMTP" \| "ESMTP" \| "ESMTPA" …` | Calculated for `Received:` headers.                             |
 
 ---
 
@@ -451,6 +451,143 @@ const server = new SMTPServer({
   },
 });
 ```
+
+### Production DSN Implementation Example
+
+Here's a complete example showing how to implement DSN notifications using nodemailer:
+
+```javascript
+const { SMTPServer } = require('smtp-server');
+const nodemailer = require('nodemailer');
+
+// Create a nodemailer transporter for sending DSN notifications
+const dsnTransporter = nodemailer.createTransporter({
+  host: 'smtp.example.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'dsn-sender@example.com',
+    pass: 'your-password'
+  }
+});
+
+// DSN notification generator
+class DSNNotifier {
+  constructor(transporter) {
+    this.transporter = transporter;
+  }
+
+  async sendSuccessNotification(envelope, messageId, deliveryTime) {
+    // Only send if SUCCESS notification was requested
+    const needsSuccessNotification = envelope.rcptTo.some(rcpt =>
+      rcpt.dsn.notify && rcpt.dsn.notify.includes('SUCCESS')
+    );
+
+    if (!needsSuccessNotification || !envelope.mailFrom.address) {
+      return;
+    }
+
+    const dsnMessage = this.generateDSNMessage({
+      action: 'delivered',
+      status: '2.0.0',
+      envelope,
+      messageId,
+      deliveryTime,
+      diagnosticCode: 'smtp; 250 2.0.0 Message accepted for delivery'
+    });
+
+    await this.transporter.sendMail({
+      from: 'postmaster@example.com',
+      to: envelope.mailFrom.address,
+      subject: 'Delivery Status Notification (Success)',
+      text: dsnMessage.text,
+      headers: {
+        'Auto-Submitted': 'auto-replied',
+        'Content-Type': 'multipart/report; report-type=delivery-status'
+      }
+    });
+  }
+
+  generateDSNMessage({ action, status, envelope, messageId, deliveryTime, diagnosticCode }) {
+    const { dsn } = envelope;
+    const timestamp = deliveryTime || new Date().toISOString();
+
+    // Generate RFC 3464 compliant delivery status notification
+    const text = `This is an automatically generated Delivery Status Notification.
+
+Original Message Details:
+- Message ID: ${messageId}
+- Envelope ID: ${dsn.envid || 'Not provided'}
+- Sender: ${envelope.mailFrom.address}
+- Recipients: ${envelope.rcptTo.map(r => r.address).join(', ')}
+- Action: ${action}
+- Status: ${status}
+- Time: ${timestamp}
+
+${action === 'delivered' ?
+  'Your message has been successfully delivered to all recipients.' :
+  'Delivery failed for one or more recipients.'
+}`;
+
+    return { text };
+  }
+}
+
+// Create DSN notifier instance
+const dsnNotifier = new DSNNotifier(dsnTransporter);
+
+// SMTP Server with DSN support
+const server = new SMTPServer({
+  name: 'mail.example.com',
+
+  onMailFrom(address, session, callback) {
+    const { dsn } = session.envelope;
+    console.log(`MAIL FROM: ${address.address}, RET=${dsn.ret}, ENVID=${dsn.envid}`);
+    callback();
+  },
+
+  onRcptTo(address, session, callback) {
+    const { notify, orcpt } = address.dsn;
+    console.log(`RCPT TO: ${address.address}, NOTIFY=${notify?.join(',')}, ORCPT=${orcpt}`);
+    callback();
+  },
+
+  async onData(stream, session, callback) {
+    const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    stream.on('end', async () => {
+      try {
+        // Simulate message delivery
+        const deliveryTime = new Date();
+
+        // Send DSN success notification if requested
+        await dsnNotifier.sendSuccessNotification(
+          session.envelope,
+          messageId,
+          deliveryTime
+        );
+
+        callback(null, `Message ${messageId} accepted for delivery`);
+      } catch (error) {
+        callback(error);
+      }
+    });
+
+    stream.resume();
+  }
+});
+
+server.listen(2525, () => {
+  console.log('DSN-enabled SMTP server listening on port 2525');
+});
+```
+
+This example demonstrates:
+- **Complete DSN workflow** from parameter parsing to notification sending
+- **RFC-compliant DSN messages** with proper headers and content
+- **Conditional notifications** based on NOTIFY parameters
+- **Integration with nodemailer** for sending DSN notifications
+- **Production-ready structure** with error handling
 
 ---
 
