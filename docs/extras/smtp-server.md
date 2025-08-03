@@ -51,6 +51,7 @@ server.close(callback);
 | **disabledCommands**                                                         | `String[]`          |  –                   | Commands to disable, e.g. `['AUTH']`.                                                                                            |
 | **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8**              | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
 | **hideENHANCEDSTATUSCODES**                                                  | `Boolean`           | `true`               | Enable or disable the `ENHANCEDSTATUSCODES` capability in `EHLO` response.  **Enhanced status codes are disabled by default.**   |
+| **hideDSN**                                                  | `Boolean`           | `true`               | Enable or disable the `DSN` capability in `EHLO` response.  **Delivery status notifications are disabled by default.**   |
 | **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication before TLS.                                                                                                 |
 | **disableReverseLookup**                                                     | `Boolean`           | `false`              | Skip reverse DNS lookup of the client.                                                                                           |
 | **sniOptions**                                                               | `Map \| Object`     |  –                   | TLS options per SNI hostname.                                                                                                    |
@@ -382,7 +383,7 @@ const server = new SMTPServer({
 
 _smtp‑server_ fully supports **DSN parameters** as defined in RFC 3461, allowing clients to request delivery status notifications.
 
-DSN functionality requires **Enhanced Status Codes** to be enabled. Since enhanced status codes are disabled by default, you must set `hideENHANCEDSTATUSCODES: false` to use DSN features.
+DSN functionality requires **Enhanced Status Codes** to be enabled. Since enhanced status codes are disabled by default, you must set `hideDSN: false` to use DSN features.
 
 ### DSN Parameters
 
