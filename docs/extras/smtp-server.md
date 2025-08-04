@@ -51,6 +51,7 @@ server.close(callback);
 | **disabledCommands**                                                         | `String[]`          |  –                   | Commands to disable, e.g. `['AUTH']`.                                                                                            |
 | **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8**              | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
 | **hideENHANCEDSTATUSCODES**                                                  | `Boolean`           | `true`               | Enable or disable the `ENHANCEDSTATUSCODES` capability in `EHLO` response.  **Enhanced status codes are disabled by default.**   |
+| **hideDSN**                                                                  | `Boolean`           | `true`               | Enable or disable the `DSN` capability in `EHLO` response.  **Delivery status notifications are disabled by default.**           |
 | **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication before TLS.                                                                                                 |
 | **disableReverseLookup**                                                     | `Boolean`           | `false`              | Skip reverse DNS lookup of the client.                                                                                           |
 | **sniOptions**                                                               | `Map \| Object`     |  –                   | TLS options per SNI hostname.                                                                                                    |
@@ -382,7 +383,7 @@ const server = new SMTPServer({
 
 _smtp‑server_ fully supports **DSN parameters** as defined in RFC 3461, allowing clients to request delivery status notifications.
 
-DSN functionality requires **Enhanced Status Codes** to be enabled. Since enhanced status codes are disabled by default, you must set `hideENHANCEDSTATUSCODES: false` to use DSN features.
+DSN functionality requires **delivery status notifications** to be enabled. Since delivery status notifications are disabled by default, you must set `hideDSN: false` to use DSN features.
 
 ### DSN Parameters
 
@@ -410,7 +411,7 @@ DSN parameters are available in your callback handlers:
 
 ```javascript
 const server = new SMTPServer({
-  hideENHANCEDSTATUSCODES: false, // Required for DSN functionality
+  hideDSN: false, // Required for DSN functionality
   onMailFrom(address, session, callback) {
     // Access DSN parameters from MAIL FROM
     const ret = session.envelope.dsn.ret;        // 'FULL' or 'HDRS'
@@ -444,7 +445,7 @@ _smtp‑server_ automatically validates DSN parameters:
 
 ```javascript
 const server = new SMTPServer({
-  hideENHANCEDSTATUSCODES: false, // Required for DSN functionality
+  hideDSN: false, // Required for DSN functionality
   onMailFrom(address, session, callback) {
     const { ret, envid } = session.envelope.dsn;
     console.log(`Mail from ${address.address}, RET=${ret}, ENVID=${envid}`);
@@ -556,7 +557,7 @@ const dsnNotifier = new DSNNotifier(dsnTransporter);
 
 // SMTP Server with DSN support
 const server = new SMTPServer({
-  hideENHANCEDSTATUSCODES: false, // Required for DSN functionality
+  hideDSN: false, // Required for DSN functionality
   name: 'mail.example.com',
 
   onMailFrom(address, session, callback) {
@@ -629,6 +630,7 @@ This example demonstrates:
 - `8BITMIME`
 - `SMTPUTF8`
 - `SIZE`
+- `DSN` (RFC 3461)
 - `ENHANCEDSTATUSCODES` (RFC 2034/3463)
 
 > The `CHUNKING` extension is **not** implemented.
