@@ -383,7 +383,7 @@ const server = new SMTPServer({
 
 _smtp‑server_ fully supports **DSN parameters** as defined in RFC 3461, allowing clients to request delivery status notifications.
 
-DSN functionality requires **Enhanced Status Codes** to be enabled. Since enhanced status codes are disabled by default, you must set `hideDSN: false` to use DSN features.
+DSN functionality requires **delivery status notifications** to be enabled. Since delivery status notifications are disabled by default, you must set `hideDSN: false` to use DSN features.
 
 ### DSN Parameters
 
