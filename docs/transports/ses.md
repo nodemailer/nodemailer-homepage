@@ -77,6 +77,7 @@ The promise (or callback) resolves to:
 1. Confirm that the IAM principal used by the SDK has the **ses\:SendEmail** permission (see [Example 2](#example-2)).
 2. Make sure the **From** address (or its domain) is _verified_ in the SES console.
 3. _Rare_: AWS access keys containing non‑alphanumeric characters have been reported to fail—regenerate the keys if permission checks look correct.
+4. **Limited functionality:** SES transport doesn't support verifying connections anymore [see](https://github.com/nodemailer/nodemailer/issues/1751#issuecomment-3175843706)
 
 ### “Cannot find module '@aws-sdk/client-sesv2'”
 

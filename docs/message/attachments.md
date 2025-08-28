@@ -12,7 +12,7 @@ An attachment is an object inside the `attachments` array. You can attach **as m
 | `filename`           | `string`                     | Name that will be displayed to the recipient. Unicode is allowed.                                                                                 |
 | `content`            | `string \| Buffer \| Stream` | Contents of the file.                                                                                                                             |
 | `path`               | `string`                     | Filesystem path or URL (including data URIs). Nodemailer streams the file instead of reading it fully into memory—recommended for large files.    |
-| `href`               | `string`                     | HTTP(s) URL that Nodemailer should fetch and attach.                                                                                              |
+| `href`               | `string`                     | HTTP(S) URL that Nodemailer should fetch and attach.                                                                                              |
 | `httpHeaders`        | `object`                     | Custom HTTP headers for `href`, for example `{ authorization: 'Bearer …' }`.                                                                      |
 | `contentType`        | `string`                     | Explicit [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types). Defaults to the type inferred from `filename`. |
 | `contentDisposition` | `string`                     | Content‑Disposition header. Defaults to `'attachment'`.                                                                                           |
