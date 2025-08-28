@@ -65,10 +65,39 @@ Setting **`secure: false`** does **not** necessarily mean you are sending in pla
 
 ### Debug options
 
-| Name     | Type                 | Description                                                                                                                       |
-| -------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `logger` | `object` / `boolean` | A [Bunyan](https://github.com/trentm/node-bunyan) logger instance, `true` for console logging, or `false` / unset for no logging. |
-| `debug`  | `boolean`            | Log SMTP traffic when `true`, otherwise only transaction events.                                                                  |
+| Name     | Type                 | Description                                                                                                                                  |
+| -------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logger` | `object` / `boolean` | A [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance, `true` for console logging, or `false` / unset for no logging. |
+| `debug`  | `boolean`            | Log SMTP traffic when `true`, otherwise only transaction events.                                                                             |
+
+**Custom logger**
+
+If you want to use some specific logger, you can wrap it into Nodemailer-compatible logger object.
+
+```js
+const smtpLogger = {};
+
+// Set up logger wrapper
+for (let level of ['trace', 'debug', 'info', 'warn', 'error', 'fatal']) {
+    smtpLogger[level] = (data, message, ...args) => {
+        if (args && args.length) {
+            message = util.format(message, ...args);
+        }
+        data.msg = message;
+        data.src = 'nodemailer';
+        if (typeof pinoLogger[level] === 'function') {
+            pinoLogger[level](data);
+        } else {
+            pinoLogger.debug(data);
+        }
+    };
+}
+
+nodemailer.createTransport({
+    ...,
+    logger: smtpLogger
+})
+```
 
 ### Security options
 
