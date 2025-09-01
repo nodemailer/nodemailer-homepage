@@ -127,10 +127,14 @@ sourceStream.pipe(parser);
 
 `MailParser` is a `Transform` stream in **object mode** that emits two kinds of objects via the `'data'` event:
 
-1. **`{ type: 'headers', headers: Map }`** – once, after the headers are parsed.
-2. **`{ type: 'attachment', ... }`** – for every attachment (see below).
+1. **`{ type: 'attachment', ... }`** – for every attachment (see below).
    The `content` property is a **Readable stream**.
-3. **`{ type: 'text', html, text, textAsHtml }`** – once, containing the message bodies.
+2. **`{ type: 'text', html, text, textAsHtml }`** – once, containing the message bodies.
+
+`MailParser` also emits two events for email headers:
+
+1. `'headers'` - A `Map` of header keys to their values
+2. `'headerLines'` - An `Array` of `{key: '...key...', line: '...line...'}` containing the raw lines of each header.
 
 ### Stream options {#options}
 
