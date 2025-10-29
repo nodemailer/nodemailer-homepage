@@ -43,7 +43,8 @@ server.close(callback);
 | ---------------------------------------------------------------------------- | ------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **secure**                                                                   | `Boolean`           | `false`              | Start in TLS mode. Can still be upgraded with `STARTTLS` if you leave this `false`.                                              |
 | **name**                                                                     | `String`            | `os.hostname()`      | Hostname announced in banner.                                                                                                    |
-| **banner**                                                                   | `String`            | –                    | Greeting appended to the standard ESMTP banner.                                                                                  |
+| **banner**                                                                   | `String`            | –                    | Greeting message appended to the standard ESMTP banner (initial connection greeting).                                            |
+| **heloResponse**                                                             | `String`            | `'%s Nice to meet you, %s'` | HELO/EHLO greeting format. Use `%s` placeholders: 1st = server name, 2nd = client hostname.                                   |
 | **size**                                                                     | `Number`            | `0`                  | Maximum accepted message size in bytes. `0` means unlimited.                                                                     |
 | **hideSize**                                                                 | `Boolean`           | `false`              | Hide the SIZE limit from clients but still track `stream.sizeExceeded`.                                                          |
 | **authMethods**                                                              | `String[]`          | `['PLAIN', 'LOGIN']` | Allowed auth mechanisms. Add `'XOAUTH2'` and/or `'CRAM-MD5'` as needed.                                                          |
@@ -67,6 +68,55 @@ server.close(callback);
 | **resolver**                                                                 | `Object`            | –                    | Custom DNS resolver with `.reverse` function, defaults to Node.js native `dns` module and its `dns.reverse` function.            |
 
 You may also pass any [`net.createServer`](https://nodejs.org/api/net.html#net_net_createserver_options_connectionlistener) options and, when `secure` is `true`, any [`tls.createServer`](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener) options.
+
+---
+
+## Customizing greetings
+
+### Initial connection banner
+
+The `banner` option adds a custom greeting to the initial connection response (220 code):
+
+```javascript
+const server = new SMTPServer({
+  banner: "Welcome to our mail service",
+});
+// Client sees: "220 hostname ESMTP Welcome to our mail service"
+```
+
+### HELO/EHLO response
+
+The `heloResponse` option customizes the HELO/EHLO greeting message using `%s` placeholders:
+
+```javascript
+const server = new SMTPServer({
+  heloResponse: "%s says hello to %s",
+});
+// Client sees: "250 hostname says hello to client.example.com"
+```
+
+**Placeholders:**
+- First `%s` → Server name (from `name` option or `os.hostname()`)
+- Second `%s` → Client hostname (resolved or IP address)
+
+**Examples:**
+
+```javascript
+// Default (no configuration)
+// "250 hostname Nice to meet you, client.example.com"
+
+// Custom formal greeting
+heloResponse: "Welcome to %s mail server"
+// "250 Welcome to hostname mail server"
+
+// Minimal greeting
+heloResponse: "Hello"
+// "250 Hello"
+
+// Custom with both placeholders
+heloResponse: "%s greets %s"
+// "250 hostname greets client.example.com"
+```
 
 ---
 
