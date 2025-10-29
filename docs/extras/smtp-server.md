@@ -52,6 +52,7 @@ server.close(callback);
 | **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8**              | `Boolean`           | `false`              | Remove the respective feature from the EHLO response.                                                                            |
 | **hideENHANCEDSTATUSCODES**                                                  | `Boolean`           | `true`               | Enable or disable the `ENHANCEDSTATUSCODES` capability in `EHLO` response. **Enhanced status codes are disabled by default.**    |
 | **hideDSN**                                                                  | `Boolean`           | `true`               | Enable or disable the `DSN` capability in `EHLO` response. **Delivery status notifications are disabled by default.**            |
+| **hideREQUIRETLS**                                                           | `Boolean`           | `true`               | Enable or disable the `REQUIRETLS` capability in `EHLO` response. **REQUIRETLS is disabled by default (opt-in).**               |
 | **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication before TLS.                                                                                                 |
 | **disableReverseLookup**                                                     | `Boolean`           | `false`              | Skip reverse DNS lookup of the client.                                                                                           |
 | **sniOptions**                                                               | `Map \| Object`     | –                    | TLS options per SNI hostname.                                                                                                    |
@@ -270,7 +271,7 @@ The `session.envelope` object contains transaction-specific data:
 {
   "mailFrom": {
     "address": "sender@example.com",
-    "args": { "SIZE": "12345", "RET": "HDRS" },
+    "args": { "SIZE": "12345", "RET": "HDRS", "BODY": "8BITMIME", "SMTPUTF8": true, "REQUIRETLS": true },
     "dsn": { "ret": "HDRS", "envid": "abc123" }
   },
   "rcptTo": [
@@ -280,6 +281,9 @@ The `session.envelope` object contains transaction-specific data:
       "dsn": { "notify": ["SUCCESS", "FAILURE"], "orcpt": "rfc822;user1@example.com" }
     }
   ],
+  "bodyType": "8bitmime",
+  "smtpUtf8": true,
+  "requireTLS": true,
   "dsn": {
     "ret": "HDRS",
     "envid": "abc123"
@@ -287,11 +291,14 @@ The `session.envelope` object contains transaction-specific data:
 }
 ```
 
-| Property     | Type       | Description                                |
-| ------------ | ---------- | ------------------------------------------ |
-| **mailFrom** | `Object`   | Sender address object (see Address object) |
-| **rcptTo**   | `Object[]` | Array of recipient address objects         |
-| **dsn**      | `Object`   | DSN parameters from MAIL FROM command      |
+| Property      | Type       | Description                                                      |
+| ------------- | ---------- | ---------------------------------------------------------------- |
+| **mailFrom**  | `Object`   | Sender address object (see Address object)                       |
+| **rcptTo**    | `Object[]` | Array of recipient address objects                               |
+| **bodyType**  | `String`   | RFC 6152: Message body type - `'7bit'` or `'8bitmime'`           |
+| **smtpUtf8**  | `Boolean`  | RFC 6531: Whether UTF-8 support was requested                    |
+| **requireTLS**| `Boolean`  | RFC 8689: Whether TLS is required for entire delivery chain      |
+| **dsn**       | `Object`   | DSN parameters from MAIL FROM command                            |
 
 ---
 
@@ -603,6 +610,127 @@ This example demonstrates:
 
 ---
 
+## MAIL FROM Parameters (BODY, SMTPUTF8, REQUIRETLS)
+
+_smtp-server_ supports several RFC-compliant MAIL FROM parameters that allow clients to specify message characteristics and delivery requirements.
+
+### BODY Parameter (RFC 6152)
+
+The `BODY` parameter specifies the message body encoding type:
+
+- **`BODY=7BIT`** - 7-bit ASCII encoding (default)
+- **`BODY=8BITMIME`** - 8-bit MIME encoding
+
+```javascript
+// Client sends: MAIL FROM:<sender@example.com> BODY=8BITMIME
+```
+
+The selected body type is available in `session.envelope.bodyType`:
+
+```javascript
+const server = new SMTPServer({
+  onMailFrom(address, session, callback) {
+    console.log(`Body type: ${session.envelope.bodyType}`); // '7bit' or '8bitmime'
+    callback();
+  },
+});
+```
+
+**Note:** `BINARYMIME` is not supported as it requires the `BDAT` command (RFC 3030) which is not implemented.
+
+### SMTPUTF8 Parameter (RFC 6531)
+
+The `SMTPUTF8` parameter indicates that the client wants to use UTF-8 encoding in email addresses and headers:
+
+```javascript
+// Client sends: MAIL FROM:<sender@example.com> SMTPUTF8
+```
+
+The UTF-8 flag is available in `session.envelope.smtpUtf8`:
+
+```javascript
+const server = new SMTPServer({
+  onMailFrom(address, session, callback) {
+    if (session.envelope.smtpUtf8) {
+      console.log("UTF-8 support requested");
+    }
+    callback();
+  },
+});
+```
+
+### REQUIRETLS Parameter (RFC 8689)
+
+The `REQUIRETLS` parameter indicates that the client requires TLS encryption for the entire delivery chain, not just the client-to-server connection.
+
+**Important:** REQUIRETLS is disabled by default and must be explicitly enabled:
+
+```javascript
+const server = new SMTPServer({
+  hideREQUIRETLS: false, // Enable REQUIRETLS support
+  onMailFrom(address, session, callback) {
+    if (session.envelope.requireTLS) {
+      console.log("TLS required for entire delivery chain");
+      // Ensure downstream delivery also uses TLS
+    }
+    callback();
+  },
+});
+```
+
+**Requirements:**
+- REQUIRETLS is only advertised over TLS connections (after STARTTLS or on initially secure connections)
+- Clients can only use REQUIRETLS when connected via TLS
+- If a client attempts to use REQUIRETLS without TLS, the server returns error code 530
+
+```javascript
+// Client sends: MAIL FROM:<sender@example.com> REQUIRETLS
+// Server checks: session.envelope.requireTLS === true
+```
+
+### Combined Parameters Example
+
+All MAIL FROM parameters can be used together:
+
+```javascript
+const server = new SMTPServer({
+  hideREQUIRETLS: false, // Enable REQUIRETLS
+  onMailFrom(address, session, callback) {
+    const { bodyType, smtpUtf8, requireTLS } = session.envelope;
+
+    console.log(`
+      Body Type: ${bodyType}
+      UTF-8: ${smtpUtf8}
+      Require TLS: ${requireTLS}
+    `);
+
+    // Validate requirements
+    if (requireTLS && !session.secure) {
+      return callback(new Error("TLS required but not established"));
+    }
+
+    callback();
+  },
+});
+```
+
+```javascript
+// Client sends: MAIL FROM:<sender@example.com> BODY=8BITMIME SMTPUTF8 REQUIRETLS
+```
+
+### Parameter Validation
+
+_smtp-server_ automatically validates all MAIL FROM parameters:
+
+- **BODY** must be `7BIT` or `8BITMIME` (case-insensitive)
+- **SMTPUTF8** is a flag and must not have a value
+- **REQUIRETLS** is a flag and must not have a value
+- **REQUIRETLS** can only be used over TLS connections
+
+Invalid parameters return appropriate error codes (501 for syntax errors, 530 for TLS requirement violations).
+
+---
+
 ## Supported commands and extensions
 
 ### Commands
@@ -619,13 +747,14 @@ This example demonstrates:
 ### Extensions
 
 - `PIPELINING`
-- `8BITMIME`
-- `SMTPUTF8`
+- `8BITMIME` (RFC 6152)
+- `SMTPUTF8` (RFC 6531)
 - `SIZE`
 - `DSN` (RFC 3461)
 - `ENHANCEDSTATUSCODES` (RFC 2034/3463)
+- `REQUIRETLS` (RFC 8689) - opt-in via `hideREQUIRETLS: false`
 
-> The `CHUNKING` extension is **not** implemented.
+> The `CHUNKING` extension (BDAT command) is **not** implemented.
 
 ---
 
