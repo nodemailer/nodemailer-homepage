@@ -56,6 +56,17 @@ Pass an `SES` object to `createTransport()` with the following **required** keys
 | `sesClient`        | `SESv2Client`      | An initialised AWS SDK v3 client                 |
 | `SendEmailCommand` | `SendEmailCommand` | The command class from **@aws-sdk/client‑sesv2** |
 
+:::warning Property names matter
+The property **must** be named exactly `sesClient`. If your variable has a different name, use explicit property syntax:
+
+```javascript
+const myClient = new SESv2Client({ region: "us-east-1" });
+const transporter = nodemailer.createTransport({
+  SES: { sesClient: myClient, SendEmailCommand }, // explicit property name
+});
+```
+:::
+
 ## Message‑level options
 
 `sendMail()` accepts an optional **ses** property.
