@@ -6,9 +6,9 @@ description: Write custom plugins for message pre-processing, stream transformat
 
 Nodemailer provides three extension points in the email delivery pipeline where you can attach [plugins](./index.md) to customize behavior:
 
-1. **`compile`** -- Runs immediately after `sendMail()` is called, before Nodemailer builds the MIME tree. Use this stage to modify `mail.data` (for example, to transform HTML content, add custom headers, or set default values).
-2. **`stream`** -- Runs after the MIME tree is fully constructed but before the message bytes are streamed out. At this stage you can modify the `mail.message` object directly or insert transform streams to process the raw message data.
-3. **Transport** -- The final stage where the raw message stream is delivered to its destination. Custom [transports](/transports/) implement this stage to define how messages are actually sent.
+1. **`compile`** - Runs immediately after `sendMail()` is called, before Nodemailer builds the MIME tree. Use this stage to modify `mail.data` (for example, to transform HTML content, add custom headers, or set default values).
+2. **`stream`** - Runs after the MIME tree is fully constructed but before the message bytes are streamed out. At this stage you can modify the `mail.message` object directly or insert transform streams to process the raw message data.
+3. **Transport** - The final stage where the raw message stream is delivered to its destination. Custom [transports](/transports/) implement this stage to define how messages are actually sent.
 
 ---
 
@@ -34,8 +34,8 @@ You can register multiple plugins for the same stage. They will execute in the o
 
 Every plugin function, including custom transport `send` methods, receives two arguments:
 
-1. **`mail`** -- An object containing information about the message being processed (see the table below).
-2. **`done`** -- A callback function with the signature `function(err)`. You **must** call this when your plugin finishes. Pass an `Error` object to abort the send operation, or call it with no arguments to continue processing.
+1. **`mail`** - An object containing information about the message being processed (see the table below).
+2. **`done`** - A callback function with the signature `function(err)`. You **must** call this when your plugin finishes. Pass an `Error` object to abort the send operation, or call it with no arguments to continue processing.
 
 ### The `mail` object
 

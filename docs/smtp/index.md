@@ -16,8 +16,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport(options[, defaults]);
 ```
 
-- **`options`** -- an object that defines the SMTP connection settings (detailed in the sections below).
-- **`defaults`** -- an optional object whose properties are merged into every [message](/message/) you send. This is useful for setting a common **from** address or other repeated values.
+- **`options`** - an object that defines the SMTP connection settings (detailed in the sections below).
+- **`defaults`** - an optional object whose properties are merged into every [message](/message/) you send. This is useful for setting a common **from** address or other repeated values.
 
 Instead of an options object, you can also pass a connection URL. Use the **smtp:** protocol for standard connections or **smtps:** for connections that use TLS from the start (typically port 465).
 
@@ -244,4 +244,4 @@ transporter.verify((error, success) => {
 });
 ```
 
-The `verify()` method tests DNS resolution, the TCP connection, TLS upgrade (if applicable), and authentication. However, it does **not** verify whether the server will accept messages from a specific sender address -- that can only be determined when you actually send a message, and depends on the server's policies.
+The `verify()` method tests DNS resolution, the TCP connection, TLS upgrade (if applicable), and authentication. However, it does **not** verify whether the server will accept messages from a specific sender address - that can only be determined when you actually send a message, and depends on the server's policies.

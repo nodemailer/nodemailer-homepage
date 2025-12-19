@@ -10,10 +10,10 @@ description: Use Ethereal.email to test email sending without delivering to real
 
 ## Why use Ethereal?
 
-- **No real emails sent** -- test freely without worrying about accidentally emailing customers or colleagues
-- **Instant preview** -- view your emails in a web-based inbox immediately after sending
-- **No configuration hassle** -- Nodemailer can generate credentials automatically
-- **Free to use** -- no signup required, reasonable rate limits for development
+- **No real emails sent** - test freely without worrying about accidentally emailing customers or colleagues
+- **Instant preview** - view your emails in a web-based inbox immediately after sending
+- **No configuration hassle** - Nodemailer can generate credentials automatically
+- **Free to use** - no signup required, reasonable rate limits for development
 
 ## Automatic test account
 

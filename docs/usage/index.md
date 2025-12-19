@@ -48,8 +48,8 @@ Create the transporter **once** when your application starts and reuse it for al
 
 ### Other transport types
 
-- **SMTP** -- see the [SMTP guide](../smtp/) for the full list of configuration options.
-- **Plugins** -- Nodemailer can send emails through any transport that implements the `send(mail, callback)` interface. See the [transport plugin documentation](../transports/) for available options.
+- **SMTP** - see the [SMTP guide](../smtp/) for the full list of configuration options.
+- **Plugins** - Nodemailer can send emails through any transport that implements the `send(mail, callback)` interface. See the [transport plugin documentation](../transports/) for available options.
 
 ## Verify the connection (optional)
 
