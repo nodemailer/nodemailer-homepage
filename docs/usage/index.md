@@ -5,11 +5,11 @@ sidebar_position: 2
 
 # Usage
 
-This page shows how to get Nodemailer up and running quickly, then walks through the most common tasks you’ll perform: creating a **transporter** and sending a message.
+This page shows you how to get Nodemailer up and running quickly. You will learn how to create a **transporter** (the object that sends your emails) and how to send messages through it.
 
 ## Installation
 
-Add Nodemailer to your project:
+Install Nodemailer from npm:
 
 ```bash
 npm install nodemailer
@@ -17,16 +17,16 @@ npm install nodemailer
 
 ## Create a transporter
 
-Every email you send goes through a **transporter**—an object that knows how to deliver messages to your chosen email service.
+A **transporter** is an object that handles the connection to your email service and sends messages on your behalf. You create one transporter and reuse it for all your emails.
 
 ```javascript
 const nodemailer = require("nodemailer");
 
-// Create a transporter for SMTP
+// Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
   port: 587,
-  secure: false, // upgrade later with STARTTLS
+  secure: false, // use STARTTLS (upgrade connection to TLS after connecting)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -34,25 +34,25 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-`createTransport(transport[, defaults])` returns a reusable transporter instance.
+The `createTransport(transport[, defaults])` function returns a reusable transporter instance.
 
-| Parameter     | Type / Description                                                                                 |          |                                                                                                                                                                                        |
-| ------------- | -------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **transport** | \*\*Object                                                                                         |  String  |  Plugin\*\*. Either a configuration object (like the SMTP example above), a connection URL (`"smtp://user:pass@smtp.example.com:587"`), or a pre‑configured transport plugin instance. |
-| **defaults**  | _Object (optional)_. Values that will be merged into every message you send with this transporter. |          |                                                                                                                                                                                        |
+| Parameter     | Type / Description                                                                                                                                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **transport** | **Object, String, or Plugin**. Pass a configuration object (as shown above), a connection URL (for example, `"smtp://user:pass@smtp.example.com:587"`), or an already-configured transport plugin. |
+| **defaults**  | _Object (optional)_. Default values that are automatically merged into every message sent through this transporter. Useful for setting a consistent `from` address or custom headers.                 |
 
-:::tip Keep the transporter
-Create the transporter **once** and reuse it. Transporter creation opens network sockets and performs authentication; doing this for every email adds needless overhead.
+:::tip Reuse your transporter
+Create the transporter **once** when your application starts and reuse it for all emails. Creating a new transporter for each message wastes resources because each transporter opens network connections and may perform authentication.
 :::
 
 ### Other transport types
 
-- **SMTP** – see the [SMTP guide](/smtp/) for all available options.
-- **Plugins** – Nodemailer can deliver through anything that exposes a [`send(mail, callback)`](https://nodemailer.com/transports/) interface. See the [transport plugin docs](/transports/).
+- **SMTP** -- see the [SMTP guide](/smtp/) for the full list of configuration options.
+- **Plugins** -- Nodemailer can send emails through any transport that implements the [`send(mail, callback)`](https://nodemailer.com/transports/) interface. See the [transport plugin documentation](/transports/) for available options.
 
 ## Verify the connection (optional)
 
-Before you start sending, you can check that Nodemailer can connect to your SMTP server:
+Before sending emails, you can verify that Nodemailer can connect to your SMTP server. This is useful for catching configuration errors early.
 
 ```javascript
 await transporter.verify();
@@ -61,20 +61,21 @@ console.log("Server is ready to take our messages");
 
 ## Send a message {#quick-example}
 
-Once you have a transporter, send an email with `transporter.sendMail(message[, callback])`.
+Once you have a transporter, send an email by calling `transporter.sendMail(message[, callback])`.
 
 ```javascript
 (async () => {
   try {
     const info = await transporter.sendMail({
       from: '"Example Team" <team@example.com>', // sender address
-      to: "alice@example.com, bob@example.com", // list of receivers
-      subject: "Hello", // Subject line
+      to: "alice@example.com, bob@example.com", // list of recipients
+      subject: "Hello", // subject line
       text: "Hello world?", // plain text body
-      html: "<b>Hello world?</b>", // html body
+      html: "<b>Hello world?</b>", // HTML body
     });
 
     console.log("Message sent: %s", info.messageId);
+    // Preview URL is only available when using an Ethereal test account
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   } catch (err) {
     console.error("Error while sending mail", err);
@@ -84,22 +85,22 @@ Once you have a transporter, send an email with `transporter.sendMail(message[, 
 
 ### Parameters
 
-| Parameter    | Description                                                                        |
-| ------------ | ---------------------------------------------------------------------------------- |
-| **message**  | Email content and headers. See [Message configuration](/message/) for all options. |
-| **callback** | _(optional)_ `(err, info) => {}`. If omitted, `sendMail` returns a Promise.        |
+| Parameter    | Description                                                                                              |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| **message**  | An object containing the email content and headers. See [Message configuration](/message/) for details. |
+| **callback** | _(optional)_ A function with signature `(err, info) => {}`. If omitted, `sendMail` returns a Promise.    |
 
 The `info` object returned by most transports contains:
 
 | Property    | Description                                                               |
 | ----------- | ------------------------------------------------------------------------- |
-| `messageId` | The final **Message‑ID** value assigned to the email.                     |
-| `envelope`  | Object with the SMTP envelope (FROM, TO).                                 |
-| `accepted`  | Array of addresses accepted by the server.                                |
-| `rejected`  | Array of addresses rejected by the server.                                |
+| `messageId` | The **Message-ID** header value assigned to the email.                    |
+| `envelope`  | An object containing the SMTP envelope addresses (`from` and `to`).       |
+| `accepted`  | An array of recipient addresses that the server accepted.                 |
+| `rejected`  | An array of recipient addresses that the server rejected.                 |
 | `pending`   | With the _direct_ transport: addresses that received a temporary failure. |
-| `response`  | The last response string received from the SMTP server.                   |
+| `response`  | The final response string received from the SMTP server.                  |
 
 :::info Partial success
-If a message has multiple recipients it is considered **sent** as long as **at least one** address was accepted.
+When a message has multiple recipients, it is considered **sent** as long as **at least one** recipient address was accepted by the server. Check the `rejected` array to see which addresses failed.
 :::

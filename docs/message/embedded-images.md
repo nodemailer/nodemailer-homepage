@@ -3,33 +3,37 @@ title: Embedded images
 sidebar_position: 15
 ---
 
-You can embed images directly inside the HTML body by attaching them and referring to them with the `cid:` URL scheme.
+Embedded images are images that display directly in the email body rather than appearing as downloadable attachments. You can embed images in your HTML emails by including them in the `attachments` array and referencing them using the `cid:` (Content-ID) URL scheme.
 
-1. Add the image to **attachments**.
-2. Set a **cid** (Content‑ID) that is unique within the message.
-3. Reference the image in your HTML (or CSS) with `cid:<cid>`.
+Here is how to embed an image in three steps:
 
-:::info Why use `cid:`?
-Using a Content‑ID lets the email client display the image even when it blocks external images, because the file travels inside the message itself.
+1. Add the image to the **attachments** array in your message options.
+2. Assign a unique **cid** (Content-ID) value to the attachment.
+3. Reference the image in your HTML using `src="cid:your-cid-value"`.
+
+:::info Why use embedded images?
+Many email clients block external images by default for privacy and security reasons. Embedded images bypass this restriction because the image data travels inside the message itself, so the recipient sees the image immediately without needing to click "load images."
 :::
 
-:::note Unique `cid`
-The **cid** must be **globally unique** within the message. A good pattern is to append a domain you control, e.g. `logo.12345@example.com`.
+:::note Choosing a unique cid
+The **cid** value must be unique within the message. A recommended pattern is to use an email-like format with a domain you control, such as `logo@example.com` or `header-image@mycompany.com`. This format helps ensure uniqueness and follows email standards.
 :::
 
 #### Basic example
+
+This example shows how to embed a single image from a file path. The `cid` value in the attachment must match the value used in the HTML `src` attribute (without the `cid:` prefix).
 
 ```javascript
 const message = {
   from: "Alice <alice@example.com>",
   to: "Bob <bob@example.com>",
   subject: "Inline image test",
-  html: 'Embedded image: <img src="cid:logo@example.com" alt="logo"/>',
+  html: 'Embedded image: <img src="cid:logo@example.com" alt="Company logo"/>',
   attachments: [
     {
       filename: "logo.png",
       path: "/path/to/logo.png",
-      cid: "logo@example.com", // same cid value as in the html img src
+      cid: "logo@example.com", // matches the cid in the img src attribute
     },
   ],
 };
@@ -37,16 +41,20 @@ const message = {
 
 #### Using a Buffer instead of a file
 
+Instead of specifying a file path, you can provide the image data directly as a Buffer. This is useful when the image is generated dynamically or already loaded in memory.
+
 ```javascript
 const fs = require("fs");
 
 const message = {
-  // ...
-  html: '<img src="cid:screenshot@example.com"/>',
+  from: "Alice <alice@example.com>",
+  to: "Bob <bob@example.com>",
+  subject: "Screenshot attached",
+  html: '<img src="cid:screenshot@example.com" alt="Screenshot"/>',
   attachments: [
     {
       filename: "screenshot.png",
-      content: fs.readFileSync("/tmp/screenshot.png"),
+      content: fs.readFileSync("/tmp/screenshot.png"), // Buffer containing the image data
       cid: "screenshot@example.com",
     },
   ],
@@ -55,14 +63,22 @@ const message = {
 
 #### Embedding multiple images
 
+You can embed multiple images in the same email. Each image needs its own unique `cid` value, and each must be listed as a separate entry in the `attachments` array.
+
 ```javascript
-html: `
-  <h1>Monthly report</h1>
-  <img src="cid:chart@example.com" alt="Chart"/>
-  <img src="cid:badge@example.com" alt="Badge"/>
-`,
-attachments: [
-  { filename: 'chart.png', path: './chart.png', cid: 'chart@example.com' },
-  { filename: 'badge.png', path: './badge.png', cid: 'badge@example.com' }
-]
+const message = {
+  from: "Reports <reports@example.com>",
+  to: "Team <team@example.com>",
+  subject: "Monthly report",
+  html: `
+    <h1>Monthly Report</h1>
+    <p>Here are this month's results:</p>
+    <img src="cid:chart@example.com" alt="Sales chart"/>
+    <img src="cid:badge@example.com" alt="Achievement badge"/>
+  `,
+  attachments: [
+    { filename: "chart.png", path: "./chart.png", cid: "chart@example.com" },
+    { filename: "badge.png", path: "./badge.png", cid: "badge@example.com" },
+  ],
+};
 ```

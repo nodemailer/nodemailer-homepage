@@ -2,18 +2,20 @@
 title: License
 ---
 
-Nodemailer is licensed under the **"MIT No Attribution"** (MIT-0) License
+Nodemailer is licensed under the **MIT No Attribution (MIT-0)** license. This is one of the most permissive open-source licenses available, allowing you to use, modify, and distribute Nodemailer in any project, including commercial applications, without attribution requirements.
 
-Version 3 of Nodemailer was licensed under the **European Union Public License 1.1 (EUPL)**, which is a _copyleft_ license. For more details on the decision to use EUPL for Nodemailer v3, you can refer to the [Nodemailer blog](https://blog.nodemailer.com/2017/02/02/nodemailer-v3-0-0/). However, after a two-month experiment, I decided to revert Nodemailer back to the MIT license and canceled all active subscriptions.
+### License History
 
-Using a restrictive license for a lower-level infrastructure module like Nodemailer proved to be more problematic than beneficial. Even I had to use older versions of Nodemailer to avoid licensing issues for client work. Additionally, there wasn’t a significant interest in paid subscriptions or services, and most users continued using the copyleft-licensed Nodemailer in their commercial projects, with little concern for the licensing terms. Without a feasible way to enforce the copyleft license, the decision was made to return to the more permissive MIT license.
+Version 3 of Nodemailer was briefly licensed under the **European Union Public License 1.1 (EUPL)**, a _copyleft_ license that required derivative works to be released under the same terms. For the reasoning behind that decision, see the [Nodemailer blog post](https://blog.nodemailer.com/2017/02/02/nodemailer-v3-0-0/).
+
+After a two-month experiment, Nodemailer was reverted to the MIT license and all active subscriptions were canceled. The restrictive license proved impractical for a foundational infrastructure module like Nodemailer. Even the author had to use older versions to avoid licensing complications in client work. Additionally, paid subscriptions did not gain traction, and most users continued using Nodemailer in commercial projects regardless of the copyleft terms. Without a practical way to enforce the license, the more permissive MIT license was restored.
 
 ---
 
 ### Support Nodemailer
 
-If you appreciate Nodemailer or if your business profits from its use, I would greatly appreciate any support. You can donate via Bitcoin or PayPal, or become a sponsor on GitHub.
+If you find Nodemailer useful, or if your business benefits from it, please consider supporting its development. You can donate via Bitcoin or PayPal, or become a sponsor on GitHub.
 
-- Nodemailer Bitcoin wallet: `15Z8ADxhssKUiwP3jbbqJwA21744KMCfTM`
-- [Donate via PayPal](https://www.paypal.me/nodemailer)
-- Become a sponsor on [GitHub](https://github.com/sponsors/andris9)
+- **Bitcoin wallet:** `15Z8ADxhssKUiwP3jbbqJwA21744KMCfTM`
+- **PayPal:** [Donate via PayPal](https://www.paypal.me/nodemailer)
+- **GitHub Sponsors:** [Become a sponsor](https://github.com/sponsors/andris9)

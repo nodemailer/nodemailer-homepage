@@ -5,81 +5,86 @@ sidebar_position: 1
 
 # Nodemailer
 
-**Send e-mails with Node.JS – easy as cake! ✉️**
+**Send emails from Node.js - easy as cake! ✉️**
 
-Nodemailer makes sending email from a Node.js application straightforward and secure, without pulling in a single runtime dependency.
+Nodemailer is the most popular email sending library for Node.js. It makes sending emails straightforward and secure, with zero runtime dependencies to manage.
 
 ```bash title="Install with npm"
 npm install nodemailer
 ```
 
-:::tip Looking for a full mail gateway?
-[**EmailEngine**](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=tip-link) is a self‑hosted email gateway that lets you make REST calls to IMAP & SMTP accounts, receive webhooks for mailbox changes, and send email with extras such as OAuth2, delayed delivery, open‑ & click‑tracking, bounce detection, and more.
+:::tip Looking for a complete email gateway solution?
+[**EmailEngine**](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=tip-link) is a self-hosted email gateway that provides REST API access to IMAP and SMTP accounts, webhooks for mailbox changes, and advanced features like OAuth2, delayed delivery, open and click tracking, bounce detection, and more.
 :::
 
 ## Why Nodemailer?
 
-- **Zero runtime dependencies** – the entire implementation lives in one audited package.
-- **Security first** – avoids known RCE vectors that have affected other Node.js mailers.
-- **Unicode everywhere** – send any characters, including emoji 💪.
-- **Cross‑platform** – no native addons, works the same on Linux, macOS, and Windows (great for Azure).
-- **HTML e‑mails** with **plain‑text fallbacks** out of the box.
-- **[Attachments](/message/attachments/)** & **[embedded images](/message/embedded-images/)** without pain.
-- Out‑of‑the‑box **TLS/STARTTLS** encryption.
-- Multiple **[transports](/transports/)** (SMTP, Sendmail, SES, streams, and more).
-- **[DKIM](/dkim/)** signing & **[OAuth2](/smtp/oauth2/)** authentication.
-- **[Proxy support](/smtp/proxies/)** for restricted networks.
-- **Plugin API** for advanced message manipulation.
-- Built‑in test accounts from **[Ethereal.email](https://ethereal.email)** for local development.
+- **Zero runtime dependencies** - everything you need is included in a single, well-maintained package.
+- **Security focused** - designed to avoid remote code execution vulnerabilities that have affected other Node.js email libraries.
+- **Full Unicode support** - send messages with any characters, including emoji 💪.
+- **Cross-platform** - works identically on Linux, macOS, and Windows with no native addons required (ideal for cloud environments like Azure).
+- **HTML and plain-text emails** - send rich HTML emails with automatic plain-text fallbacks.
+- **[Attachments](/message/attachments/)** and **[embedded images](/message/embedded-images/)** - easily include files and inline images in your messages.
+- **Built-in TLS/STARTTLS encryption** - secure connections are handled automatically.
+- **Multiple [transports](/transports/)** - send via SMTP, Sendmail, Amazon SES, streams, and more.
+- **[DKIM signing](/dkim/)** and **[OAuth2 authentication](/smtp/oauth2/)** - enterprise-ready email authentication.
+- **[Proxy support](/smtp/proxies/)** - route email through proxies for restricted network environments.
+- **Plugin API** - extend functionality with custom plugins for advanced message processing.
+- **[Ethereal.email](https://ethereal.email) integration** - generate test accounts instantly for local development and testing.
 
 ## Requirements
 
-- **Node.js ≥ 6.0.0** (async/await examples require ≥ 8.0.0).
+- **Node.js v6.0.0 or later** (examples using async/await require Node.js v8.0.0 or later).
 
-No other system libraries, services, or build tools are needed.
+No additional system libraries, services, or build tools are needed.
 
-## Quick‑start
+## Quick Start
 
-1. **Create a transporter.** Use SMTP or another supported transport.
-2. **Compose a message.** Define sender, recipient(s), subject, and content.
-3. **Send it** with `transporter.sendMail()`.
+Sending an email with Nodemailer involves three simple steps:
 
-### Example (using an Ethereal test account)
+1. **Create a transporter** - Configure your SMTP server or another supported transport method.
+2. **Compose your message** - Define the sender, recipient(s), subject, and content.
+3. **Send the email** - Call `transporter.sendMail()` with your message options.
+
+### Example: Sending an Email with Ethereal
+
+[Ethereal](https://ethereal.email) is a free service that captures outgoing emails for testing. No emails are actually delivered, making it perfect for development.
 
 ```javascript
 const nodemailer = require("nodemailer");
 
-// Create a test account or replace with real credentials.
+// Create a transporter using Ethereal test credentials.
+// For production, replace with your actual SMTP server details.
 const transporter = nodemailer.createTransport({
   host: "smtp.ethereal.email",
   port: 587,
-  secure: false, // true for 465, false for other ports
+  secure: false, // Use true for port 465, false for port 587
   auth: {
     user: "maddison53@ethereal.email",
     pass: "jn7jnAPss4f63QBp6D",
   },
 });
 
-// Wrap in an async IIFE so we can use await.
+// Send an email using async/await
 (async () => {
   const info = await transporter.sendMail({
-    from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
+    from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
     to: "bar@example.com, baz@example.com",
     subject: "Hello ✔",
-    text: "Hello world?", // plain‑text body
-    html: "<b>Hello world?</b>", // HTML body
+    text: "Hello world?", // Plain-text version of the message
+    html: "<b>Hello world?</b>", // HTML version of the message
   });
 
   console.log("Message sent:", info.messageId);
 })();
 ```
 
-> **Tip:** Ethereal generates a URL for every message so you can view the rendered email in your browser — perfect for development.
+> **Tip:** Ethereal provides a preview URL for every message sent, allowing you to view the rendered email in your browser. This is invaluable for testing email layouts and content during development.
 
-## Source & license
+## Source and License
 
-Nodemailer is open source, licensed under the [MIT No Attribution (MIT-0)](/license) license. Browse the code on [GitHub](https://github.com/nodemailer/nodemailer).
+Nodemailer is open source software, licensed under the [MIT No Attribution (MIT-0)](/license) license. This means you can use it freely in any project without attribution requirements. Browse the source code on [GitHub](https://github.com/nodemailer/nodemailer).
 
 ---
 
-Made with ❤️ by [Andris Reinman](https://github.com/andris9). Logo by [Sven Kristjansen](https://www.behance.net/kristjansen).
+Made with ❤️ by [Andris Reinman](https://github.com/andris9). Logo by [Sven Kristjansen](https://www.behance.net/kristjansen).

@@ -3,102 +3,127 @@ title: Message configuration
 sidebar_position: 3
 ---
 
-The following are the possible fields of an email message:
+This page describes all available fields you can use when composing an email message with Nodemailer. Most emails only need a few basic fields, but advanced options are available when you need more control.
 
 ### Common fields
 
-- **from** - The email address of the sender. All email addresses can be plain `'sender@server.com'` or formatted `'"Sender Name" <sender@server.com>'`, see [Address object](/message/addresses/) for details
-- **to** - Comma separated list or an array of recipients email addresses that will appear on the _To:_ field
-- **cc** - Comma separated list or an array of recipients email addresses that will appear on the _Cc:_ field
-- **bcc** - Comma separated list or an array of recipients email addresses that will appear on the _Bcc:_ field
-- **subject** - The subject of the email
-- **text** - The plaintext version of the message as a Unicode string, Buffer, Stream or an attachment-like object (`{path: '/var/data/...'}`)
-- **html** - The HTML version of the message as a Unicode string, Buffer, Stream or an attachment-like object (`{path: 'http://...'}`)
-- **attachments** - An array of attachment objects (see [Using attachments](/message/attachments/) for details). Attachments can be used for [embedding images](/message/embedded-images/) as well.
+These are the fields you will use most often when sending emails:
 
-A large majority of emails sent look a lot like this, using only a few basic fields:
+- **from** - The email address of the sender. You can use a plain address like `'sender@server.com'` or include a display name like `'"Sender Name" <sender@server.com>'`. See [Address object](/message/addresses/) for more formatting options.
+- **to** - The recipients who will appear in the _To:_ field. Accepts a comma-separated string or an array of addresses.
+- **cc** - The recipients who will appear in the _Cc:_ (carbon copy) field. Accepts a comma-separated string or an array of addresses.
+- **bcc** - The recipients who will appear in the _Bcc:_ (blind carbon copy) field. These recipients receive the email but are hidden from other recipients. Accepts a comma-separated string or an array of addresses.
+- **subject** - The subject line of the email.
+- **text** - The plaintext version of the message body. Can be a string, Buffer, Stream, or an attachment-like object (for example, `{path: '/var/data/message.txt'}`).
+- **html** - The HTML version of the message body. Can be a string, Buffer, Stream, or an attachment-like object (for example, `{path: 'http://example.com/email.html'}`).
+- **attachments** - An array of attachment objects. See [Using attachments](/message/attachments/) for details. You can also use attachments for [embedding images](/message/embedded-images/) in your HTML content.
+
+The following example shows a typical email using only the basic fields:
 
 ```javascript
-var message = {
+const message = {
   from: "sender@server.com",
-  to: "receiver@sender.com",
-  subject: "Message title",
-  text: "Plaintext version of the message",
-  html: "<p>HTML version of the message</p>",
+  to: "receiver@example.com",
+  subject: "Hello World",
+  text: "This is the plaintext version of the email.",
+  html: "<p>This is the <strong>HTML version</strong> of the email.</p>",
 };
 ```
 
 ### More advanced fields
 
+The following sections cover additional options for fine-tuning your email messages.
+
 ##### Routing options
 
-- **sender** - An email address that will appear on the _Sender:_ field (always prefer _from_ if you're not sure which one to use)
-- **replyTo** - An email address that will appear on the _Reply-To:_ field
-- **inReplyTo** - The Message-ID this message is replying to
-- **references** - Message-ID list (an array or space separated string)
-- **envelope** - optional SMTP envelope, if auto-generated envelope is not suitable (see [SMTP envelope](/smtp/envelope/) for details)
+These options control how the email is addressed and how replies are handled:
+
+- **sender** - An email address that will appear in the _Sender:_ field. This is typically used when the actual sender differs from the address in the _From:_ field (for example, when sending on behalf of someone else). In most cases, you should use **from** instead.
+- **replyTo** - An email address that will appear in the _Reply-To:_ field. When recipients reply to your email, their response will be sent to this address instead of the _From:_ address.
+- **inReplyTo** - The Message-ID of the email this message is replying to. This helps email clients thread conversations together.
+- **references** - A list of Message-IDs that this email references. Can be an array of strings or a space-separated string. Used for threading related messages together.
+- **envelope** - A custom SMTP envelope, if the automatically generated envelope is not suitable for your needs. See [SMTP envelope](/smtp/envelope/) for details.
 
 ##### Content options
 
-- **attachDataUrls** – if true then convert _data:_ images in the HTML content of this message to embedded attachments
-- **watchHtml** - Apple Watch specific HTML version of the message. Latest watches have no problems rendering text/html content so watchHtml is most probably never seen by the recipient
-- **amp** - AMP4EMAIL specific HTML version of the message, same usage as with `text` and `html`. See AMP example [below](#amp-example) for usage or [this blogpost](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for sending and rendering
+These options provide additional ways to control the message content:
 
-* **icalEvent** – iCalendar event to use as an alternative. See details [here](/message/calendar-events/)
-* **alternatives** - An array of alternative text contents (in addition to text and html parts) (see [Using alternative content](/message/alternatives/) for details)
-* **encoding** - identifies encoding for text/html strings (defaults to 'utf-8', other values are 'hex' and 'base64')
-* **raw** - existing MIME message to use instead of generating a new one. See details [here](/message/custom-source/)
-* **textEncoding** - force content-transfer-encoding for text values (either _quoted-printable_ or _base64_). By default the best option is detected (for lots of ascii use _quoted-printable_, otherwise _base64_)
+- **attachDataUrls** - When set to `true`, Nodemailer automatically converts `data:` URI images in your HTML content into embedded attachments. This is useful when your HTML contains inline images encoded as data URIs.
+- **watchHtml** - An Apple Watch-specific HTML version of the message. Note that modern Apple Watches render standard `text/html` content well, so this field is rarely needed.
+- **amp** - An AMP4EMAIL-specific HTML version of the message. Works the same way as `text` and `html`. See the [AMP example below](#amp-example) for usage, or read [this blog post](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for more details about sending and rendering AMP emails.
+- **icalEvent** - An iCalendar event to include as an alternative content type. This is useful for sending calendar invitations. See [Calendar events](/message/calendar-events/) for details.
+- **alternatives** - An array of alternative content representations (in addition to the text and HTML parts). See [Using alternative content](/message/alternatives/) for details.
+- **encoding** - Specifies the encoding used for text and HTML strings. Defaults to `'utf-8'`. Other valid values are `'hex'` and `'base64'`.
+- **raw** - An existing MIME message to send instead of generating a new one. Use this when you have a pre-built email message. See [Custom source](/message/custom-source/) for details.
+- **textEncoding** - Forces a specific content-transfer-encoding for text content. Valid values are `'quoted-printable'` or `'base64'`. By default, Nodemailer automatically chooses the best option: `quoted-printable` for content with mostly ASCII characters, and `base64` otherwise.
 
 ##### Header options
 
-- **priority** - Sets message importance headers, either **'high'**, **'normal'** (default) or **'low'**.
-- **headers** - An object or array of additional header fields (e.g. `{"X-Key-Name": "key value"}` or `[{key: "X-Key-Name", value: "val1"}, {key: "X-Key-Name", value: "val2"}]`). Read more about custom headers [here](/message/custom-headers/)
-- **messageId** - optional Message-Id value, random value will be generated if not set
-- **date** - optional Date value, current UTC string will be used if not set
-- **list** - helper for setting List-\* headers (see more [here](/message/list-headers/))
+These options let you customize the email headers:
+
+- **priority** - Sets the message importance level. Valid values are `'high'`, `'normal'` (the default), or `'low'`. This adds the appropriate `X-Priority`, `X-MSMail-Priority`, and `Importance` headers to your message.
+- **headers** - Custom header fields to add to the message. Can be an object like `{"X-Key-Name": "key value"}` or an array for multiple values with the same key: `[{key: "X-Key-Name", value: "val1"}, {key: "X-Key-Name", value: "val2"}]`. See [Custom headers](/message/custom-headers/) for more details.
+- **messageId** - A custom Message-ID value for the email. If not provided, Nodemailer generates a random unique identifier automatically.
+- **date** - The date to use for the email's Date header. If not provided, the current date and time (in UTC) is used. You can pass a Date object or a date string.
+- **list** - A helper object for setting List-\* headers, commonly used for mailing list messages. See [List headers](/message/list-headers/) for more details.
 
 ##### Security options
 
-- **disableFileAccess** if true, then does not allow to use files as content. Use it when you want to use JSON data from untrusted source as the email. If an attachment or message node tries to fetch something from a file the sending returns an error. If this field is also set in the transport options, then the value in mail data is ignored
-- **disableUrlAccess** if true, then does not allow to use URLs as content. If this field is also set in the transport options, then the value in mail data is ignored
+These options help protect your application when processing email data from untrusted sources:
+
+- **disableFileAccess** - When set to `true`, prevents Nodemailer from reading files from the filesystem. Use this option when constructing emails from untrusted JSON data to prevent attackers from reading arbitrary files. If an attachment or message node attempts to read from a file path, the send operation will return an error. Note: If this option is also set in the transport configuration, the transport-level setting takes precedence.
+- **disableUrlAccess** - When set to `true`, prevents Nodemailer from fetching content from URLs. This is useful for preventing server-side request forgery (SSRF) attacks when processing untrusted email data. Note: If this option is also set in the transport configuration, the transport-level setting takes precedence.
 
 ##### Advanced options
 
-- **normalizeHeaderKey** - a function to normalize header keys for custom casing. The function receives the header key and value as arguments and should return the normalized key
-- **boundaryPrefix** - custom prefix for MIME boundary strings (defaults to `'--_NmP'`)
-- **baseBoundary** - shared base string for generating unique MIME boundaries (defaults to a random hex string)
-- **newline** - control line endings in the generated message. Set to `'windows'` (or `'dos'`, `'win'`, `'\r\n'`) for CRLF line endings, or `'unix'` (or `'linux'`, `'\n'`) for LF line endings
-- **xMailer** - custom value for the X-Mailer header. Set to `false` to skip the header entirely
+These options are rarely needed but provide fine-grained control over the generated MIME message:
+
+- **normalizeHeaderKey** - A function to customize header key casing. The function receives the header key and value as arguments and should return the normalized key. Useful when you need specific header capitalization for compatibility with certain email systems.
+- **boundaryPrefix** - A custom prefix for MIME boundary strings. Defaults to `'--_NmP'`. Boundaries separate different parts of a multipart message.
+- **baseBoundary** - A shared base string used when generating unique MIME boundaries. Defaults to a random hex string. All boundaries in the message will be derived from this value.
+- **newline** - Controls the line ending style in the generated message. Set to `'windows'` (or `'dos'`, `'win'`, `'\r\n'`) for Windows-style CRLF line endings, or `'unix'` (or `'linux'`, `'\n'`) for Unix-style LF line endings.
+- **xMailer** - A custom value for the X-Mailer header, which typically identifies the software that generated the email. Set to `false` to omit this header entirely.
+
+The following example demonstrates setting a custom header and a specific date:
 
 ```javascript
-var message = {
-    ...,
-    headers: {
-        'My-Custom-Header': 'header value'
-    },
-    date: new Date('2000-01-01 00:00:00')
+const message = {
+  from: "sender@example.com",
+  to: "recipient@example.com",
+  subject: "Custom Headers Example",
+  text: "Hello!",
+  headers: {
+    "X-Custom-Header": "my custom value",
+  },
+  date: new Date("2000-01-01 00:00:00"),
 };
 ```
 
+You can also use a readable stream as the HTML content. When using streams, make sure to handle errors properly and clean up resources:
+
 ```javascript
-var htmlstream = fs.createReadStream("content.html");
-transport.sendMail({ html: htmlstream }, function (err) {
+const htmlStream = fs.createReadStream("content.html");
+transporter.sendMail({ html: htmlStream }, function (err) {
   if (err) {
-    // check if htmlstream is still open and close it to clean up
+    // If an error occurred, check if the stream is still open and close it
+    if (!htmlStream.closed) {
+      htmlStream.destroy();
+    }
   }
 });
 ```
 
 ##### AMP example
 
+AMP4EMAIL allows you to create interactive, dynamic emails. The following example shows how to include an AMP version of your email alongside the standard text and HTML versions. Email clients that support AMP will display the AMP content, while others will fall back to the HTML or plaintext versions:
+
 ```javascript
-let message = {
+const message = {
   from: "Nodemailer <example@nodemailer.com>",
   to: "Nodemailer <example@nodemailer.com>",
   subject: "AMP4EMAIL message",
   text: "For clients with plaintext support only",
-  html: "<p>For clients that do not support AMP4EMAIL or amp content is not valid</p>",
+  html: "<p>For clients that do not support AMP4EMAIL or when AMP content is invalid</p>",
   amp: `<!doctype html>
     <html ⚡4email>
       <head>

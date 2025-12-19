@@ -3,55 +3,59 @@ title: Create plugins
 sidebar_position: 30
 ---
 
-Nodemailer exposes three points in the e‑mail delivery pipeline where you can attach **plugins**:
+Nodemailer provides three extension points in the email delivery pipeline where you can attach **plugins** to customize behavior:
 
-1. **`compile`** – triggered right after the original `sendMail()` input has been received, before any MIME tree has been built. Modify `mail.data` here (e.g. tweak **`html`** contents, add headers, etc.).
-2. **`stream`** – triggered after Nodemailer has generated the complete MIME tree but _before_ it starts streaming the raw message. At this stage you can mutate the `mail.message` object or inject transform streams that the message is piped through.
-3. **Transport** – the final step where the raw message stream is sent to its destination. Custom transports implement this stage themselves.
+1. **`compile`** -- Runs immediately after `sendMail()` is called, before Nodemailer builds the MIME tree. Use this stage to modify `mail.data` (for example, to transform HTML content, add custom headers, or set default values).
+2. **`stream`** -- Runs after the MIME tree is fully constructed but before the message bytes are streamed out. At this stage you can modify the `mail.message` object directly or insert transform streams to process the raw message data.
+3. **Transport** -- The final stage where the raw message stream is delivered to its destination. Custom transports implement this stage to define how messages are actually sent.
 
 ---
 
 ## Attaching `compile` and `stream` plugins
 
+To register a plugin, call the `use()` method on your transporter:
+
 ```javascript
 transporter.use(step, pluginFn);
 ```
 
-| Parameter     | Type                   | Description                                               |
-| ------------- | ---------------------- | --------------------------------------------------------- |
-| `transporter` | `Object`               | A transporter created with `nodemailer.createTransport()` |
-| `step`        | `String`               | Either `'compile'` or `'stream'`                          |
-| `pluginFn`    | `Function(mail, done)` | Your plugin function (see API below)                      |
+| Parameter     | Type                   | Description                                                        |
+| ------------- | ---------------------- | ------------------------------------------------------------------ |
+| `transporter` | `Object`               | A transporter instance created with `nodemailer.createTransport()` |
+| `step`        | `String`               | The pipeline stage: either `'compile'` or `'stream'`               |
+| `pluginFn`    | `Function(mail, done)` | Your plugin function (see the Plugin API section below)            |
+
+You can register multiple plugins for the same stage. They will execute in the order they were added.
 
 ---
 
 ## Plugin API
 
-Every plugin ‑‑ including custom transports ‑‑ receives two arguments:
+Every plugin function, including custom transport `send` methods, receives two arguments:
 
-1. `mail`  – Details about the message being processed (see below)
-2. `done`  – Callback **`function (err?)`** which **must** be invoked when your plugin finishes (pass an `Error` to abort the send)
+1. **`mail`** -- An object containing information about the message being processed (see the table below).
+2. **`done`** -- A callback function with the signature `function(err)`. You **must** call this when your plugin finishes. Pass an `Error` object to abort the send operation, or call it with no arguments to continue processing.
 
-### `mail` object
+### The `mail` object
 
-| Property         | Available at                       | Description                                                                                                                   |
-| ---------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `data`           | `compile`, `stream`, **transport** | Original options object passed to `sendMail()`                                                                                |
-| `message`        | `stream`, **transport**            | [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance of the fully‑built message |
-| `resolveContent` | `compile`, `stream`, **transport** | Helper for converting Nodemailer content objects to a `String` or `Buffer`                                                    |
+| Property         | Available at                       | Description                                                                                                                     |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `data`           | `compile`, `stream`, **transport** | The original options object passed to `sendMail()`                                                                              |
+| `message`        | `stream`, **transport**            | A [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance representing the built message |
+| `resolveContent` | `compile`, `stream`, **transport** | A helper method for converting Nodemailer content objects (streams, file paths, URLs) into a `String` or `Buffer`              |
 
 ### `mail.resolveContent(obj, key, callback)`
 
-Convert any [Nodemailer content type](https://nodemailer.com/message/attachments/#possible-content-types) (file path, URL, Stream, Buffer, etc.) into a plain `String` **or** `Buffer`.
+Use this method to convert any [Nodemailer content type](https://nodemailer.com/message/attachments/#possible-content-types) (file path, URL, Stream, Buffer, etc.) into a plain `String` or `Buffer`. This is useful when you need to read and process content that might come from various sources.
 
 ```javascript
 mail.resolveContent(sourceObject, propertyName, (err, value) => {
   if (err) return done(err);
-  // value is String or Buffer depending on the input type
+  // value is a String or Buffer depending on the input type
 });
 ```
 
-#### Example – log the final HTML string
+#### Example: Log the final HTML string
 
 ```javascript
 function plugin(mail, done) {
@@ -67,9 +71,9 @@ function plugin(mail, done) {
 
 ## `compile` plugins
 
-`compile` plugins **only** receive `mail.data`; `mail.message` does **not** yet exist. Mutate `mail.data` freely and call `done()` when finished. Returning an error aborts `sendMail()`.
+At the `compile` stage, only `mail.data` is available. The `mail.message` property does **not** exist yet because the MIME tree has not been built. You can freely modify `mail.data` and then call `done()` when finished. Passing an error to `done(err)` will abort the `sendMail()` operation.
 
-#### Example – generate `text` from `html` if missing
+#### Example: Generate plain text from HTML if missing
 
 ```javascript
 transporter.use("compile", (mail, done) => {
@@ -84,14 +88,14 @@ transporter.use("compile", (mail, done) => {
 
 ## `stream` plugins
 
-`stream` plugins are invoked **after** the MIME tree is ready but **before** the first byte is sent. You can:
+`stream` plugins run **after** the MIME tree is fully built but **before** any bytes are sent to the transport. At this stage you can:
 
-- Mutate `mail.message` (e.g. add headers)
-- Pipe the output through additional Transform streams via `mail.message.transform()`
+- Modify `mail.message` directly (for example, to add or change headers)
+- Pipe the output through additional Transform streams using `mail.message.transform()`
 
-> Editing `mail.data` at this stage usually has **no effect** unless your custom transport explicitly reads the changed property.
+> **Note:** Modifying `mail.data` at this stage usually has **no effect** because the MIME tree has already been built from it. The exception is if your custom transport explicitly reads properties from `mail.data`.
 
-### Example – replace all tabs with spaces in the outgoing stream
+### Example: Replace all tabs with spaces in the outgoing stream
 
 ```javascript
 const { Transform } = require("stream");
@@ -112,7 +116,7 @@ transporter.use("stream", (mail, done) => {
 });
 ```
 
-### Example – log all address fields
+### Example: Log all address fields
 
 ```javascript
 transporter.use("stream", (mail, done) => {
@@ -129,17 +133,17 @@ transporter.use("stream", (mail, done) => {
 
 ### `mail.message.transform(transformStream)`
 
-Add a [`stream.Transform`](https://nodejs.org/api/stream.html#class-streamtransform) (or a function returning one) through which the raw message is piped **before** it reaches the transport.
+Adds a [`stream.Transform`](https://nodejs.org/api/stream.html#class-streamtransform) through which the raw message is piped **before** it reaches the transport. You can also pass a function that returns a Transform stream.
 
 ### `mail.message.getAddresses()`
 
-Returns an object containing parsed addresses from **From**, **Sender**, **Reply‑To**, **To**, **Cc**, and **Bcc** headers. Each property is an **array** of `{ name, address }`. Absent fields are omitted.
+Returns an object containing parsed email addresses from the **From**, **Sender**, **Reply-To**, **To**, **Cc**, and **Bcc** headers. Each property is an **array** of objects with `{ name, address }` structure. If a header is not present in the message, that property will be omitted from the result.
 
 ---
 
 ## Writing a custom transport {#transports}
 
-A transport is simply an object with **`name`**, **`version`**, and a **`send(mail, done)`** method. Provide the object to `nodemailer.createTransport()` to create a usable transporter.
+A transport is an object that defines how messages are actually delivered. At minimum, it must have three properties: **`name`**, **`version`**, and a **`send(mail, done)`** method. Pass this object to `nodemailer.createTransport()` to create a working transporter.
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -149,16 +153,16 @@ const transport = {
   version: require("./package.json").version, // e.g. "1.0.0"
 
   /**
-   * Actually sends the message.
-   * @param {Object} mail – the same `mail` object plugins receive
-   * @param {Function} done – callback `(err, info)`
+   * Sends the message.
+   * @param {Object} mail - The same `mail` object that plugins receive
+   * @param {Function} done - Callback with signature `(err, info)`
    */
   send(mail, done) {
     const input = mail.message.createReadStream();
     const envelope = mail.message.getEnvelope();
     const messageId = mail.message.messageId();
 
-    // For demo purposes we just pipe to stdout
+    // For demonstration, we pipe the message to stdout
     input.pipe(process.stdout);
     input.on("end", () => {
       done(null, {
@@ -168,13 +172,19 @@ const transport = {
     });
   },
 
-  /* Optional: close long‑lived connections (e.g. pooled SMTP) */
+  /**
+   * Optional: Clean up resources when the transporter is closed.
+   * Useful for closing long-lived connections (e.g., pooled SMTP).
+   */
   close() {
-    // Clean‑up resources here
+    // Release resources here
   },
 
-  /* Optional: report idling state (used by pooling)
-       Should return `true` when the transport has capacity to send more messages. */
+  /**
+   * Optional: Report whether the transport is idle.
+   * Used by connection pooling. Return `true` when the transport
+   * has capacity to send more messages immediately.
+   */
   isIdle() {
     return true;
   },
@@ -197,8 +207,6 @@ transporter.sendMail(
 
 ## Summary
 
-1. Decide which stage (`compile`, `stream`, or custom **transport**) best suits your use‑case.
-2. Write a plugin function receiving **`(mail, done)`** and attach it with `transporter.use()` (or implement `transport.send`).
-3. Always invoke `done(err?)` to signal completion or abort the send.
-
-Happy Hacking! 🚀
+1. Choose the stage (`compile`, `stream`, or custom **transport**) that best fits your needs.
+2. Write a plugin function that accepts **`(mail, done)`** and register it with `transporter.use()`, or implement `transport.send()` for a custom transport.
+3. Always call `done()` when your plugin completes. Pass an `Error` to abort the send operation.

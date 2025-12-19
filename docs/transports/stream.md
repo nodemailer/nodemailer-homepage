@@ -4,23 +4,23 @@ sidebar_position: 28
 description: Generate RFC 822 messages as streams, Buffers, or JSON objects for testing or custom delivery workflows.
 ---
 
-Stream transport is **not** a real SMTP transport. Instead of handing the message off to a remote mail server it _builds_ the complete RFC 822 e-mail and gives it back to you. This makes it perfect for
+Stream transport is **not** a real SMTP transport. Instead of delivering your message to a remote mail server, it _generates_ the complete RFC 822 formatted email and returns it to you. This makes it ideal for:
 
-- **Testing** - inspect the exact bytes that would be sent over the wire, run snapshot tests, or feed the output to another system.
-- **Custom delivery pipelines** - run Nodemailer plugins (DKIM, list headers, etc.) and then deliver the message yourself via an in-house API, store it for audit logging, and so on.
+- **Testing** - Examine the exact bytes that would be sent over the wire, create snapshot tests, or forward the output to another system for validation.
+- **Custom delivery pipelines** - Apply Nodemailer plugins (such as DKIM signing or list headers) to your message, then handle delivery yourself through an internal API, archive messages for audit logging, or process them in any custom way.
 
 ---
 
 ## Enabling Stream transport
 
-Create the transporter just like any other Nodemailer transport, but pass `streamTransport: true` in the constructor options:
+To use Stream transport, create a transporter with `streamTransport: true` in the options object:
 
 ```javascript
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   streamTransport: true,
-  // optional tweaks shown below
+  // See additional options below
 });
 ```
 
@@ -28,34 +28,36 @@ const transporter = nodemailer.createTransport({
 
 | Option            | Type                  | Default      | Description                                                                                        |
 | ----------------- | --------------------- | ------------ | -------------------------------------------------------------------------------------------------- |
-| `streamTransport` | `boolean`             | **required** | Enable Stream transport.                                                                           |
-| `buffer`          | `boolean`             | `false`      | Return the generated message as a `Buffer` instead of a `Readable` stream.                         |
-| `newline`         | `'windows' \| 'unix'` | `'unix'`     | New-line format for the generated message: CR LF (`\r\n`) for Windows or LF (`\n`) for Unix-style. |
+| `streamTransport` | `boolean`             | **required** | Set to `true` to enable Stream transport.                                                          |
+| `buffer`          | `boolean`             | `false`      | When `true`, returns the generated message as a `Buffer` instead of a `Readable` stream.           |
+| `newline`         | `'windows' \| 'unix'` | `'unix'`     | Line ending style for the generated message. Use `'windows'` for CRLF (`\r\n`) or `'unix'` for LF (`\n`). |
 
 :::note JSON Transport
-There is also a separate **JSON transport** that can be enabled with `jsonTransport: true` (instead of `streamTransport`). This transport returns a JSON string representation of the message. See the [JSON transport section](#json-transport) below.
+A separate **JSON transport** is also available. Enable it by setting `jsonTransport: true` (instead of `streamTransport`). JSON transport returns a serialized JSON representation of the message rather than the raw RFC 822 format. See the [JSON transport section](#json-transport) below for details.
 :::
 
 ### `sendMail()` callback signature
 
-The callback receives `(err, info)` where `info` contains:
+The `sendMail()` callback receives two arguments: `(err, info)`. On success, the `info` object contains:
 
-- **`envelope`** - the SMTP envelope `{ from, to }`.
-- **`messageId`** - the _Message-ID_ header value.
-- **`message`** - a Node.js `Readable` stream (default) **or** a `Buffer`/JSON string depending on the options you set.
+- **`envelope`** - The SMTP envelope object with `from` (string) and `to` (array of strings) properties.
+- **`messageId`** - The generated _Message-ID_ header value for this email.
+- **`message`** - The generated email content. By default this is a Node.js `Readable` stream. If you set `buffer: true`, it will be a `Buffer`. For JSON transport, it will be a JSON string (or a plain object if `skipEncoding: true`).
 
 ---
 
 ## Examples
 
-### 1. Stream a message with Windows-style new-lines
+### 1. Stream a message with Windows-style line endings
+
+This example generates an email as a readable stream using Windows-style CRLF line endings. The stream can be piped to any writable destination.
 
 ```javascript
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   streamTransport: true,
-  newline: "windows", // CRLF (\r\n)
+  newline: "windows", // Use CRLF (\r\n) line endings
 });
 
 transporter.sendMail(
@@ -63,27 +65,29 @@ transporter.sendMail(
     from: "sender@example.com",
     to: "recipient@example.com",
     subject: "Streamed message",
-    text: "This message is streamed using CRLF new-lines.",
+    text: "This message is streamed using CRLF line endings.",
   },
   (err, info) => {
     if (err) throw err;
-    console.log(info.envelope);
-    console.log(info.messageId);
-    // Pipe the raw RFC 822 message to STDOUT
+    console.log(info.envelope);   // { from: '...', to: ['...'] }
+    console.log(info.messageId);  // '<unique-id@example.com>'
+    // Pipe the raw RFC 822 message to stdout
     info.message.pipe(process.stdout);
   }
 );
 ```
 
-### 2. Return a `Buffer` with Unix-style new-lines
+### 2. Return a Buffer with Unix-style line endings
+
+When you need the entire message in memory at once, set `buffer: true`. This example also explicitly uses Unix-style LF line endings (the default).
 
 ```javascript
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   streamTransport: true,
-  buffer: true, // return Buffer instead of Stream
-  newline: "unix", // LF (\n)
+  buffer: true,    // Return a Buffer instead of a stream
+  newline: "unix", // Use LF (\n) line endings (this is the default)
 });
 
 transporter.sendMail(
@@ -91,13 +95,13 @@ transporter.sendMail(
     from: "sender@example.com",
     to: "recipient@example.com",
     subject: "Buffered message",
-    text: "This message is buffered using LF new-lines.",
+    text: "This message is buffered using LF line endings.",
   },
   (err, info) => {
     if (err) throw err;
     console.log(info.envelope);
     console.log(info.messageId);
-    // The complete message is in a single Buffer
+    // The complete message is available as a Buffer
     console.log(info.message.toString());
   }
 );
@@ -105,9 +109,9 @@ transporter.sendMail(
 
 ### 3. Generate a JSON-encoded message object (>= v3.1.0) {#json-transport}
 
-The **JSON transport** is a separate transport (not an option of Stream transport). Pass `jsonTransport: true` (and omit `streamTransport`). The resulting `info.message` is a serialized JSON string that you can later feed back to Nodemailer or inspect in your tests. Binary data such as attachments is base64-encoded.
+**JSON transport** is a separate transport type, not an option of Stream transport. To use it, set `jsonTransport: true` instead of `streamTransport`. The resulting `info.message` will be a JSON string representing the message structure. This format is useful for storing messages, inspecting them in tests, or passing them to other systems. Binary data such as attachments is automatically base64-encoded.
 
-You can also pass `skipEncoding: true` to get the raw data object instead of a JSON string.
+If you prefer to work with a JavaScript object rather than a JSON string, set `skipEncoding: true` to receive the raw data object directly.
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -132,7 +136,7 @@ transporter.sendMail(
 );
 ```
 
-An abbreviated example of the JSON payload:
+Here is an example of what the JSON output looks like:
 
 ```json
 {
@@ -149,9 +153,11 @@ An abbreviated example of the JSON payload:
 
 ## When to choose Stream vs. JSON transport
 
-| Use case                                    | Recommended option                      |
-| ------------------------------------------- | --------------------------------------- |
-| Inspect or pipe raw SMTP content            | `streamTransport` (Stream or Buffer)    |
-| Persist structured message for later replay | `jsonTransport`                         |
-| Need to support Nodemailer plugins          | Both (plugins run before serialization) |
-| Want `_raw` property support                | **Stream transport only**               |
+Use the following table to help decide which transport best fits your needs:
+
+| Use case                                            | Recommended transport                   |
+| --------------------------------------------------- | --------------------------------------- |
+| Inspect or pipe raw RFC 822 SMTP content            | `streamTransport` (Stream or Buffer)    |
+| Store structured message data for later replay      | `jsonTransport`                         |
+| Apply Nodemailer plugins (DKIM, headers, etc.)      | Either (plugins run before output)      |
+| Need access to the `_raw` property                  | **Stream transport only**               |

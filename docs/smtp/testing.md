@@ -3,24 +3,26 @@ title: Testing SMTP
 sidebar_position: 22
 ---
 
-When you need to exercise the email‑sending paths of your application in a development or continuous‑integration environment, you **must not** accidentally spam real inboxes. Instead of routing all mail to a single hard‑coded test address, point your code at a _mail‑catcher_ service: it accepts messages over SMTP exactly like a production provider, but **never** delivers them. It just stores the messages so that you can open or download them later.
+When testing email functionality in development or CI environments, you need to avoid accidentally sending messages to real inboxes. Rather than redirecting all emails to a single test address, the recommended approach is to use a _mail-catcher_ service. A mail-catcher accepts messages over SMTP just like a production email provider, but it **never delivers them** to actual recipients. Instead, it stores the messages so you can inspect or download them later.
 
-Nodemailer ships with first‑class support for [Ethereal Email](https://ethereal.email/) — a free, open‑source mail‑catcher designed for test environments. You can either
+Nodemailer includes built-in support for [Ethereal Email](https://ethereal.email/), a free mail-catcher service designed specifically for testing. You have two options:
 
-- **provision an account on the fly** with `createTestAccount`, or
-- **create a persistent test mailbox** from the Ethereal dashboard.
+- **Create a temporary account programmatically** using `nodemailer.createTestAccount()`, or
+- **Create a persistent test mailbox** through the Ethereal web dashboard.
 
-If you would rather stay completely offline you can preview messages locally with [forwardemail/email‑templates](https://github.com/forwardemail/email-templates) (it renders every message in your browser and iOS simulator via [preview-email](https://github.com/forwardemail/preview-email)).
+If you prefer to work completely offline, you can preview messages locally using [forwardemail/email-templates](https://github.com/forwardemail/email-templates), which renders each message in your browser or iOS simulator via [preview-email](https://github.com/forwardemail/preview-email).
 
-## Quick‑start
+## Quick-start
 
-Install Nodemailer if you have not done so yet:
+Install Nodemailer if you have not done so already:
 
 ```bash
 npm install nodemailer
 ```
 
-### 1. Spin up a throw‑away Ethereal account
+### 1. Create a temporary Ethereal account
+
+The following example demonstrates how to create a test account, configure a transporter, and send a message:
 
 ```javascript
 // ./mail.js
@@ -32,28 +34,28 @@ nodemailer.createTestAccount((err, account) => {
     return;
   }
 
-  // 1️⃣  Configure a transporter that talks to Ethereal
+  // Create a transporter using the Ethereal test account credentials
   const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false, // upgrade later with STARTTLS
+    host: account.smtp.host,
+    port: account.smtp.port,
+    secure: account.smtp.secure,
     auth: {
-      user: account.user, // generated user
-      pass: account.pass, // generated password
+      user: account.user,
+      pass: account.pass,
     },
   });
 
-  // 2️⃣  Send a message
+  // Send a test message
   transporter
     .sendMail({
-      from: "Example app <no-reply@example.com>",
+      from: "Example App <no-reply@example.com>",
       to: "user@example.com",
-      subject: "Hello from tests ✔",
+      subject: "Hello from tests",
       text: "This message was sent from a Node.js integration test.",
     })
     .then((info) => {
       console.log("Message sent: %s", info.messageId);
-      // Preview the stored message in Ethereal’s web UI
+      // Get a URL to preview the message in Ethereal's web interface
       console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     })
     .catch(console.error);
@@ -61,20 +63,20 @@ nodemailer.createTestAccount((err, account) => {
 ```
 
 :::tip
-Ethereal automatically deletes an account after **48 hours of inactivity**. Save the generated credentials somewhere if you want to inspect the messages later via the dashboard.
+Ethereal automatically deletes accounts after **48 hours of inactivity**. If you need to inspect messages later, save the generated credentials or create a persistent account through the Ethereal dashboard.
 :::
 
-### 2. Switch transports per environment
+### 2. Switch transports based on environment
 
-You only need one place in your code base that knows which SMTP credentials to use. Everything else just calls `createTransport()`.
+A common pattern is to centralize your transport configuration in one place. This makes it easy to use Ethereal during development and testing while using a production email service in production:
 
 ```javascript
-// ./mail‑transport.js
+// ./mail-transport.js
 const nodemailer = require("nodemailer");
 
 function createTransport() {
   if (process.env.NODE_ENV === "production") {
-    // 🚀  Real emails
+    // Production: send real emails
     return nodemailer.createTransport({
       host: "smtp.sendgrid.net",
       port: 587,
@@ -86,7 +88,7 @@ function createTransport() {
     });
   }
 
-  // 🧪  Captured by Ethereal
+  // Development/Testing: capture emails with Ethereal
   return nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -101,7 +103,7 @@ function createTransport() {
 module.exports = createTransport;
 ```
 
-Your application code can treat the transporter as a black box:
+Your application code can then use the transporter without knowing which service is being used:
 
 ```javascript
 const createTransport = require('./mail-transport');
@@ -112,19 +114,19 @@ await transporter.sendMail({...});
 
 ### 3. Inspect the message
 
-When `sendMail` resolves (or its callback fires), the returned `info` object contains everything you need to locate the message inside Ethereal:
+After `sendMail` completes successfully, the returned `info` object contains everything you need to locate the message in Ethereal:
 
 ```javascript
 const info = await transporter.sendMail(message);
 
 console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-// → https://ethereal.email/message/WaQKMgKddxQDoou
+// Example output: https://ethereal.email/message/WaQKMgKddxQDoou
 ```
 
-You can also open **Messages → Inbox** in Ethereal’s dashboard and browse around.
+You can also browse your messages directly in the Ethereal dashboard by navigating to **Messages** in the web interface.
 
 ---
 
-Below is what a captured message looks like in the Ethereal UI.
+Below is what a captured message looks like in the Ethereal web interface.
 
 ![Screenshot of the Ethereal message preview](https://cldup.com/D5Cj_C1Vw3.png)

@@ -3,16 +3,13 @@ title: Well-Known Services
 sidebar_position: 23
 ---
 
-Nodemailer ships with connection presets for many popular SMTP providers.
-Instead of looking up each provider’s SMTP host name, port and security settings
-you can pass a single **`service`** string when you create a transport.
-Nodemailer will fill in the rest for you.
+Nodemailer includes built-in connection presets for many popular email providers. Instead of manually looking up each provider's SMTP server hostname, port number, and security settings, you can simply specify a **`service`** name when creating a transport. Nodemailer automatically configures all the connection details for you.
 
 ```js
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "Gmail", // any id from the table below, case insensitive
+  service: "Gmail", // Use any Service ID from the table below (case-insensitive)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -20,21 +17,16 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-Internally `service` is just a shortcut – you can always supply `host`, `port`,
-`secure` and other options yourself. If something changes or your provider is
-missing you can open a pull‑request against the [services.json](https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json) file
-or bypass this feature entirely and set the connection details manually.
+The `service` option is simply a convenient shortcut. You can always specify `host`, `port`, `secure`, and other connection options manually if you prefer. If your provider is not listed or if connection settings have changed, you have two options: submit a pull request to update the [services.json](https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json) file, or bypass the presets entirely and configure the connection details yourself.
 
 :::info
-Most major providers require OAuth 2 or application‑specific
-passwords. The presets only configure the server connection; you are still
-responsible for using the correct authentication mechanism.
+Most major email providers now require OAuth 2.0 authentication or app-specific passwords for security. The service presets only configure the server connection settings. You are still responsible for setting up the correct authentication method for your provider.
 :::
 
-## List of built‑in services
+## List of built-in services
 
-| Service ID         | Provider                         | SMTP host                               | Port |
-| ------------------ | -------------------------------- | --------------------------------------- | ---- |
+| Service ID         | Provider                          | SMTP host                               | Port |
+| ------------------ | --------------------------------- | --------------------------------------- | ---- |
 | 1und1              | 1&1 IONOS                         | smtp.1und1.de                           | 465  |
 | 126                | 126 Mail                          | smtp.126.com                            | 465  |
 | 163                | 163 Mail                          | smtp.163.com                            | 465  |
@@ -108,7 +100,7 @@ responsible for using the correct authentication mechanism.
 | SES-AP-SOUTHEAST-1 | AWS SES Asia Pacific (Singapore)  | email-smtp.ap-southeast-1.amazonaws.com | 465  |
 | SES-AP-SOUTHEAST-2 | AWS SES Asia Pacific (Sydney)     | email-smtp.ap-southeast-2.amazonaws.com | 465  |
 | SES-CA-CENTRAL-1   | AWS SES Canada (Central)          | email-smtp.ca-central-1.amazonaws.com   | 465  |
-| SES-SA-EAST-1      | AWS SES South America (São Paulo) | email-smtp.sa-east-1.amazonaws.com      | 465  |
+| SES-SA-EAST-1      | AWS SES South America (Sao Paulo) | email-smtp.sa-east-1.amazonaws.com      | 465  |
 | SES-US-GOV-EAST-1  | AWS SES GovCloud (US-East)        | email-smtp.us-gov-east-1.amazonaws.com  | 465  |
 | SES-US-GOV-WEST-1  | AWS SES GovCloud (US-West)        | email-smtp.us-gov-west-1.amazonaws.com  | 465  |
 | Seznam             | Seznam.cz Email                   | smtp.seznam.cz                          | 465  |
@@ -120,4 +112,3 @@ responsible for using the correct authentication mechanism.
 | Yandex             | Yandex Mail                       | smtp.yandex.ru                          | 465  |
 | Zimbra             | Zimbra Mail Server                | smtp.zimbra.com                         | 587  |
 | Zoho               | Zoho Mail                         | smtp.zoho.com                           | 465  |
-
