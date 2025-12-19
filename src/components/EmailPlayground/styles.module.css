@@ -3,18 +3,15 @@
 }
 
 .tabsWrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.tabsWrapper > :first-child {
-  flex: 1;
+  position: relative;
 }
 
 .resetButton {
-  margin-top: 4px;
-  padding: 0.5rem 1rem;
+  position: absolute;
+  top: 6px;
+  right: 0;
+  z-index: 1;
+  padding: 6px 12px;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--ifm-color-primary);
