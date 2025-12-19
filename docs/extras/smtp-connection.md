@@ -3,7 +3,7 @@ title: SMTP Connection
 sidebar_position: 2
 ---
 
-A low-level SMTP client for establishing outbound SMTP connections. This module is the foundation that powers Nodemailer's SMTP transport internally. Use it when you need direct, fine-grained control over the SMTP session lifecycle.
+A low-level SMTP client for establishing outbound SMTP connections. This module is the foundation that powers Nodemailer's [SMTP transport](/smtp/) internally. Use it when you need direct, fine-grained control over the SMTP session lifecycle.
 
 :::info
 SMTPConnection is included with Nodemailer. No additional packages need to be installed.
@@ -71,10 +71,10 @@ connection.quit(); // or connection.close()
 | **opportunisticTLS**            | `Boolean`           | `false`                | If true, attempts STARTTLS but continues with an unencrypted connection if the upgrade fails.    |
 | **tls**                         | `Object`            | -                      | Additional options passed directly to Node.js `tls.connect()` and `tls.createSecureContext()`. Use this to configure certificates, ciphers, and other TLS settings. |
 | **socket**                      | `net.Socket`        | -                      | A pre-created socket to use instead of creating a new one. The socket should not yet be connected. |
-| **connection**                  | `net.Socket`        | -                      | An already-connected socket to use. Useful for connection pooling or proxy scenarios.            |
+| **connection**                  | `net.Socket`        | -                      | An already-connected socket to use. Useful for connection pooling or [proxy](/smtp/proxies/) scenarios. |
 | **secured**                     | `Boolean`           | `false`                | Set to true when providing a socket via the `connection` option that has already been upgraded to TLS. |
 | **allowInternalNetworkInterfaces** | `Boolean`        | `false`                | If true, allows connections to internal or private network interfaces.                           |
-| **customAuth**                  | `Object`            | -                      | Custom authentication handlers for non-standard authentication methods (see [Custom Authentication](/smtp/customauth)). |
+| **customAuth**                  | `Object`            | -                      | Custom authentication handlers for non-standard authentication methods (see [Custom Authentication](/smtp/customauth/)). |
 
 ---
 
@@ -113,7 +113,7 @@ Authenticates with the SMTP server. Only call this method if the server requires
 - `user` - The username for authentication
 - `pass` - The password for authentication
 - `method` - The authentication method to use (optional). If not specified, the client automatically selects the best available method supported by the server
-- `oauth2` - An OAuth2 token provider object for XOAUTH2 authentication
+- `oauth2` - An [OAuth2](/smtp/oauth2/) token provider object for XOAUTH2 authentication
 
 ```javascript
 connection.login(
@@ -316,7 +316,7 @@ SMTPConnection supports the following authentication methods:
 - `PLAIN` - Sends credentials in base64 encoding
 - `LOGIN` - Legacy method that sends username and password separately
 - `CRAM-MD5` - Challenge-response authentication using MD5 hashing
-- `XOAUTH2` - OAuth 2.0 authentication for services like Gmail
+- `XOAUTH2` - [OAuth 2.0](/smtp/oauth2/) authentication for services like Gmail
 - Custom methods via the `customAuth` option
 
 The client automatically selects the most secure available method unless you specify one explicitly.

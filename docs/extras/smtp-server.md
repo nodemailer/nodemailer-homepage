@@ -3,7 +3,7 @@ title: SMTP Server
 sidebar_position: 1
 ---
 
-Create SMTP and LMTP server instances on the fly. The _smtp-server_ module is **not** a full-blown mail server application like [Haraka](https://haraka.github.io/). Instead, it provides a convenient way to add custom SMTP or LMTP listeners to your Node.js application. It is the successor to the server portion of the now-deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [smtp-connection](/extras/smtp-connection/).
+Create SMTP and LMTP server instances on the fly. The _smtp-server_ module is **not** a full-blown mail server application like [Haraka](https://haraka.github.io/). Instead, it provides a convenient way to add custom SMTP or LMTP listeners to your Node.js application. It is the successor to the server portion of the now-deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [SMTP Connection](./smtp-connection). This module is also useful for [testing email functionality](../smtp/testing) in development environments.
 
 ## Usage
 
@@ -259,7 +259,7 @@ onRcptTo(address, session, callback) {
 
 ## Processing incoming messages (`onData`)
 
-The `onData` callback receives a readable stream containing the email message data. The message is streamed verbatim as sent by the client.
+The `onData` callback receives a readable stream containing the email message data. The message is streamed verbatim as sent by the client. To parse the received message, you can use [MailParser](./mailparser).
 
 ```javascript
 onData(stream, session, callback) {

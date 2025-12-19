@@ -5,6 +5,8 @@ sidebar_position: 22
 
 When testing email functionality in development or CI environments, you need to avoid accidentally sending messages to real inboxes. Rather than redirecting all emails to a single test address, the recommended approach is to use a _mail-catcher_ service. A mail-catcher accepts messages over SMTP just like a production email provider, but it **never delivers them** to actual recipients. Instead, it stores the messages so you can inspect or download them later.
 
+For alternative testing approaches, you can also use the [stream transport](../transports/stream) to capture generated messages without any network connection, or run your own local mail server using [smtp-server](../extras/smtp-server).
+
 Nodemailer includes built-in support for [Ethereal Email](https://ethereal.email/), a free mail-catcher service designed specifically for testing. You have two options:
 
 - **Create a temporary account programmatically** using `nodemailer.createTestAccount()`, or
@@ -68,7 +70,7 @@ Ethereal automatically deletes accounts after **48 hours of inactivity**. If you
 
 ### 2. Switch transports based on environment
 
-A common pattern is to centralize your transport configuration in one place. This makes it easy to use Ethereal during development and testing while using a production email service in production:
+A common pattern is to centralize your transport configuration in one place. This makes it easy to use Ethereal during development and testing while using a production email service in production. For more details on SMTP configuration options, see the [SMTP transport](./index.md) documentation.
 
 ```javascript
 // ./mail-transport.js

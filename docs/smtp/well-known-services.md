@@ -20,7 +20,11 @@ const transporter = nodemailer.createTransport({
 The `service` option is simply a convenient shortcut. You can always specify `host`, `port`, `secure`, and other connection options manually if you prefer. If your provider is not listed or if connection settings have changed, you have two options: submit a pull request to update the [services.json](https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json) file, or bypass the presets entirely and configure the connection details yourself.
 
 :::info
-Most major email providers now require OAuth 2.0 authentication or app-specific passwords for security. The service presets only configure the server connection settings. You are still responsible for setting up the correct authentication method for your provider.
+Most major email providers now require [OAuth 2.0 authentication](./oauth2) or app-specific passwords for security. The service presets only configure the server connection settings. You are still responsible for setting up the correct authentication method for your provider. For Gmail-specific setup instructions, see [Using Gmail](/usage/using-gmail).
+:::
+
+:::tip AWS SES Users
+While the SES service presets below use SMTP credentials, Nodemailer also offers a dedicated [SES transport](/transports/ses) that integrates directly with the AWS SDK. The SES transport can be simpler to configure if you are already using AWS credentials in your application.
 :::
 
 ## List of built-in services

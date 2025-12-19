@@ -9,7 +9,7 @@ Nodemailer is designed to be **extensible**. You can inject custom logic at thre
 | ------------------ | ----------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
 | **Pre-processing** | `compile`   | After the message object is created but _before_ the MIME source is generated | Templating, automatic plain-text alternatives, address validation |
 | **Processing**     | `stream`    | After MIME compilation, while the message stream is being prepared for sending | Inlining images, transforming HTML content                        |
-| **Sending**        | `transport` | When the message is ready to be delivered                                      | SMTP, SES, SparkPost, custom HTTP APIs                            |
+| **Sending**        | `transport` | When the message is ready to be delivered                                      | [SMTP](/smtp/), [SES](/transports/ses), SparkPost, custom HTTP APIs |
 
 :::tip
 Use _compile_ and _stream_ plugins when you want your plugin to work with any transport. Transport plugins are only needed when you want to define a completely custom delivery mechanism.
@@ -71,4 +71,4 @@ Looking for something else? Try [searching npm for "nodemailer plugin"](https://
 
 ---
 
-Need more control? See **[Creating plugins](/plugins/create)** for a detailed guide on the plugin API.
+Need more control? See **[Creating plugins](./create)** for a detailed guide on the plugin API.

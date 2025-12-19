@@ -6,6 +6,8 @@ sidebar_position: 28
 The Nodemailer **SES transport** allows you to send emails through **Amazon Simple Email Service (SES)** using the official AWS SDK v3 package [@aws-sdk/client-sesv2](https://www.npmjs.com/package/@aws-sdk/client-sesv2).
 It acts as a wrapper around the [`SendEmailCommand`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/sesv2/) while letting you use the familiar `transporter.sendMail()` API you already know from Nodemailer.
 
+For an overview of all available transports, see the [transports documentation](./).
+
 The AWS SES SDK is not included with Nodemailer, so you need to install it separately:
 
 ```bash
@@ -71,7 +73,7 @@ const transporter = nodemailer.createTransport({
 
 ## Message-level options
 
-When calling `sendMail()`, you can include an optional **ses** property in your mail options object.
+When calling `sendMail()`, you can include an optional **ses** property in your [mail options](../message/) object.
 Any properties you add to this object are passed directly to the AWS `SendEmailCommand`, allowing you to use SES-specific features such as `EmailTags`, `ConfigurationSetName`, `FeedbackForwardingEmailAddress`, and more. See the [AWS SES documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/sesv2/command/SendEmailCommand/) for all available options.
 
 ## Response object
@@ -104,9 +106,15 @@ The AWS SES SDK is not bundled with Nodemailer. You need to install it as a sepa
 npm install @aws-sdk/client-sesv2
 ```
 
-### The verify() method does not work with SES
+### Using the verify() method with SES
 
-Unlike SMTP transports, the SES transport does not support connection verification via `transporter.verify()`. This is because SES does not provide a way to test the connection without actually sending an email. If you need to validate your configuration, consider sending a test email to a verified address instead. See [GitHub issue #1751](https://github.com/nodemailer/nodemailer/issues/1751) for more details.
+The SES transport supports the `transporter.verify()` method to validate your configuration. Unlike [SMTP transports](../smtp/), which test the actual connection, the SES verify method works by attempting to send an invalid test message. If SES responds with an `InvalidParameterValue` or `MessageRejected` error, the verification is considered successful because it confirms your credentials and configuration are correct.
+
+```javascript
+// Verify SES configuration
+const isValid = await transporter.verify();
+console.log("SES configuration is valid:", isValid);
+```
 
 ## Examples
 

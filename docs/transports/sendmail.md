@@ -44,7 +44,7 @@ Note that the `-i` flag (which prevents a single dot on a line from being treate
 
 After successfully sending a message, `transporter.sendMail()` resolves with an `info` object containing the following properties:
 
-- `envelope` - An object with `from` (string) and `to` (array of strings) properties representing the message envelope
+- `envelope` - An object with `from` (string) and `to` (array of strings) properties representing the message [envelope](../smtp/envelope)
 - `messageId` - The generated Message-ID header value for the sent message
 - `response` - The string `'Messages queued for delivery'`
 
@@ -95,7 +95,7 @@ transporter.sendMail(
 
 #### Passing custom command-line arguments
 
-Use the `args` option to pass additional flags to the sendmail binary. For example, to override the envelope sender address (useful for setting a custom bounce address):
+Use the `args` option to pass additional flags to the sendmail binary. For example, to override the [envelope](../smtp/envelope) sender address (useful for setting a custom bounce address):
 
 ```javascript
 const transporter = nodemailer.createTransport({

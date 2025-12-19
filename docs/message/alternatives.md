@@ -12,12 +12,12 @@ Common use cases for alternatives include:
 - Other machine-readable formats that some email clients can process
 
 :::tip Prefer `icalEvent` for calendar invites
-For calendar events specifically, use the dedicated **`icalEvent`** option instead of alternatives. It provides a simpler API with better compatibility. See [Calendar events](/message/calendar-events/) for details.
+For calendar events specifically, use the dedicated **`icalEvent`** option instead of alternatives. It provides a simpler API with better compatibility. See [Calendar events](./calendar-events) for details.
 :::
 
 ## How alternatives differ from attachments
 
-Alternative objects use the same fields as [attachment objects](/message/attachments/), including `content`, `path`, `contentType`, `encoding`, and `headers`. The key difference is how they appear in the email structure:
+Alternative objects use the same fields as [attachment objects](./attachments), including `content`, `path`, `contentType`, `encoding`, and `headers`. The key difference is how they appear in the email structure:
 
 - **Attachments** are separate files that recipients download. They go in `multipart/mixed` or `multipart/related` containers.
 - **Alternatives** are different versions of the email body itself. They go in a `multipart/alternative` container, and the email client picks one to display.

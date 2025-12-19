@@ -24,13 +24,13 @@ npm install nodemailer
 - **Full Unicode support** - send messages with any characters, including emoji 💪.
 - **Cross-platform** - works identically on Linux, macOS, and Windows with no native addons required (ideal for cloud environments like Azure).
 - **HTML and plain-text emails** - send rich HTML emails with automatic plain-text fallbacks.
-- **[Attachments](/message/attachments/)** and **[embedded images](/message/embedded-images/)** - easily include files and inline images in your messages.
+- **[Attachments](./message/attachments/)** and **[embedded images](./message/embedded-images/)** - easily include files and inline images in your messages.
 - **Built-in TLS/STARTTLS encryption** - secure connections are handled automatically.
-- **Multiple [transports](/transports/)** - send via SMTP, Sendmail, Amazon SES, streams, and more.
-- **[DKIM signing](/dkim/)** and **[OAuth2 authentication](/smtp/oauth2/)** - enterprise-ready email authentication.
-- **[Proxy support](/smtp/proxies/)** - route email through proxies for restricted network environments.
-- **Plugin API** - extend functionality with custom plugins for advanced message processing.
-- **[Ethereal.email](https://ethereal.email) integration** - generate test accounts instantly for local development and testing.
+- **Multiple [transports](./transports/)** - send via [SMTP](./smtp/), [Sendmail](./transports/sendmail/), [Amazon SES](./transports/ses/), [streams](./transports/stream/), and more.
+- **[DKIM signing](./dkim/)** and **[OAuth2 authentication](./smtp/oauth2/)** - enterprise-ready email authentication.
+- **[Proxy support](./smtp/proxies/)** - route email through proxies for restricted network environments.
+- **[Plugin API](./plugins/)** - extend functionality with [custom plugins](./plugins/create/) for advanced message processing.
+- **[Ethereal.email](https://ethereal.email) integration** - generate test accounts instantly for [local development and testing](./smtp/testing/).
 
 ## Requirements
 
@@ -42,13 +42,13 @@ No additional system libraries, services, or build tools are needed.
 
 Sending an email with Nodemailer involves three simple steps:
 
-1. **Create a transporter** - Configure your SMTP server or another supported transport method.
-2. **Compose your message** - Define the sender, recipient(s), subject, and content.
+1. **Create a transporter** - Configure your [SMTP server](./smtp/) or another supported [transport method](./transports/).
+2. **Compose your message** - Define the sender, recipient(s), subject, and [content](./message/).
 3. **Send the email** - Call `transporter.sendMail()` with your message options.
 
 ### Example: Sending an Email with Ethereal
 
-[Ethereal](https://ethereal.email) is a free service that captures outgoing emails for testing. No emails are actually delivered, making it perfect for development.
+[Ethereal](https://ethereal.email) is a free service that captures outgoing emails for [testing](./smtp/testing/). No emails are actually delivered, making it perfect for development.
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -83,7 +83,7 @@ const transporter = nodemailer.createTransport({
 
 ## Source and License
 
-Nodemailer is open source software, licensed under the [MIT No Attribution (MIT-0)](/license) license. This means you can use it freely in any project without attribution requirements. Browse the source code on [GitHub](https://github.com/nodemailer/nodemailer).
+Nodemailer is open source software, licensed under the [MIT No Attribution (MIT-0)](./license) license. This means you can use it freely in any project without attribution requirements. Browse the source code on [GitHub](https://github.com/nodemailer/nodemailer).
 
 ---
 

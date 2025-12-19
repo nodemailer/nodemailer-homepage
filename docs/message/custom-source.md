@@ -4,7 +4,7 @@ sidebar_position: 18
 description: Provide your own pre-built RFC 822/EML source instead of letting Nodemailer generate it.
 ---
 
-Sometimes you already have a fully-formatted RFC 822/EML message ready to send. This might happen when a message was composed by another system, retrieved from storage, or exported from an email client. In these cases, you can pass the pre-built content directly to Nodemailer using the **raw** option, and Nodemailer will send it without modifying the structure.
+Sometimes you already have a fully-formatted RFC 822/EML message ready to send. This might happen when a message was composed by another system, retrieved from storage, parsed from an EML file using [MailParser](../extras/mailparser), or generated with [Mailcomposer](../extras/mailcomposer). In these cases, you can pass the pre-built content directly to Nodemailer using the **raw** option, and Nodemailer will send it without modifying the structure.
 
 The **raw** option can be used at three different levels:
 
@@ -13,7 +13,7 @@ The **raw** option can be used at three different levels:
 3. **Per attachment** - Provide a complete attachment including its MIME headers and body.
 
 :::tip Always set an envelope
-When you use **raw** for the entire message, you must also provide `envelope.from` and `envelope.to` explicitly. Nodemailer does not parse these values from the raw message content. The envelope tells the SMTP server who the sender and recipients are during the mail transfer.
+When you use **raw** for the entire message, you must also provide `envelope.from` and `envelope.to` explicitly. Nodemailer does not parse these values from the raw message content. The envelope tells the [SMTP](../smtp/) server who the sender and recipients are during the mail transfer.
 :::
 
 ## Examples

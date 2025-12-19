@@ -23,7 +23,7 @@ You can configure DKIM signing in two ways:
 
 - **Transport-wide** - Every message sent through the transporter is
   automatically signed with the same key(s), **or**
-- **Per-message** - Pass a `dkim` object in the _MailOptions_ to override or
+- **Per-message** - Pass a `dkim` object in the [message configuration](../message/) to override or
   replace the transport-level settings.
 
 If you specify DKIM settings at both levels, the **message-level settings take
@@ -159,10 +159,14 @@ const transporter = nodemailer.createTransport({
 
 ### 5 - Skip mutable headers
 
-Some email service providers, such as **Amazon SES**, replace headers like
+Some email service providers, such as **[Amazon SES](../transports/ses)**, replace headers like
 `Message-ID` and `Date` after you submit the message. If these headers are
 included in the DKIM signature, the signature will fail verification. Use
-`skipFields` to exclude them:
+`skipFields` to exclude them.
+
+:::tip
+When using the [SES transport](../transports/ses), Nodemailer automatically adds `date:message-id` to `skipFields` for you.
+:::
 
 ```javascript
 const transporter = nodemailer.createTransport({

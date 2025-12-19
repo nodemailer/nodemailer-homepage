@@ -28,7 +28,7 @@ Use this method when your SMTP server accepts a standard username and access tok
 > **Token scopes**
 > Different email providers require different OAuth scopes to allow SMTP access:
 >
-> - **Gmail** - your token must include the `https://mail.google.com/` scope
+> - **Gmail** - your token must include the `https://mail.google.com/` scope (see [Using Gmail](../usage/using-gmail) for complete setup instructions)
 > - **Outlook** - your token must include the `https://outlook.office.com/SMTP.Send` scope
 
 ```js
@@ -46,13 +46,13 @@ let transporter = nodemailer.createTransport({
 
 :::tip
 
-When using a non-pooled transport (the default), you can override the authentication credentials on a per-message basis. This means you can create a single transporter and pass different tokens in the `sendMail` options for each message you send.
+When using a non-pooled transport (the default), you can override the authentication credentials on a per-message basis. This means you can create a single transporter and pass different tokens in the `sendMail` options for each message you send. See [Pooled SMTP Connections](./pooled) for more information about pooled vs. non-pooled transports.
 
 :::
 
 ### Gmail-specific helpers {#oauth-gmail}
 
-Nodemailer includes built-in helpers that automate OAuth2 token management specifically for Gmail. These helpers can automatically refresh expired tokens, generate new tokens using service accounts, or integrate with your custom token provider.
+Nodemailer includes built-in helpers that automate OAuth2 token management specifically for Gmail. These helpers can automatically refresh expired tokens, generate new tokens using service accounts, or integrate with your custom token provider. For general Gmail setup guidance, including App Passwords as an alternative authentication method, see [Using Gmail](../usage/using-gmail).
 
 #### 3-legged OAuth2 authentication {#oauth-3lo}
 
@@ -116,6 +116,10 @@ transporter.on("token", (t) => {
 ```
 
 #### Examples {#examples}
+
+:::tip
+The examples below use explicit `host`, `port`, and `secure` settings. For Gmail and other popular providers, you can simplify this by using `service: "gmail"` instead. See [Well-Known Services](./well-known-services) for the full list of supported providers.
+:::
 
 1. **Authenticate with an existing token**
 
@@ -224,7 +228,7 @@ transporter.sendMail({
 
 :::info
 
-Per-message authentication only works with non-pooled transports. If you are using a pooled transport (created with `pool: true`), you cannot override authentication on a per-message basis.
+Per-message authentication only works with non-pooled transports. If you are using a [pooled transport](./pooled) (created with `pool: true`), you cannot override authentication on a per-message basis.
 
 :::
 

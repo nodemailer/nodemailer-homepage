@@ -27,7 +27,7 @@ OAuth 2.0 is the most secure and reliable method for authenticating with Gmail. 
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: "gmail", // Shortcut for Gmail's SMTP settings - see Well-Known Services
   auth: {
     type: "OAuth2",
     user: "me@gmail.com",
@@ -38,7 +38,9 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-For a complete walkthrough on setting up OAuth 2.0 credentials, including how to obtain your client ID, client secret, and refresh token, see the dedicated guide: [SMTP / OAuth 2.0](/smtp/oauth2/).
+The `service: "gmail"` option is a convenient shortcut that automatically configures Gmail's SMTP server settings. See [Well-Known Services](../smtp/well-known-services) for more details and a full list of supported providers.
+
+For a complete walkthrough on setting up OAuth 2.0 credentials, including how to obtain your client ID, client secret, and refresh token, see the dedicated guide: [SMTP / OAuth 2.0](../smtp/oauth2).
 
 ### App Password (requires 2-Step Verification)
 
@@ -91,7 +93,7 @@ If you exceed these limits, Gmail returns SMTP error **454 4.7.0** ("Too many re
 
 ## 3. Production alternatives
 
-For reliable email delivery at higher volumes, consider switching to a dedicated email service provider such as SendGrid, Postmark, Amazon SES, or Mailgun. These services are designed for automated sending and offer several advantages over Gmail:
+For reliable email delivery at higher volumes, consider switching to a dedicated email service provider such as SendGrid, Postmark, [Amazon SES](../transports/ses), or Mailgun. These services are designed for automated sending and offer several advantages over Gmail:
 
 - No aggressive login security that blocks legitimate server connections
 - Higher sending limits (many offer free tiers of 100-300 emails per day)

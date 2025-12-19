@@ -47,8 +47,8 @@ Create the transporter **once** when your application starts and reuse it for al
 
 ### Other transport types
 
-- **SMTP** -- see the [SMTP guide](/smtp/) for the full list of configuration options.
-- **Plugins** -- Nodemailer can send emails through any transport that implements the [`send(mail, callback)`](https://nodemailer.com/transports/) interface. See the [transport plugin documentation](/transports/) for available options.
+- **SMTP** -- see the [SMTP guide](../smtp/) for the full list of configuration options.
+- **Plugins** -- Nodemailer can send emails through any transport that implements the `send(mail, callback)` interface. See the [transport plugin documentation](../transports/) for available options.
 
 ## Verify the connection (optional)
 
@@ -87,7 +87,7 @@ Once you have a transporter, send an email by calling `transporter.sendMail(mess
 
 | Parameter    | Description                                                                                              |
 | ------------ | -------------------------------------------------------------------------------------------------------- |
-| **message**  | An object containing the email content and headers. See [Message configuration](/message/) for details. |
+| **message**  | An object containing the email content and headers. See [Message configuration](../message/) for details. |
 | **callback** | _(optional)_ A function with signature `(err, info) => {}`. If omitted, `sendMail` returns a Promise.    |
 
 The `info` object returned by most transports contains:
@@ -95,7 +95,7 @@ The `info` object returned by most transports contains:
 | Property    | Description                                                               |
 | ----------- | ------------------------------------------------------------------------- |
 | `messageId` | The **Message-ID** header value assigned to the email.                    |
-| `envelope`  | An object containing the SMTP envelope addresses (`from` and `to`).       |
+| `envelope`  | An object containing the [SMTP envelope](../smtp/envelope) addresses (`from` and `to`). |
 | `accepted`  | An array of recipient addresses that the server accepted.                 |
 | `rejected`  | An array of recipient addresses that the server rejected.                 |
 | `pending`   | With the _direct_ transport: addresses that received a temporary failure. |

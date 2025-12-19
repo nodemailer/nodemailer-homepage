@@ -3,7 +3,7 @@ title: Attachments
 sidebar_position: 11
 ---
 
-To attach files to an email, use the `attachments` option of the [message object](/message). The `attachments` option accepts an array of attachment objects, and you can include **as many files as you need**.
+To attach files to an email, use the `attachments` option of the [message object](../). The `attachments` option accepts an array of attachment objects, and you can include **as many files as you need**.
 
 Each attachment object supports the following properties:
 
@@ -16,10 +16,10 @@ Each attachment object supports the following properties:
 | `httpHeaders`        | `object`                     | Custom HTTP headers to send when fetching content from `href`. For example: `{ authorization: 'Bearer token123' }`.                               |
 | `contentType`        | `string`                     | The [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the attachment. If not specified, Nodemailer will attempt to detect it from the `filename` or `path`. |
 | `contentDisposition` | `string`                     | The Content-Disposition header value. Defaults to `'attachment'`. Use `'inline'` for embedded content like images referenced in HTML.              |
-| `cid`                | `string`                     | A Content-ID value for referencing the attachment in HTML content. Use this with `<img src="cid:your-cid-value"/>` to embed images inline.        |
+| `cid`                | `string`                     | A Content-ID value for referencing the attachment in HTML content. Use this with `<img src="cid:your-cid-value"/>` to [embed images inline](./embedded-images). |
 | `encoding`           | `string`                     | Specifies how to decode the `content` string. Common values include `'base64'`, `'hex'`, and `'utf8'`.                                            |
 | `contentTransferEncoding` | `string`                | The Content-Transfer-Encoding header value. Supported values are `'base64'`, `'quoted-printable'`, `'7bit'`, and `'8bit'`. Defaults to `'base64'` for most attachments. |
-| `headers`            | `object`                     | Additional custom headers to add to this specific attachment's MIME node.                                                                         |
+| `headers`            | `object`                     | Additional [custom headers](./custom-headers) to add to this specific attachment's MIME node.                                                     |
 | `raw`                | `string`                     | **Advanced**: A complete, pre-built MIME node including all headers. When specified, this overrides all other attachment properties.              |
 
 :::tip Streaming vs. in-memory
@@ -114,7 +114,7 @@ attachments: [
 
 ## Embedding images
 
-You can embed images directly in the HTML body of your email instead of displaying them as downloadable attachments. To do this, assign a Content-ID (`cid`) to the attachment and reference it in your HTML using the `cid:` URL scheme.
+You can embed images directly in the HTML body of your email instead of displaying them as downloadable attachments. To do this, assign a Content-ID (`cid`) to the attachment and reference it in your HTML using the `cid:` URL scheme. For more details and examples, see the [embedded images](./embedded-images) page.
 
 The `cid` value can be any unique string. A common convention is to use an email-like format (for example, `logo@nodemailer`), but this is not required.
 

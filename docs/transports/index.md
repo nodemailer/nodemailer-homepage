@@ -5,9 +5,9 @@ sidebar_position: 5
 
 # Other transports
 
-Nodemailer includes a fully-featured [SMTP transport](/smtp/) that is enabled by default, but you are not limited to SMTP. A _transport_ is the mechanism Nodemailer uses to deliver a fully-constructed email message. This could involve piping the message to the local `sendmail` binary, posting it to an HTTPS API like Amazon SES, or using any other delivery method you choose.
+Nodemailer includes a fully-featured [SMTP transport](../smtp/) that is enabled by default, but you are not limited to SMTP. A _transport_ is the mechanism Nodemailer uses to deliver a fully-constructed email message. This could involve piping the message to the local `sendmail` binary, posting it to an HTTPS API like Amazon SES, or using any other delivery method you choose.
 
-This page lists the transports bundled with Nodemailer as well as popular community-maintained transports. If none of these fit your needs, you can create your own by following the [transport API documentation](/plugins/create/#transports).
+This page lists the transports bundled with Nodemailer as well as popular community-maintained transports. If none of these fit your needs, you can create your own by following the [transport API documentation](../plugins/create/#transports).
 
 ---
 
@@ -55,10 +55,10 @@ These transports are included with Nodemailer and require no additional packages
 
 | Transport    | Purpose                                                                              | Reference                     |
 | ------------ | ------------------------------------------------------------------------------------ | ----------------------------- |
-| **SMTP**     | The default transport. Connects to an SMTP server to deliver messages.               | [Docs](/smtp/)                |
-| **sendmail** | Pipes the generated message to a local `sendmail`-compatible binary on your server.  | [Docs](/transports/sendmail/) |
-| **SES**      | Sends mail through the Amazon SES API using the AWS SDK v3.                          | [Docs](/transports/ses/)      |
-| **stream**   | Returns the generated RFC 5322 message as a stream instead of sending it. Useful for testing or custom processing. | [Docs](/transports/stream/)   |
+| **SMTP**     | The default transport. Connects to an SMTP server to deliver messages.               | [Docs](../smtp/)                |
+| **sendmail** | Pipes the generated message to a local `sendmail`-compatible binary on your server.  | [Docs](./sendmail/) |
+| **SES**      | Sends mail through the Amazon SES API using the AWS SDK v3.                          | [Docs](./ses/)      |
+| **stream**   | Returns the generated RFC 5322 message as a stream instead of sending it. Useful for testing or custom processing. | [Docs](./stream/)   |
 
 ### Community transports
 
@@ -66,7 +66,7 @@ These transports are maintained by the community in separate npm packages. Insta
 
 - **Mailtrap** - Deliver messages to your Mailtrap inbox for safe email testing without sending to real recipients ([npm](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport))
 - **Mailgun** - Send email through Mailgun's HTTP API ([npm](https://www.npmjs.com/package/nodemailer-mailgun-transport))
-- **Custom** - Build your own transport to implement business-specific logic. See [creating custom transports](/plugins/create/#transports).
+- **Custom** - Build your own transport to implement business-specific logic. See [creating custom transports](../plugins/create/#transports).
 
 > **Note:** Third-party transports are not maintained by the Nodemailer team. Check each project's README for installation instructions and usage details.
 

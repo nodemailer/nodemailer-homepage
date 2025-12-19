@@ -3,12 +3,12 @@ title: Embedded images
 sidebar_position: 15
 ---
 
-Embedded images are images that display directly in the email body rather than appearing as downloadable attachments. You can embed images in your HTML emails by including them in the `attachments` array and referencing them using the `cid:` (Content-ID) URL scheme.
+Embedded images are images that display directly in the email body rather than appearing as downloadable attachments. You can embed images in your HTML emails by including them in the [attachments](./attachments) array and referencing them using the `cid:` (Content-ID) URL scheme.
 
 Here is how to embed an image in three steps:
 
-1. Add the image to the **attachments** array in your message options.
-2. Assign a unique **cid** (Content-ID) value to the attachment.
+1. Add the image to the [attachments](./attachments) array in your message options.
+2. Assign a unique [`cid`](./attachments) (Content-ID) value to the attachment.
 3. Reference the image in your HTML using `src="cid:your-cid-value"`.
 
 :::info Why use embedded images?

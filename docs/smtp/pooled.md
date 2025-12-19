@@ -3,12 +3,16 @@ title: Pooled SMTP Connections
 sidebar_position: 21
 ---
 
-**Pooled SMTP** maintains a fixed number of persistent TCP/TLS connections to your SMTP server and reuses them across multiple messages. Instead of opening a new connection for each email (which requires a full TLS handshake every time), pooled connections stay open and ready for the next message.
+**Pooled SMTP** maintains a fixed number of persistent TCP/TLS connections to your SMTP server and reuses them across multiple messages. Instead of opening a new connection for each email (which requires a full TLS handshake every time), pooled connections stay open and ready for the next message. This is an extension of the standard [SMTP transport](./index.md).
 
 This approach is ideal when:
 
 - You need to send a **large batch of emails** quickly, since connection reuse eliminates repeated TLS handshake overhead.
 - Your SMTP provider **limits the number of simultaneous connections** you can open, and you need to queue messages efficiently within those limits.
+
+:::tip
+For extremely high-volume email sending, consider using the [SES transport](/transports/ses/) which integrates with Amazon Simple Email Service and handles rate limiting and deliverability at scale.
+:::
 
 ---
 
@@ -41,6 +45,10 @@ await transporter.sendMail({
   text: "Hi Alice!",
 });
 ```
+
+:::info
+Pooled connections work with all authentication methods, including [OAuth2](./oauth2.md). This is particularly useful when sending through services like Gmail or Outlook that support OAuth2.
+:::
 
 ---
 
@@ -109,6 +117,6 @@ transporter.on("idle", async () => {
 ### Best practices
 
 - **Create one transporter and reuse it throughout your application.** Each call to `createTransport()` creates a separate pool with its own connections. Creating multiple transporters defeats the purpose of pooling.
-- **Match `maxConnections` and `maxMessages` to your SMTP provider's limits.** Many providers restrict the number of concurrent connections or messages per connection. Check your provider's documentation.
+- **Match `maxConnections` and `maxMessages` to your SMTP provider's limits.** Many providers restrict the number of concurrent connections or messages per connection. Check your provider's documentation or the [well-known services list](./well-known-services.md) for common providers.
 - **Use the `idle` event for high-volume sending.** Instead of queuing thousands of messages in memory, use the pull-based pattern shown above to fetch messages only when the transporter is ready.
 - **Close the pool during application shutdown.** Call `transporter.close()` in your shutdown handler to ensure connections are properly terminated and your process can exit cleanly.

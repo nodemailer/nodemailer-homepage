@@ -3,7 +3,7 @@ title: Address object
 sidebar_position: 13
 ---
 
-Nodemailer accepts email addresses in **three interchangeable formats**. You can use any of these formats (or mix them together) in any address field, including `from`, `to`, `cc`, `bcc`, `replyTo`, and `sender`.
+Nodemailer accepts email addresses in **three interchangeable formats**. You can use any of these formats (or mix them together) in any address field, including `from`, `to`, `cc`, `bcc`, `replyTo`, and `sender`. For a complete list of message fields, see [message configuration](./index.md).
 
 ## 1. Plain email address
 
@@ -100,15 +100,15 @@ Nodemailer supports internationalized domain names (IDNs) that contain non-ASCII
 
 ### Unicode usernames (EAI/SMTPUTF8)
 
-Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and sends the `SMTPUTF8` parameter with the `MAIL FROM` command.
+Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and sends the `SMTPUTF8` parameter with the `MAIL FROM` command. For more details about SMTP envelope handling, see [SMTP envelope](../smtp/envelope.md).
 
-If the server does not advertise SMTPUTF8 support, Nodemailer will reject the message with an `EENVELOPE` error to prevent delivery failures.
+If the server does not advertise SMTPUTF8 support, the message will be rejected with an `EENVELOPE` error to prevent delivery failures.
 
 ---
 
 ## Complete example
 
-The following example demonstrates how to send an email using multiple address formats together:
+The following example demonstrates how to send an email using multiple address formats together. For more information about configuring SMTP transport options, see [SMTP transport](../smtp/index.md).
 
 ```javascript
 const nodemailer = require("nodemailer");

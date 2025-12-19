@@ -3,7 +3,7 @@ title: Custom headers
 sidebar_position: 17
 ---
 
-Nodemailer automatically generates all required email headers, so you typically do not need to set them manually. However, when you need to add custom headers or override default values, you can use the **`headers`** property. This works both at the message level and for individual attachments or alternatives.
+Nodemailer automatically generates all required email headers, so you typically do not need to set them manually. However, when you need to add custom headers or override default values, you can use the **`headers`** property. This works both at the message level and for individual [attachments](./attachments) or alternatives.
 
 - **`headers`** - an object where each key-value pair becomes an email header.
 
@@ -11,7 +11,7 @@ Nodemailer automatically generates all required email headers, so you typically 
   - Values are automatically encoded for non-ASCII characters using MIME word encoding, and long lines are wrapped to comply with the 78-character line limit. You can disable this automatic processing by using the `prepared` option.
 
 :::warning
-Do **not** set protected headers such as `From`, `Sender`, `To`, `Cc`, `Bcc`, `Reply-To`, `In-Reply-To`, `References`, `Subject`, `Message-ID`, or `Date` using the `headers` property. Nodemailer manages these headers internally and will overwrite any values you set. Instead, use the dedicated message properties (for example, `from`, `to`, `subject`) to set these values.
+Do **not** set protected headers such as `From`, `Sender`, `To`, `Cc`, `Bcc`, `Reply-To`, `In-Reply-To`, `References`, `Subject`, `Message-ID`, or `Date` using the `headers` property. Nodemailer manages these headers internally and will overwrite any values you set. Instead, use the dedicated [message properties](./) (for example, `from`, `to`, `subject`) to set these values.
 :::
 
 ---
@@ -82,7 +82,7 @@ X-Unprocessed: Header value is used exactly as provided, with no modifications
 
 ### 4. Headers on an attachment
 
-You can also add custom headers to individual attachments. This is useful for adding metadata or tracking information to specific files within an email. Simply include a `headers` object inside the attachment definition.
+You can also add custom headers to individual [attachments](./attachments). This is useful for adding metadata or tracking information to specific files within an email. Simply include a `headers` object inside the attachment definition.
 
 ```javascript
 const message = {

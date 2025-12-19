@@ -3,11 +3,11 @@ title: Create plugins
 sidebar_position: 30
 ---
 
-Nodemailer provides three extension points in the email delivery pipeline where you can attach **plugins** to customize behavior:
+Nodemailer provides three extension points in the email delivery pipeline where you can attach [plugins](./index.md) to customize behavior:
 
 1. **`compile`** -- Runs immediately after `sendMail()` is called, before Nodemailer builds the MIME tree. Use this stage to modify `mail.data` (for example, to transform HTML content, add custom headers, or set default values).
 2. **`stream`** -- Runs after the MIME tree is fully constructed but before the message bytes are streamed out. At this stage you can modify the `mail.message` object directly or insert transform streams to process the raw message data.
-3. **Transport** -- The final stage where the raw message stream is delivered to its destination. Custom transports implement this stage to define how messages are actually sent.
+3. **Transport** -- The final stage where the raw message stream is delivered to its destination. Custom [transports](/transports/) implement this stage to define how messages are actually sent.
 
 ---
 
@@ -41,7 +41,7 @@ Every plugin function, including custom transport `send` methods, receives two a
 | Property         | Available at                       | Description                                                                                                                     |
 | ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `data`           | `compile`, `stream`, **transport** | The original options object passed to `sendMail()`                                                                              |
-| `message`        | `stream`, **transport**            | A [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance representing the built message |
+| `message`        | `stream`, **transport**            | A [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance representing the built message (see also [MailComposer](/extras/mailcomposer/)) |
 | `resolveContent` | `compile`, `stream`, **transport** | A helper method for converting Nodemailer content objects (streams, file paths, URLs) into a `String` or `Buffer`              |
 
 ### `mail.resolveContent(obj, key, callback)`
@@ -143,7 +143,7 @@ Returns an object containing parsed email addresses from the **From**, **Sender*
 
 ## Writing a custom transport {#transports}
 
-A transport is an object that defines how messages are actually delivered. At minimum, it must have three properties: **`name`**, **`version`**, and a **`send(mail, done)`** method. Pass this object to `nodemailer.createTransport()` to create a working transporter.
+A transport is an object that defines how messages are actually delivered. For built-in options, see [SMTP transport](/smtp/) and [other transports](/transports/). To create your own, implement an object with three properties: **`name`**, **`version`**, and a **`send(mail, done)`** method. Pass this object to `nodemailer.createTransport()` to create a working transporter.
 
 ```javascript
 const nodemailer = require("nodemailer");

@@ -37,7 +37,7 @@ However, if you need precise control over the envelope, you can override the def
 | `cc`   | `string \| string[]` | _Optional._ These addresses are merged into the `to` list when the envelope is generated. |
 | `bcc`  | `string \| string[]` | _Optional._ These addresses are merged into the `to` list when the envelope is generated. |
 
-Nodemailer accepts any address format it supports: plain email addresses like `user@example.com`, name-address pairs like `Name <address>`, or internationalized addresses with UTF-8 domains.
+Nodemailer accepts any [address format](../message/addresses) it supports: plain email addresses like `user@example.com`, name-address pairs like `Name <address>`, or internationalized addresses with UTF-8 domains.
 
 ### Complete example
 
@@ -80,7 +80,7 @@ The object returned by `sendMail()` always includes an `envelope` property showi
 
 ### When should I override the envelope?
 
-- **VERP or bounce management** - Route bounces to a unique per-message or per-recipient address so you can track which specific email bounced.
+- **VERP or bounce management** - Route bounces to a unique per-message or per-recipient address so you can track which specific email bounced. For automated bounce notifications, see also [Delivery Status Notifications (DSN)](./dsn).
 - **Mailing lists** - Deliver the same message to many recipients while keeping their addresses hidden from each other (not shown in the headers).
 - **Different return path** - Display one address in the `From:` header but route bounces to a different address for centralized bounce processing.
 

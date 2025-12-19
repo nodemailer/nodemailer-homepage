@@ -4,7 +4,7 @@ sidebar_position: 25
 description: Use HTTP, SOCKS or custom proxy handlers with Nodemailer SMTP transports.
 ---
 
-Nodemailer can route SMTP connections **through an outbound proxy server**. This is useful when your application runs behind a corporate firewall or when you need to route traffic through a specific network path.
+Nodemailer can route [SMTP](./index.md) connections **through an outbound proxy server**. This is useful when your application runs behind a corporate firewall or when you need to route traffic through a specific network path. Proxy support works with both single connections and [pooled connections](./pooled.md).
 
 Nodemailer includes built-in support for **HTTP CONNECT** proxies. For **SOCKS4/4a/5** proxies or other protocols, you have two options:
 

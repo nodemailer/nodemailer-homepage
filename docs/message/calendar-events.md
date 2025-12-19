@@ -34,7 +34,7 @@ let message = {
 You must provide **exactly one** of `content`, `path`, or `href` to specify the calendar data source.
 
 :::note Best practice
-Calendar invitations can be sensitive to email structure. Adding extra file attachments or complex alternative message bodies often causes email clients to display the calendar incorrectly or not at all. For the best compatibility across different email clients, keep your message simple: include only **text**, **html**, and a single **icalEvent**. Avoid adding other attachments to calendar invitation emails.
+Calendar invitations can be sensitive to email structure. Adding extra file [attachments](./attachments) or complex alternative message bodies often causes email clients to display the calendar incorrectly or not at all. For the best compatibility across different email clients, keep your message simple: include only **text**, **html**, and a single **icalEvent**. Avoid adding other attachments to calendar invitation emails.
 :::
 
 ## Examples

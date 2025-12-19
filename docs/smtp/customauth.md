@@ -3,7 +3,7 @@ title: Custom authentication
 sidebar_position: 24
 ---
 
-Nodemailer's SMTP transport supports common authentication mechanisms like LOGIN, PLAIN, and XOAUTH2 out of the box. However, some SMTP servers use proprietary or less common authentication methods that Nodemailer does not recognize. For these cases, you can create custom authentication handlers.
+Nodemailer's [SMTP transport](./index.md) supports common authentication mechanisms like LOGIN, PLAIN, and [XOAUTH2](./oauth2) out of the box. However, some SMTP servers use proprietary or less common authentication methods that Nodemailer does not recognize. For these cases, you can create custom authentication handlers.
 
 ## When do I need a custom handler?
 
@@ -99,7 +99,7 @@ An array of SMTP extensions supported by the server (such as `SIZE`, `STARTTLS`,
 
 #### `ctx.authMethods`
 
-An array of authentication methods the server advertised (such as `LOGIN`, `PLAIN`, `XOAUTH2`). You can check this to verify your expected method is available before attempting authentication.
+An array of authentication methods the server advertised (such as `LOGIN`, `PLAIN`, [`XOAUTH2`](./oauth2)). You can check this to verify your expected method is available before attempting authentication.
 
 #### `ctx.maxAllowedSize`
 

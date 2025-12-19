@@ -6,8 +6,10 @@ description: Generate RFC 822 messages as streams, Buffers, or JSON objects for 
 
 Stream transport is **not** a real SMTP transport. Instead of delivering your message to a remote mail server, it _generates_ the complete RFC 822 formatted email and returns it to you. This makes it ideal for:
 
-- **Testing** - Examine the exact bytes that would be sent over the wire, create snapshot tests, or forward the output to another system for validation.
+- **[Testing](../smtp/testing)** - Examine the exact bytes that would be sent over the wire, create snapshot tests, or forward the output to another system for validation.
 - **Custom delivery pipelines** - Apply Nodemailer plugins (such as DKIM signing or list headers) to your message, then handle delivery yourself through an internal API, archive messages for audit logging, or process them in any custom way.
+
+For an overview of all available transports, see the [transports documentation](./index.md).
 
 ---
 
@@ -43,6 +45,8 @@ The `sendMail()` callback receives two arguments: `(err, info)`. On success, the
 - **`envelope`** - The SMTP envelope object with `from` (string) and `to` (array of strings) properties.
 - **`messageId`** - The generated _Message-ID_ header value for this email.
 - **`message`** - The generated email content. By default this is a Node.js `Readable` stream. If you set `buffer: true`, it will be a `Buffer`. For JSON transport, it will be a JSON string (or a plain object if `skipEncoding: true`).
+
+For details on configuring the message object passed to `sendMail()`, see the [message configuration](../message/) documentation. To parse the generated RFC 822 stream output, you can use [MailParser](../extras/mailparser).
 
 ---
 
@@ -160,4 +164,4 @@ Use the following table to help decide which transport best fits your needs:
 | Inspect or pipe raw RFC 822 SMTP content            | `streamTransport` (Stream or Buffer)    |
 | Store structured message data for later replay      | `jsonTransport`                         |
 | Apply Nodemailer plugins (DKIM, headers, etc.)      | Either (plugins run before output)      |
-| Need access to the `_raw` property                  | **Stream transport only**               |
+| Need access to the `_raw` property (see [custom source](../message/custom-source)) | **Stream transport only** |
