@@ -13,7 +13,7 @@ description: Use Ethereal.email to test email sending without delivering to real
 - **No real emails sent** -- test freely without worrying about accidentally emailing customers or colleagues
 - **Instant preview** -- view your emails in a web-based inbox immediately after sending
 - **No configuration hassle** -- Nodemailer can generate credentials automatically
-- **Free and unlimited** -- no signup required, no rate limits during development
+- **Free to use** -- no signup required, reasonable rate limits for development
 
 ## Automatic test account
 
