@@ -613,32 +613,32 @@ export default function EmailPlayground() {
 
   return (
     <div className={styles.playground}>
-      <div className={styles.toolbar}>
+      <div className={styles.tabsWrapper}>
+        <Tabs>
+          <TabItem value="editor" label={error ? "Editor ⚠️" : "Editor"} default>
+            <div className={styles.editorPane}>
+              <JsonEditor
+                value={jsonValue}
+                onChange={setJsonValue}
+                error={error}
+                errorType={errorType}
+              />
+            </div>
+          </TabItem>
+          <TabItem value="preview" label="Preview">
+            <div className={styles.previewPane}>
+              {error ? (
+                <ValidationErrorDisplay error={error} />
+              ) : (
+                <EmailPreview message={message} />
+              )}
+            </div>
+          </TabItem>
+        </Tabs>
         <button className={styles.resetButton} onClick={handleReset}>
-          Reset to Default
+          Reset
         </button>
       </div>
-      <Tabs>
-        <TabItem value="editor" label={error ? "Editor ⚠️" : "Editor"} default>
-          <div className={styles.editorPane}>
-            <JsonEditor
-              value={jsonValue}
-              onChange={setJsonValue}
-              error={error}
-              errorType={errorType}
-            />
-          </div>
-        </TabItem>
-        <TabItem value="preview" label="Preview">
-          <div className={styles.previewPane}>
-            {error ? (
-              <ValidationErrorDisplay error={error} />
-            ) : (
-              <EmailPreview message={message} />
-            )}
-          </div>
-        </TabItem>
-      </Tabs>
     </div>
   );
 }
