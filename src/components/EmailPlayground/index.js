@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { addressParser } from 'postal-mime';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import styles from './styles.module.css';
 
 const DEFAULT_MESSAGE = {
@@ -580,7 +582,6 @@ export default function EmailPlayground() {
   const [jsonValue, setJsonValue] = useState(JSON.stringify(DEFAULT_MESSAGE, null, 2));
   const [error, setError] = useState(null);
   const [errorType, setErrorType] = useState(null);
-  const [activeTab, setActiveTab] = useState('editor');
 
   const message = useMemo(() => {
     try {
@@ -613,27 +614,12 @@ export default function EmailPlayground() {
   return (
     <div className={styles.playground}>
       <div className={styles.toolbar}>
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'editor' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('editor')}
-          >
-            Editor
-            {error && <span className={styles.tabErrorDot} />}
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'preview' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('preview')}
-          >
-            Preview
-          </button>
-        </div>
         <button className={styles.resetButton} onClick={handleReset}>
-          Reset
+          Reset to Default
         </button>
       </div>
-      <div className={styles.container}>
-        {activeTab === 'editor' ? (
+      <Tabs>
+        <TabItem value="editor" label={error ? "Editor ⚠️" : "Editor"} default>
           <div className={styles.editorPane}>
             <JsonEditor
               value={jsonValue}
@@ -642,7 +628,8 @@ export default function EmailPlayground() {
               errorType={errorType}
             />
           </div>
-        ) : (
+        </TabItem>
+        <TabItem value="preview" label="Preview">
           <div className={styles.previewPane}>
             {error ? (
               <ValidationErrorDisplay error={error} />
@@ -650,8 +637,8 @@ export default function EmailPlayground() {
               <EmailPreview message={message} />
             )}
           </div>
-        )}
-      </div>
+        </TabItem>
+      </Tabs>
     </div>
   );
 }
