@@ -18,6 +18,7 @@ An attachment is an object inside the `attachments` array. You can attach **as m
 | `contentDisposition` | `string`                     | Content‑Disposition header. Defaults to `'attachment'`.                                                                                           |
 | `cid`                | `string`                     | Content‑ID for embedding the attachment inline in the HTML body (`<img src="cid:my-logo"/>`).                                                     |
 | `encoding`           | `string`                     | Encoding applied when `content` is a string (e.g. `'base64'`, `'hex'`).                                                                           |
+| `contentTransferEncoding` | `string`                | Content-Transfer-Encoding header value (e.g. `'base64'`, `'quoted-printable'`, `'7bit'`, `'8bit'`). Defaults to `'base64'` for most attachments. |
 | `headers`            | `object`                     | Custom headers for the individual MIME node.                                                                                                      |
 | `raw`                | `string`                     | **Advanced**: Full pre‑built MIME node including headers. Overrides every other field.                                                            |
 

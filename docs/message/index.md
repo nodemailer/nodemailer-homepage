@@ -63,6 +63,14 @@ var message = {
 - **disableFileAccess** if true, then does not allow to use files as content. Use it when you want to use JSON data from untrusted source as the email. If an attachment or message node tries to fetch something from a file the sending returns an error. If this field is also set in the transport options, then the value in mail data is ignored
 - **disableUrlAccess** if true, then does not allow to use URLs as content. If this field is also set in the transport options, then the value in mail data is ignored
 
+##### Advanced options
+
+- **normalizeHeaderKey** - a function to normalize header keys for custom casing. The function receives the header key and value as arguments and should return the normalized key
+- **boundaryPrefix** - custom prefix for MIME boundary strings (defaults to `'--_NmP'`)
+- **baseBoundary** - shared base string for generating unique MIME boundaries (defaults to a random hex string)
+- **newline** - control line endings in the generated message. Set to `'windows'` (or `'dos'`, `'win'`, `'\r\n'`) for CRLF line endings, or `'unix'` (or `'linux'`, `'\n'`) for LF line endings
+- **xMailer** - custom value for the X-Mailer header. Set to `false` to skip the header entirely
+
 ```javascript
 var message = {
     ...,

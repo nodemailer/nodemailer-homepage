@@ -78,7 +78,7 @@ const transporter = nodemailer.createTransport({
 
 ## Source & license
 
-Nodemailer is MIT‑licensed open source. Browse the code on [GitHub](https://github.com/nodemailer/nodemailer).
+Nodemailer is open source, licensed under the [MIT No Attribution (MIT-0)](/license) license. Browse the code on [GitHub](https://github.com/nodemailer/nodemailer).
 
 ---
 

@@ -46,11 +46,12 @@ await transporter.sendMail({
 
 ## Transport options
 
-| Option           | Type      | Default | Description                                                       |
-| ---------------- | --------- | ------- | ----------------------------------------------------------------- |
-| `pool`           | `boolean` | `false` | Enable connection pooling.                                        |
-| `maxConnections` | `number`  | `5`     | Maximum simultaneous SMTP connections.                            |
-| `maxMessages`    | `number`  | `100`   | How many messages to send _per connection_ before it is recycled. |
+| Option           | Type      | Default | Description                                                                                                                                     |
+| ---------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pool`           | `boolean` | `false` | Enable connection pooling.                                                                                                                      |
+| `maxConnections` | `number`  | `5`     | Maximum simultaneous SMTP connections.                                                                                                          |
+| `maxMessages`    | `number`  | `100`   | How many messages to send _per connection_ before it is recycled.                                                                               |
+| `maxRequeues`    | `number`  | `-1`    | Maximum times a message can be re-queued when a connection closes unexpectedly. Set to `-1` or omit to allow unlimited re-queue attempts.       |
 
 :::warning Deprecated
 The following options are **deprecated** and will be removed in a future major release:

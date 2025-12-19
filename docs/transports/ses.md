@@ -80,6 +80,8 @@ The promise (or callback) resolves to:
 | ----------- | -------------------------------------------------------------------------------------- |
 | `envelope`  | `{ from: 'address', to: ['address'] }`—the SMTP envelope Nodemailer sent               |
 | `messageId` | The value returned by SES in the **MessageId** field (overrides the Message‑ID header) |
+| `response`  | The raw SES MessageId string                                                           |
+| `raw`       | A `Buffer` containing the raw RFC 822 message that was sent to SES                     |
 
 ## Troubleshooting
 

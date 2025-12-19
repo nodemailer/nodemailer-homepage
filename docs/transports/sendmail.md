@@ -40,10 +40,11 @@ sendmail -i <args…> <to…>
 
 ### Response
 
-The `info` object that `transporter.sendMail()` yields contains only two properties—`sendmail` writes nothing to stdout/stderr:
+The `info` object that `transporter.sendMail()` yields contains the following properties—`sendmail` writes nothing to stdout/stderr:
 
 - `envelope` – `{ from: 'address', to: ['address', …] }`
 - `messageId` – value of the generated **Message‑ID** header
+- `response` – the string `'Messages queued for delivery'`
 
 ### Troubleshooting
 

@@ -147,6 +147,7 @@ sourceStream.pipe(parser);
 | `skipTextToHtml`       | `false`      | Do not generate `textAsHtml`                               |
 | `skipTextLinks`        | `false`      | Skip link‑autodetection in `text`                          |
 | `keepDeliveryStatus`   | `false`      | Treat `message/delivery-status` parts as attachments       |
+| `checksumAlgo`         | `'md5'`      | Hash algorithm for attachment checksums (e.g. `'sha256'`)  |
 | `Iconv`                | `iconv-lite` | Alternative iconv implementation                           |
 | `keepCidLinks`         | `false`      | **simpleParser‑only** – synonym for `skipImageLinks: true` |
 

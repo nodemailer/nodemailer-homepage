@@ -66,6 +66,9 @@ Your app requests consent from the user and receives a _refreshToken_. Nodemaile
   - **accessToken** – access token (optional; Nodemailer auto‑refreshes if missing or expired)
   - **expires** – UNIX expiration timestamp for _accessToken_ (optional)
   - **accessUrl** – custom token endpoint (optional; defaults to Gmail)
+  - **timeout** – TTL for the access token in seconds (optional; alternative to _expires_)
+  - **customHeaders** – custom HTTP headers for token requests (optional)
+  - **customParams** – custom parameters for token requests (optional)
 
 #### 2LO authentication (service accounts) {#oauth-2lo}
 
@@ -77,6 +80,8 @@ Use a Google service account to impersonate a user. No interactive consent is re
   - **user** – e‑mail address to send as (required)
   - **serviceClient** – service account _client_id_ (required)
   - **privateKey** – service account private key (required)
+  - **scope** – OAuth scope (optional; defaults to `'https://mail.google.com/'`)
+  - **serviceRequestTimeout** – timeout for service account requests in seconds (optional; defaults to 300, max 3600)
 
 #### Using custom token handling {#custom-handling}
 

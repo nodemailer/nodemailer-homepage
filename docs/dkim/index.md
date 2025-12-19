@@ -39,7 +39,7 @@ If both are present the **message‑level settings win**.
 | `headerFieldNames` | `string`                                         | see spec           | Explicit colon‑separated list of header fields to sign.                                                            |
 | `skipFields`       | `string`                                         | —                  | Colon‑separated list of header fields _not_ to sign (e.g. `message-id:date` when your ESP rewrites them).          |
 | `cacheDir`         | `string \| false`                                | `false`            | Folder used for temporary files when streaming large messages.                                                     |
-| `cacheTreshold`    | `number`                                         | `131 072` (128 kB) | Bytes kept in memory before switching to disk when `cacheDir` is enabled.                                          |
+| `cacheTreshold`    | `number`                                         | `2 097 152` (2 MB) | Bytes kept in memory before switching to disk when `cacheDir` is enabled.                                          |
 
 :::warning
 The option `cacheTreshold` is intentionally misspelled to preserve backwards‑compatibility with older Nodemailer versions.

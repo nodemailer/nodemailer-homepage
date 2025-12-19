@@ -41,8 +41,11 @@ responsible for using the correct authentication mechanism.
 | Aliyun             | Alibaba Cloud (Aliyun)            | smtp.aliyun.com                         | 465  |
 | AliyunQiye         | Alibaba Cloud Enterprise          | smtp.qiye.aliyun.com                    | 465  |
 | AOL                | AOL Mail                          | smtp.aol.com                            | 587  |
+| Aruba              | Aruba PEC (Italian)               | smtps.aruba.it                          | 465  |
 | Bluewin            | Swisscom Bluewin                  | smtpauths.bluewin.ch                    | 465  |
+| BOL                | BOL Mail (Brazilian)              | smtp.bol.com.br                         | 587  |
 | DebugMail          | DebugMail.io                      | debugmail.io                            | 25   |
+| Disroot            | Disroot (privacy-focused)         | disroot.org                             | 587  |
 | DynectEmail        | Oracle Dynect Email               | smtp.dynect.net                         | 25   |
 | ElasticEmail       | Elastic Email                     | smtp.elasticemail.com                   | 465  |
 | Ethereal           | Ethereal Email (test)             | smtp.ethereal.email                     | 587  |
@@ -59,12 +62,13 @@ responsible for using the correct authentication mechanism.
 | Hotmail            | Microsoft Outlook / Hotmail       | smtp-mail.outlook.com                   | 587  |
 | iCloud             | Apple iCloud Mail                 | smtp.mail.me.com                        | 587  |
 | Infomaniak         | Infomaniak Mail                   | mail.infomaniak.com                     | 587  |
+| KolabNow           | KolabNow (secure email)           | smtp.kolabnow.com                       | 465  |
 | Loopia             | Loopia                            | mailcluster.loopia.se                   | 465  |
 | Loops              | Loops                             | smtp.loops.so                           | 587  |
 | mail.ee            | Mail.ee                           | smtp.mail.ee                            | 25   |
 | Mail.ru            | Mail.ru                           | smtp.mail.ru                            | 465  |
 | Mailcatch.app      | Mailcatch.app (sandbox)           | sandbox-smtp.mailcatch.app              | 2525 |
-| Maildev            | Maildev (local)                   | 127.0.0.1                               | 1025 |
+| Maildev            | Maildev (local)                   | localhost                               | 1025 |
 | MailerSend         | MailerSend                        | smtp.mailersend.net                     | 587  |
 | Mailgun            | Mailgun                           | smtp.mailgun.org                        | 465  |
 | Mailjet            | Mailjet                           | in.mailjet.com                          | 587  |
@@ -82,6 +86,7 @@ responsible for using the correct authentication mechanism.
 | QQ                 | QQ Mail                           | smtp.qq.com                             | 465  |
 | QQex               | QQ Enterprise Mail                | smtp.exmail.qq.com                      | 465  |
 | Resend             | Resend                            | smtp.resend.com                         | 465  |
+| Runbox             | Runbox (Norwegian)                | smtp.runbox.com                         | 465  |
 | SendCloud          | SendCloud                         | smtp.sendcloud.net                      | 2525 |
 | SendGrid           | SendGrid                          | smtp.sendgrid.net                       | 587  |
 | SendinBlue         | Brevo (formerly Sendinblue)       | smtp-relay.brevo.com                    | 587  |
@@ -113,5 +118,6 @@ responsible for using the correct authentication mechanism.
 | Tutanota           | Tutanota                          | smtp.tutanota.com                       | 465  |
 | Yahoo              | Yahoo Mail                        | smtp.mail.yahoo.com                     | 465  |
 | Yandex             | Yandex Mail                       | smtp.yandex.ru                          | 465  |
+| Zimbra             | Zimbra Mail Server                | smtp.zimbra.com                         | 587  |
 | Zoho               | Zoho Mail                         | smtp.zoho.com                           | 465  |
 

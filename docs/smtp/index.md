@@ -3,7 +3,7 @@ title: SMTP transport
 sidebar_position: 4
 ---
 
-SMTP is the main transport in Nodemailer for delivering messages. SMTP is also the protocol used between different email hosts, so it's truly universal. Almost every email delivery provider supports SMTP-based sending, even when they advertise API‑based sending as the primary option. APIs can offer more features, but they also introduce vendor lock‑in. With SMTP you can usually swap providers by changing only the configuration object or connection URL.
+SMTP is the main transport in Nodemailer for delivering messages. SMTP is also the protocol used between different email hosts, so it's truly universal. Almost every email delivery provider supports SMTP-based sending, even when they advertise API-based sending as the primary option. APIs can offer more features, but they also introduce vendor lock-in. With SMTP you can usually swap providers by changing only the configuration object or connection URL.
 
 ## Creating a transport
 
@@ -13,8 +13,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport(options[, defaults]);
 ```
 
-- **`options`** – object that defines the connection (detailed below).
-- **`defaults`** – object merged into every message object (for example, you can set a common **from** address).
+- **`options`** -- object that defines the connection (detailed below).
+- **`defaults`** -- object merged into every message object (for example, you can set a common **from** address).
 
 You can also pass a connection URL instead of an options object. Use the **smtp:** or **smtps:** protocol in the URL.
 
@@ -25,14 +25,14 @@ const transporter = nodemailer.createTransport(poolConfig);
 
 ### General options
 
-| Name         | Type      | Default                         | Description                                                                                                                                                                             |
-| ------------ | --------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `host`       | `string`  | `"localhost"`                   | Hostname or IP address of the SMTP server.                                                                                                                                              |
-| `port`       | `number`  | `587` (`465` if `secure: true`) | Port to connect to.                                                                                                                                                                     |
-| `secure`     | `boolean` | `false`                         | If `true`, the connection will use TLS immediately (recommended for port 465).                                                                                                          |
-| `service`    | `string`  | –                               | Connection preset for a well‑known email service, for example `"gmail"`. Overrides `host`, `port`, and `secure` if set. See the [well‑known services list](/smtp/well-known-services/). |
-| `auth`       | `object`  | –                               | Authentication data (see [Authentication](#authentication)).                                                                                                                            |
-| `authMethod` | `string`  | `"PLAIN"`                       | Preferred authentication method.                                                                                                                                                        |
+| Name         | Type      | Default                         | Description                                                                                                                                                                         |
+| ------------ | --------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`       | `string`  | `"localhost"`                   | Hostname or IP address of the SMTP server.                                                                                                                                          |
+| `port`       | `number`  | `587` (`465` if `secure: true`) | Port to connect to.                                                                                                                                                                 |
+| `secure`     | `boolean` | `false`                         | If `true`, the connection will use TLS immediately (recommended for port 465).                                                                                                      |
+| `service`    | `string`  | --                              | Connection preset for a well-known email service, for example `"gmail"`. Overrides `host`, `port`, and `secure` if set. See the [well-known services list](/smtp/well-known-services/). |
+| `auth`       | `object`  | --                              | Authentication data (see [Authentication](#authentication)).                                                                                                                        |
+| `authMethod` | `string`  | `"PLAIN"`                       | Preferred authentication method.                                                                                                                                                    |
 
 :::info
 Nodemailer resolves the `host` value with `dns.resolve()`. If you point `host` to an IP address that is _not_ resolvable (for example, it is defined in **/etc/hosts**), also set `tls.servername` to the real hostname. TLS validation continues to work even though a DNS lookup is skipped.
@@ -43,13 +43,13 @@ Nodemailer resolves the `host` value with `dns.resolve()`. If you point `host` t
 | Name             | Type      | Default | Description                                                                                                                    |
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `secure`         | `boolean` | `false` | See **General options**.                                                                                                       |
-| `tls`            | `object`  | –       | [Node.js `TLSSocket`](https://nodejs.org/api/tls.html#class-tlstlssocket) options, for example `{ rejectUnauthorized: true }`. |
-| `tls.servername` | `string`  | –       | Optional hostname for TLS validation when `host` is an IP.                                                                     |
+| `tls`            | `object`  | --      | [Node.js `TLSSocket`](https://nodejs.org/api/tls.html#class-tlstlssocket) options, for example `{ rejectUnauthorized: true }`. |
+| `tls.servername` | `string`  | --      | Optional hostname for TLS validation when `host` is an IP.                                                                     |
 | `ignoreTLS`      | `boolean` | `false` | Disable STARTTLS even if the server supports it.                                                                               |
 | `requireTLS`     | `boolean` | `false` | Force STARTTLS. If the server does not support it the message is **not** sent.                                                 |
 
 :::info
-Setting **`secure: false`** does **not** necessarily mean you are sending in plaintext—most servers automatically upgrade to TLS via the [STARTTLS](https://datatracker.ietf.org/doc/html/rfc3207) command. Nodemailer follows the server’s lead unless `ignoreTLS` is set.
+Setting **`secure: false`** does **not** necessarily mean you are sending in plaintext -- most servers automatically upgrade to TLS via the [STARTTLS](https://datatracker.ietf.org/doc/html/rfc3207) command. Nodemailer follows the server's lead unless `ignoreTLS` is set.
 :::
 
 ### Connection options
@@ -57,17 +57,20 @@ Setting **`secure: false`** does **not** necessarily mean you are sending in pla
 | Name                | Default        | Description                                      |
 | ------------------- | -------------- | ------------------------------------------------ |
 | `name`              | local hostname | Hostname to use in the `HELO`/`EHLO` greeting.   |
-| `localAddress`      | –              | Local interface to bind for network connections. |
-| `connectionTimeout` | 120 000 ms     | How long to wait for the initial TCP connect.    |
-| `greetingTimeout`   | 30 000 ms      | How long to wait for the server greeting.        |
-| `socketTimeout`     | 600 000 ms     | Idle timeout after the greeting.                 |
-| `dnsTimeout`        | 30 000 ms      | Maximum time allowed for DNS lookups.            |
+| `localAddress`      | --             | Local interface to bind for network connections. |
+| `connectionTimeout` | 120000 ms      | How long to wait for the initial TCP connect.    |
+| `greetingTimeout`   | 30000 ms       | How long to wait for the server greeting.        |
+| `socketTimeout`     | 600000 ms      | Idle timeout after the greeting.                 |
+| `dnsTimeout`        | 30000 ms       | Maximum time allowed for DNS lookups.            |
+| `lmtp`              | `false`        | If `true`, use LMTP protocol instead of SMTP.    |
+| `opportunisticTLS`  | `false`        | Continue unencrypted if STARTTLS upgrade fails.  |
+| `forceAuth`         | `false`        | Attempt authentication even if not advertised.   |
 
 ### Debug options
 
 | Name     | Type                 | Description                                                                                                                                  |
 | -------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `logger` | `object` / `boolean` | A [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance, `true` for console logging, or `false` / unset for no logging. |
+| `logger` | `object` / `boolean` | A [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance, `true` for console logging, or `false` / unset for no logging. |
 | `debug`  | `boolean`            | Log SMTP traffic when `true`, otherwise only transaction events.                                                                             |
 
 **Custom logger**
@@ -138,7 +141,7 @@ const transporter = nodemailer.createTransport({
 
 ### 2. Pooled connections
 
-Keep a pool of connections open against an SMTP server on port 465:
+Keep a pool of connections open against an SMTP server on port 465:
 
 ```javascript
 const transporter = nodemailer.createTransport({
@@ -153,9 +156,9 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-### 3. Allow self‑signed certificates
+### 3. Allow self-signed certificates
 
-Connect to a TLS server that uses a self‑signed or otherwise invalid certificate:
+Connect to a TLS server that uses a self-signed or otherwise invalid certificate:
 
 ```javascript
 const transporter = nodemailer.createTransport({
@@ -194,7 +197,7 @@ auth: {
 }
 ```
 
-### OAuth 2.0
+### OAuth 2.0
 
 ```javascript
 auth: {
@@ -205,7 +208,7 @@ auth: {
 }
 ```
 
-See the dedicated [OAuth 2.0 guide](/smtp/oauth2/) for details, or implement a [custom authentication handler](/smtp/customauth/) if your protocol is not natively supported (see the [NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth) for an example).
+See the dedicated [OAuth 2.0 guide](/smtp/oauth2/) for details, or implement a [custom authentication handler](/smtp/customauth/) if your protocol is not natively supported (see the [NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth) for an example).
 
 ## Verifying the configuration
 
@@ -230,4 +233,4 @@ transporter.verify((error, success) => {
 });
 ```
 
-`verify()` checks DNS resolution, the TCP handshake, and authentication. It does **not** validate whether the service allows a specific envelope **From** address—that depends on the server configuration.
+`verify()` checks DNS resolution, the TCP handshake, and authentication. It does **not** validate whether the service allows a specific envelope **From** address -- that depends on the server configuration.
