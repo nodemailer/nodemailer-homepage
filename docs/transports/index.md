@@ -56,10 +56,10 @@ These transports are included with Nodemailer and require no additional packages
 
 | Transport    | Purpose                                                                              | Reference                     |
 | ------------ | ------------------------------------------------------------------------------------ | ----------------------------- |
-| **SMTP**     | The default transport. Connects to an SMTP server to deliver messages.               | [Docs](../smtp/)                |
-| **sendmail** | Pipes the generated message to a local `sendmail`-compatible binary on your server.  | [Docs](./sendmail/) |
-| **SES**      | Sends mail through the Amazon SES API using the AWS SDK v3.                          | [Docs](./ses/)      |
-| **stream**   | Returns the generated RFC 5322 message as a stream instead of sending it. Useful for testing or custom processing. | [Docs](./stream/)   |
+| **SMTP**     | The default transport. Connects to an SMTP server to deliver messages.               | [Docs](/smtp/)                |
+| **sendmail** | Pipes the generated message to a local `sendmail`-compatible binary on your server.  | [Docs](/transports/sendmail) |
+| **SES**      | Sends mail through the Amazon SES API using the AWS SDK v3.                          | [Docs](/transports/ses)      |
+| **stream**   | Returns the generated RFC 5322 message as a stream instead of sending it. Useful for testing or custom processing. | [Docs](/transports/stream)   |
 
 ### Community transports
 

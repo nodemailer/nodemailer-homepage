@@ -10,7 +10,7 @@ The SMTP **Delivery Status Notification** (DSN) extension (defined in [RFC 3461]
 
 Delivery Status Notifications allow you to receive automatic email reports about what happens to your messages after they leave your server. You can request notifications when a message is successfully delivered, when delivery is delayed, or when delivery fails permanently (bounces).
 
-To request DSN for a message, add a **`dsn`** object to your [message configuration](/docs/message/) when calling `transporter.sendMail()`.
+To request DSN for a message, add a **`dsn`** object to your [message configuration](/message/) when calling `transporter.sendMail()`.
 
 ## `dsn` object fields
 

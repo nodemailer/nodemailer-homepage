@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport(options[, defaults]);
 ```
 
 - **`options`** -- an object that defines the SMTP connection settings (detailed in the sections below).
-- **`defaults`** -- an optional object whose properties are merged into every [message](/docs/message/) you send. This is useful for setting a common **from** address or other repeated values.
+- **`defaults`** -- an optional object whose properties are merged into every [message](/message/) you send. This is useful for setting a common **from** address or other repeated values.
 
 Instead of an options object, you can also pass a connection URL. Use the **smtp:** protocol for standard connections or **smtps:** for connections that use TLS from the start (typically port 465).
 
@@ -33,7 +33,7 @@ const transporter = nodemailer.createTransport(poolConfig);
 | `host`       | `string`  | `"localhost"`                   | The hostname or IP address of the SMTP server to connect to.                                                                                                                        |
 | `port`       | `number`  | `587` (`465` if `secure: true`) | The port number to connect to.                                                                                                                                                      |
 | `secure`     | `boolean` | `false`                         | If `true`, the connection uses TLS immediately upon connecting. Set this to `true` when connecting to port 465. For port 587 or 25, leave this as `false` and let STARTTLS upgrade the connection. |
-| `service`    | `string`  | --                              | A shortcut to configure well-known email services like `"gmail"` or `"outlook"`. When set, this overrides `host`, `port`, and `secure` with predefined values. See the [well-known services list](./well-known-services). |
+| `service`    | `string`  | --                              | A shortcut to configure well-known email services like `"gmail"` or `"outlook"`. When set, this overrides `host`, `port`, and `secure` with predefined values. See the [well-known services list](/smtp/well-known-services). |
 | `auth`       | `object`  | --                              | Authentication credentials (see [Authentication](#authentication) below).                                                                                                           |
 | `authMethod` | `string`  | `"PLAIN"`                       | The preferred SASL authentication method. Common values include `"PLAIN"`, `"LOGIN"`, and `"CRAM-MD5"`.                                                                             |
 
@@ -116,7 +116,7 @@ These options restrict how Nodemailer handles attachments and content sources:
 
 ### Pooling options
 
-Connection pooling keeps multiple SMTP connections open to send messages faster. See [Pooled SMTP](./pooled) for the complete list of pooling options. The most important option is:
+Connection pooling keeps multiple SMTP connections open to send messages faster. See [Pooled SMTP](/smtp/pooled) for the complete list of pooling options. The most important option is:
 
 | Name   | Type      | Description                                                                                      |
 | ------ | --------- | ------------------------------------------------------------------------------------------------ |
@@ -124,7 +124,7 @@ Connection pooling keeps multiple SMTP connections open to send messages faster.
 
 ### Proxy options
 
-You can route SMTP connections through HTTP or SOCKS proxies. Read more in [Using proxies](./proxies).
+You can route SMTP connections through HTTP or SOCKS proxies. Read more in [Using proxies](/smtp/proxies).
 
 ## Examples {#examples}
 
@@ -219,7 +219,7 @@ auth: {
 }
 ```
 
-See the dedicated [OAuth 2.0 guide](./oauth2) for complete setup instructions, including how to automatically refresh tokens. If you need to use an authentication protocol that Nodemailer does not support natively, you can implement a [custom authentication handler](./customauth) (see the [NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth) for an example).
+See the dedicated [OAuth 2.0 guide](/smtp/oauth2) for complete setup instructions, including how to automatically refresh tokens. If you need to use an authentication protocol that Nodemailer does not support natively, you can implement a [custom authentication handler](/smtp/customauth) (see the [NTLM handler](https://github.com/nodemailer/nodemailer-ntlm-auth) for an example).
 
 ## Verifying the configuration
 

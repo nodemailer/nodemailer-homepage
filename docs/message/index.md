@@ -10,14 +10,14 @@ This page describes all available fields you can use when composing an email mes
 
 These are the fields you will use most often when sending emails:
 
-- **from** - The email address of the sender. You can use a plain address like `'sender@server.com'` or include a display name like `'"Sender Name" <sender@server.com>'`. See [Address object](./addresses) for more formatting options.
+- **from** - The email address of the sender. You can use a plain address like `'sender@server.com'` or include a display name like `'"Sender Name" <sender@server.com>'`. See [Address object](/message/addresses) for more formatting options.
 - **to** - The recipients who will appear in the _To:_ field. Accepts a comma-separated string or an array of addresses.
 - **cc** - The recipients who will appear in the _Cc:_ (carbon copy) field. Accepts a comma-separated string or an array of addresses.
 - **bcc** - The recipients who will appear in the _Bcc:_ (blind carbon copy) field. These recipients receive the email but are hidden from other recipients. Accepts a comma-separated string or an array of addresses.
 - **subject** - The subject line of the email.
 - **text** - The plaintext version of the message body. Can be a string, Buffer, Stream, or an attachment-like object (for example, `{path: '/var/data/message.txt'}`).
 - **html** - The HTML version of the message body. Can be a string, Buffer, Stream, or an attachment-like object (for example, `{path: 'http://example.com/email.html'}`).
-- **attachments** - An array of attachment objects. See [Using attachments](./attachments) for details. You can also use attachments for [embedding images](./embedded-images) in your HTML content.
+- **attachments** - An array of attachment objects. See [Using attachments](/message/attachments) for details. You can also use attachments for [embedding images](/message/embedded-images) in your HTML content.
 
 The following example shows a typical email using only the basic fields:
 
@@ -43,7 +43,7 @@ These options control how the email is addressed and how replies are handled:
 - **replyTo** - An email address that will appear in the _Reply-To:_ field. When recipients reply to your email, their response will be sent to this address instead of the _From:_ address.
 - **inReplyTo** - The Message-ID of the email this message is replying to. This helps email clients thread conversations together.
 - **references** - A list of Message-IDs that this email references. Can be an array of strings or a space-separated string. Used for threading related messages together.
-- **envelope** - A custom SMTP envelope, if the automatically generated envelope is not suitable for your needs. See [SMTP envelope](/docs/smtp/envelope) for details.
+- **envelope** - A custom SMTP envelope, if the automatically generated envelope is not suitable for your needs. See [SMTP envelope](/smtp/envelope) for details.
 
 ##### Content options
 
@@ -52,10 +52,10 @@ These options provide additional ways to control the message content:
 - **attachDataUrls** - When set to `true`, Nodemailer automatically converts `data:` URI images in your HTML content into embedded attachments. This is useful when your HTML contains inline images encoded as data URIs.
 - **watchHtml** - An Apple Watch-specific HTML version of the message. Note that modern Apple Watches render standard `text/html` content well, so this field is rarely needed.
 - **amp** - An AMP4EMAIL-specific HTML version of the message. Works the same way as `text` and `html`. See the [AMP example below](#amp-example) for usage, or read [this blog post](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for more details about sending and rendering AMP emails.
-- **icalEvent** - An iCalendar event to include as an alternative content type. This is useful for sending calendar invitations. See [Calendar events](./calendar-events) for details.
-- **alternatives** - An array of alternative content representations (in addition to the text and HTML parts). See [Using alternative content](./alternatives) for details.
+- **icalEvent** - An iCalendar event to include as an alternative content type. This is useful for sending calendar invitations. See [Calendar events](/message/calendar-events) for details.
+- **alternatives** - An array of alternative content representations (in addition to the text and HTML parts). See [Using alternative content](/message/alternatives) for details.
 - **encoding** - Specifies the encoding used for text and HTML strings. Defaults to `'utf-8'`. Other valid values are `'hex'` and `'base64'`.
-- **raw** - An existing MIME message to send instead of generating a new one. Use this when you have a pre-built email message. See [Custom source](./custom-source) for details.
+- **raw** - An existing MIME message to send instead of generating a new one. Use this when you have a pre-built email message. See [Custom source](/message/custom-source) for details.
 - **textEncoding** - Forces a specific content-transfer-encoding for text content. Valid values are `'quoted-printable'` or `'base64'`. By default, Nodemailer automatically chooses the best option: `quoted-printable` for content with mostly ASCII characters, and `base64` otherwise.
 
 ##### Header options
@@ -63,10 +63,10 @@ These options provide additional ways to control the message content:
 These options let you customize the email headers:
 
 - **priority** - Sets the message importance level. Valid values are `'high'`, `'normal'` (the default), or `'low'`. This adds the appropriate `X-Priority`, `X-MSMail-Priority`, and `Importance` headers to your message.
-- **headers** - Custom header fields to add to the message. Can be an object like `{"X-Key-Name": "key value"}` or an array for multiple values with the same key: `[{key: "X-Key-Name", value: "val1"}, {key: "X-Key-Name", value: "val2"}]`. See [Custom headers](./custom-headers) for more details.
+- **headers** - Custom header fields to add to the message. Can be an object like `{"X-Key-Name": "key value"}` or an array for multiple values with the same key: `[{key: "X-Key-Name", value: "val1"}, {key: "X-Key-Name", value: "val2"}]`. See [Custom headers](/message/custom-headers) for more details.
 - **messageId** - A custom Message-ID value for the email. If not provided, Nodemailer generates a random unique identifier automatically.
 - **date** - The date to use for the email's Date header. If not provided, the current date and time (in UTC) is used. You can pass a Date object or a date string.
-- **list** - A helper object for setting List-\* headers, commonly used for mailing list messages. See [List headers](./list-headers) for more details.
+- **list** - A helper object for setting List-\* headers, commonly used for mailing list messages. See [List headers](/message/list-headers) for more details.
 
 ##### Security options
 

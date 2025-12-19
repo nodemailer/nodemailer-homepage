@@ -10,10 +10,10 @@ In addition to Nodemailer itself, several companion libraries extend what you ca
 
 These packages are maintained by the Nodemailer team and designed to work seamlessly with Nodemailer.
 
-1. [smtp-server](./smtp-server) - Build your own SMTP server to accept incoming email connections. Useful for creating custom mail servers, testing email workflows, or building email-receiving applications.
-2. [smtp-connection](./smtp-connection) - A low-level SMTP client for establishing connections to mail servers. This is the underlying component that powers Nodemailer's [SMTP transport](/smtp/), exposed separately for advanced use cases where you need direct control over the SMTP protocol.
-3. [mailparser](./mailparser) - Parse raw email messages (RFC 822 format) into structured JavaScript objects. The streaming parser efficiently handles large emails and extracts headers, body content, and attachments into an easy-to-use format.
-4. [mailcomposer](./mailcomposer) - Generate RFC 822-compliant email messages from JavaScript objects. This is useful when you need to create a properly formatted [MIME message](/message/) without sending it immediately, such as for storing drafts or passing to another system.
+1. [smtp-server](/extras/smtp-server) - Build your own SMTP server to accept incoming email connections. Useful for creating custom mail servers, testing email workflows, or building email-receiving applications.
+2. [smtp-connection](/extras/smtp-connection) - A low-level SMTP client for establishing connections to mail servers. This is the underlying component that powers Nodemailer's [SMTP transport](/smtp/), exposed separately for advanced use cases where you need direct control over the SMTP protocol.
+3. [mailparser](/extras/mailparser) - Parse raw email messages (RFC 822 format) into structured JavaScript objects. The streaming parser efficiently handles large emails and extracts headers, body content, and attachments into an easy-to-use format.
+4. [mailcomposer](/extras/mailcomposer) - Generate RFC 822-compliant email messages from JavaScript objects. This is useful when you need to create a properly formatted [MIME message](/message/) without sending it immediately, such as for storing drafts or passing to another system.
 
 ## Related projects
 

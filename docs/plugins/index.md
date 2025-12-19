@@ -72,4 +72,4 @@ Looking for something else? Try [searching npm for "nodemailer plugin"](https://
 
 ---
 
-Need more control? See **[Creating plugins](./create)** for a detailed guide on the plugin API.
+Need more control? See **[Creating plugins](/plugins/create)** for a detailed guide on the plugin API.

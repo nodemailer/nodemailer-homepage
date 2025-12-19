@@ -64,7 +64,7 @@ mail.compile().build((err, message) => {
 
 ## Message fields
 
-MailComposer accepts the same message options as Nodemailer's [message configuration](/docs/message/). The table below summarizes the most commonly used fields.
+MailComposer accepts the same message options as Nodemailer's [message configuration](/message/). The table below summarizes the most commonly used fields.
 
 | Field                 | Description                                                                                                                                                                                                                    |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -83,13 +83,13 @@ MailComposer accepts the same message options as Nodemailer's [message configura
 | **amp**               | AMP4EMAIL content for interactive emails. Must be a complete, valid AMP document. Email clients that cannot render AMP will display the **html** version instead. [Learn more about AMP emails](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/). |
 | **icalEvent**         | An iCalendar event to include with the message. Accepts the same input formats as **text**/**html**. To specify the calendar method, use an object: `{ method: 'REQUEST', content: icsString }`. The default method is `PUBLISH`. Content must be UTF-8 encoded. |
 | **headers**           | Additional email headers. Accepts an object (`{ 'X-Custom-Header': 'value' }`) or an array (`[{ key: 'X-Custom-Header', value: 'value' }]`).                                                                                   |
-| **attachments**       | An array of files to attach to the message. See [Attachments](#attachments) below, or the main [attachments documentation](/docs/message/attachments) for additional examples.                                                 |
+| **attachments**       | An array of files to attach to the message. See [Attachments](#attachments) below, or the main [attachments documentation](/message/attachments) for additional examples.                                                 |
 | **alternatives**      | An array of alternative content versions to include in a `multipart/alternative` section. See [Alternatives](#alternatives) for details.                                                                                       |
 | **envelope**          | A custom SMTP envelope that overrides the addresses derived from headers. See [SMTP envelope](#smtp-envelope).                                                                                                                 |
 | **messageId**         | A custom `Message-ID` value. If omitted, one is generated automatically.                                                                                                                                                       |
 | **date**              | A custom date for the `Date` header. Defaults to the current UTC time.                                                                                                                                                         |
 | **encoding**          | The transfer encoding to use for text parts (such as `quoted-printable` or `base64`).                                                                                                                                          |
-| **raw**               | Provide a pre-built raw message instead of having MailComposer generate one. When using this option, you must set headers and envelope manually. See [custom source](/docs/message/custom-source) for more details.            |
+| **raw**               | Provide a pre-built raw message instead of having MailComposer generate one. When using this option, you must set headers and envelope manually. See [custom source](/message/custom-source) for more details.            |
 | **textEncoding**      | Force a specific encoding for text parts: `quoted-printable` or `base64`. If omitted, the encoding is detected automatically based on the content.                                                                             |
 | **disableUrlAccess**  | When set to `true`, MailComposer will throw an error if any part of the message tries to fetch content from a URL.                                                                                                             |
 | **disableFileAccess** | When set to `true`, MailComposer will throw an error if any part of the message tries to read content from the file system.                                                                                                    |
