@@ -338,8 +338,10 @@ function parseAttachments(attachments) {
     };
 
     // If has cid, add to cid map for replacement
+    // Normalize cid by stripping <> like Nodemailer does
     if (att.cid) {
-      cidMap[att.cid] = dataUri;
+      const normalizedCid = att.cid.replace(/[<>]/g, '');
+      cidMap[normalizedCid] = dataUri;
     }
 
     // Categorize attachment
@@ -362,8 +364,10 @@ function replaceCidReferences(html, cidMap) {
   if (!html || Object.keys(cidMap).length === 0) return html;
 
   // Replace cid:xxx references with data URIs
+  // Normalize cid by stripping <> to match Nodemailer behavior
   return html.replace(/(['"])cid:([^'"]+)\1/gi, (match, quote, cid) => {
-    const dataUri = cidMap[cid];
+    const normalizedCid = cid.replace(/[<>]/g, '');
+    const dataUri = cidMap[normalizedCid];
     if (dataUri) {
       return `${quote}${dataUri}${quote}`;
     }
