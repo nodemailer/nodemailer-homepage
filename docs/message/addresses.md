@@ -89,14 +89,20 @@ const message = {
 
 ---
 
-## Internationalized domain names
+## Internationalized email addresses
 
 Nodemailer supports internationalized domain names (IDNs) that contain non-ASCII characters. When you provide a Unicode domain, Nodemailer automatically converts it to the ASCII-compatible [Punycode](https://en.wikipedia.org/wiki/Punycode) encoding required by the email protocol:
 
 ```javascript
-'"Unicode Domain" <info@müriaad-polüteism.info>'
-// Nodemailer converts this to: info@xn--mriaad-polteism-zvbj.info
+"андрис@уайлддак.орг"
+// Nodemailer converts the domain to punycode: андрис@xn--80aalaxjd5d.xn--c1avg
 ```
+
+### Unicode usernames (EAI/SMTPUTF8)
+
+Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and sends the `SMTPUTF8` parameter with the `MAIL FROM` command.
+
+If the server does not advertise SMTPUTF8 support, Nodemailer will reject the message with an `EENVELOPE` error to prevent delivery failures.
 
 ---
 

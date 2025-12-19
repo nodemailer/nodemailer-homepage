@@ -209,8 +209,11 @@ All address fields (including **from**) accept one or more addresses. You can mi
 Internationalized domain names (IDN) are automatically converted to their ASCII-compatible encoding (punycode):
 
 ```
-"Unicode Domain" <info@müriaad-polüteism.info>
+"Андрис" <андрис@уайлддак.орг>
+// Domain converts to punycode: андрис@xn--80aalaxjd5d.xn--c1avg
 ```
+
+Note that email addresses with non-ASCII usernames (the part before `@`) require the receiving server to support the SMTPUTF8 extension.
 
 ---
 
