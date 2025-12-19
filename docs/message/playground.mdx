@@ -1,0 +1,69 @@
+---
+title: Message Playground
+sidebar_position: 10
+description: Interactive playground to preview how your Nodemailer message configuration renders as an email.
+---
+
+import EmailPlayground from '@site/src/components/EmailPlayground';
+
+# Message Playground
+
+Use this interactive playground to experiment with Nodemailer message configuration and see a live preview of how your email will appear to recipients.
+
+Edit the JSON configuration on the left to see the email preview update in real-time on the right. The playground supports all common message fields including `from`, `to`, `cc`, `bcc`, `subject`, `text`, and `html`.
+
+<EmailPlayground />
+
+## Supported fields
+
+The playground supports the following message configuration fields:
+
+| Field | Description |
+|-------|-------------|
+| `from` | Sender address (string or object with `name` and `address`) |
+| `to` | Recipient address(es) - string, array, or object |
+| `cc` | Carbon copy recipient(s) |
+| `bcc` | Blind carbon copy recipient(s) |
+| `replyTo` | Reply-to address(es) |
+| `subject` | Email subject line |
+| `text` | Plain text message body |
+| `html` | HTML message body (takes precedence over `text`) |
+| `attachments` | Array of attachment objects (see limitations below) |
+
+:::tip
+If you only provide a `text` field without `html`, the playground will automatically convert the plain text to a simple HTML representation for preview purposes.
+:::
+
+:::warning Attachment limitations
+The playground only supports attachments with base64-encoded content. Other content sources (file paths, URLs, streams, buffers) are not available in the browser environment. Each attachment must include:
+- `content` - Base64-encoded string
+- `encoding` - Must be set to `"base64"`
+- `filename` - Name of the file
+- `contentType` - MIME type (optional, detected from filename if omitted)
+- `cid` - Content-ID for embedding images in HTML (optional)
+
+Attachments with a `cid` value can be referenced in HTML using `<img src="cid:your-cid-value">`.
+:::
+
+## Address formats
+
+You can specify email addresses in several formats:
+
+```json
+// Plain email address
+"to": "recipient@example.com"
+
+// With display name
+"to": "\"Recipient Name\" <recipient@example.com>"
+
+// Object format
+"to": { "name": "Recipient Name", "address": "recipient@example.com" }
+
+// Multiple recipients (array)
+"to": ["user1@example.com", "user2@example.com"]
+
+// Multiple recipients (comma-separated)
+"to": "user1@example.com, user2@example.com"
+```
+
+For more details on message configuration, see the [message configuration reference](./index.md).
