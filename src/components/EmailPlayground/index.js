@@ -580,6 +580,7 @@ export default function EmailPlayground() {
   const [jsonValue, setJsonValue] = useState(JSON.stringify(DEFAULT_MESSAGE, null, 2));
   const [error, setError] = useState(null);
   const [errorType, setErrorType] = useState(null);
+  const [activeTab, setActiveTab] = useState('editor');
 
   const message = useMemo(() => {
     try {
@@ -612,29 +613,44 @@ export default function EmailPlayground() {
   return (
     <div className={styles.playground}>
       <div className={styles.toolbar}>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'editor' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('editor')}
+          >
+            Editor
+            {error && <span className={styles.tabErrorDot} />}
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'preview' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('preview')}
+          >
+            Preview
+          </button>
+        </div>
         <button className={styles.resetButton} onClick={handleReset}>
-          Reset to Default
+          Reset
         </button>
       </div>
       <div className={styles.container}>
-        <div className={styles.editorPane}>
-          <JsonEditor
-            value={jsonValue}
-            onChange={setJsonValue}
-            error={error}
-            errorType={errorType}
-          />
-        </div>
-        <div className={styles.previewPane}>
-          <div className={styles.previewHeader}>
-            <span className={styles.previewTitle}>Email Preview</span>
+        {activeTab === 'editor' ? (
+          <div className={styles.editorPane}>
+            <JsonEditor
+              value={jsonValue}
+              onChange={setJsonValue}
+              error={error}
+              errorType={errorType}
+            />
           </div>
-          {error ? (
-            <ValidationErrorDisplay error={error} />
-          ) : (
-            <EmailPreview message={message} />
-          )}
-        </div>
+        ) : (
+          <div className={styles.previewPane}>
+            {error ? (
+              <ValidationErrorDisplay error={error} />
+            ) : (
+              <EmailPreview message={message} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
