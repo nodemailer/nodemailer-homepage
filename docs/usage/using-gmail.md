@@ -1,6 +1,7 @@
 ---
 title: Using Gmail
 sidebar_position: 8
+description: Send email through Gmail using OAuth2 or App Passwords with important caveats.
 ---
 
 > **TL;DR** For new projects, use **OAuth 2.0** (or an App Password if you already have Google 2-Step Verification enabled). Google permanently disabled "Less Secure App" access on **May 30, 2022**.

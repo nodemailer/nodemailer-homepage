@@ -1,6 +1,7 @@
 ---
 title: Message configuration
 sidebar_position: 3
+description: Configure email message fields including from, to, subject, text, html, and attachments.
 ---
 
 This page describes all available fields you can use when composing an email message with Nodemailer. Most emails only need a few basic fields, but advanced options are available when you need more control.

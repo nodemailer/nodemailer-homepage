@@ -1,6 +1,7 @@
 ---
 title: Custom headers
 sidebar_position: 17
+description: Add or override message headers at message level or for individual attachments.
 ---
 
 Nodemailer automatically generates all required email headers, so you typically do not need to set them manually. However, when you need to add custom headers or override default values, you can use the **`headers`** property. This works both at the message level and for individual [attachments](./attachments) or alternatives.

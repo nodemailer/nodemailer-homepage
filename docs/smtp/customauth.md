@@ -1,6 +1,7 @@
 ---
 title: Custom authentication
-sidebar_position: 24
+sidebar_position: 25
+description: Extend SMTP transport with custom authentication mechanisms like NTLM or CRAM-MD5.
 ---
 
 Nodemailer's [SMTP transport](./index.md) supports common authentication mechanisms like LOGIN, PLAIN, and [XOAUTH2](./oauth2) out of the box. However, some SMTP servers use proprietary or less common authentication methods that Nodemailer does not recognize. For these cases, you can create custom authentication handlers.

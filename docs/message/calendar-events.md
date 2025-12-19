@@ -1,6 +1,7 @@
 ---
 title: Calendar events
 sidebar_position: 14
+description: Embed iCalendar files in emails for calendar integration with Accept/Decline controls.
 ---
 
 Nodemailer can embed an iCalendar (`.ics`) file directly in an email. When recipients open the message in calendar-aware email clients such as Gmail, Outlook, or Apple Mail, they will see interactive controls like **Add to calendar** or **Accept / Decline** buttons.

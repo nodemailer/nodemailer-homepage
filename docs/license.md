@@ -1,5 +1,6 @@
 ---
 title: License
+description: MIT No Attribution license information and donation options for Nodemailer.
 ---
 
 Nodemailer is licensed under the **MIT No Attribution (MIT-0)** license. This is one of the most permissive open-source licenses available, allowing you to use, modify, and distribute Nodemailer in any project, including commercial applications, without attribution requirements.

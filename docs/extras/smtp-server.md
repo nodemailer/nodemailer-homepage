@@ -1,37 +1,38 @@
 ---
 title: SMTP Server
 sidebar_position: 1
+description: Create custom SMTP and LMTP server instances with authentication and message handling.
 ---
 
 Create SMTP and LMTP server instances on the fly. The _smtp-server_ module is **not** a full-blown mail server application like [Haraka](https://haraka.github.io/). Instead, it provides a convenient way to add custom SMTP or LMTP listeners to your Node.js application. It is the successor to the server portion of the now-deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [SMTP Connection](./smtp-connection). This module is also useful for [testing email functionality](../smtp/testing) in development environments.
 
 ## Usage
 
-### 1 - Install
+### 1. Install
 
 ```bash
 npm install smtp-server --save
 ```
 
-### 2 - Require in your script
+### 2. Require in your script
 
 ```javascript
 const { SMTPServer } = require("smtp-server");
 ```
 
-### 3 - Create a server instance
+### 3. Create a server instance
 
 ```javascript
 const server = new SMTPServer(options);
 ```
 
-### 4 - Start listening
+### 4. Start listening
 
 ```javascript
 server.listen(port[, host][, callback]);
 ```
 
-### 5 - Shut down
+### 5. Shut down
 
 ```javascript
 server.close(callback);
@@ -270,7 +271,9 @@ onData(stream, session, callback) {
 }
 ```
 
-> **Note:** _smtp-server_ does not add a `Received:` header to the message. If you need RFC 5321 compliance, you must add this header yourself.
+:::note
+_smtp-server_ does not add a `Received:` header to the message. If you need RFC 5321 compliance, you must add this header yourself.
+:::
 
 ---
 
@@ -832,7 +835,9 @@ Invalid parameters return appropriate error codes (501 for syntax errors, 530 fo
 - `ENHANCEDSTATUSCODES` (RFC 2034/3463) - Enhanced status codes (opt-in via `hideENHANCEDSTATUSCODES: false`)
 - `REQUIRETLS` (RFC 8689) - Require TLS for delivery chain (opt-in via `hideREQUIRETLS: false`)
 
-> **Note:** The `CHUNKING` extension (BDAT command) is **not** implemented.
+:::note
+The `CHUNKING` extension (BDAT command) is **not** implemented.
+:::
 
 ---
 

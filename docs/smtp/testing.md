@@ -1,6 +1,7 @@
 ---
 title: Testing SMTP
 sidebar_position: 22
+description: Test email sending with Ethereal Email mail-catcher service without spamming real inboxes.
 ---
 
 When testing email functionality in development or CI environments, you need to avoid accidentally sending messages to real inboxes. Rather than redirecting all emails to a single test address, the recommended approach is to use a _mail-catcher_ service. A mail-catcher accepts messages over SMTP just like a production email provider, but it **never delivers them** to actual recipients. Instead, it stores the messages so you can inspect or download them later.

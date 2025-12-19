@@ -1,6 +1,7 @@
 ---
 title: SES transport
-sidebar_position: 28
+sidebar_position: 29
+description: Deliver email through Amazon SES using the official AWS SDK v3.
 ---
 
 The Nodemailer **SES transport** allows you to send emails through **Amazon Simple Email Service (SES)** using the official AWS SDK v3 package [@aws-sdk/client-sesv2](https://www.npmjs.com/package/@aws-sdk/client-sesv2).

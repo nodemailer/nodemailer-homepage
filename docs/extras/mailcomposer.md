@@ -1,6 +1,7 @@
 ---
 title: Mailcomposer
 sidebar_position: 4
+description: Generate RFC 822-formatted email messages that can be streamed or saved to disk.
 ---
 
 Generate RFC 822-formatted email messages that you can stream directly to an SMTP connection or save to disk for later use. This is the inverse of [MailParser](./mailparser), which parses raw messages back into structured objects.
@@ -11,19 +12,19 @@ Mailcomposer is included with Nodemailer. There is no separate package to instal
 
 ## Usage
 
-### 1 - Install Nodemailer
+### 1. Install Nodemailer
 
 ```bash
 npm install nodemailer
 ```
 
-### 2 - Import MailComposer in your code
+### 2. Import MailComposer in your code
 
 ```js
 const MailComposer = require("nodemailer/lib/mail-composer");
 ```
 
-### 3 - Create a MailComposer instance
+### 3. Create a MailComposer instance
 
 ```js
 const mail = new MailComposer(mailOptions);
@@ -234,7 +235,9 @@ const mailOptions = {
 };
 ```
 
-> **Note:** Some transports (such as AWS SES) ignore the `envelope` option and use the header addresses instead.
+:::note
+Some transports (such as AWS SES) ignore the `envelope` option and use the header addresses instead.
+:::
 
 ---
 

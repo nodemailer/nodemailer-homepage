@@ -1,6 +1,7 @@
 ---
 title: Sendmail transport
 sidebar_position: 27
+description: Pipe generated RFC 822 messages to local sendmail or compatible binary.
 ---
 
 The **Sendmail transport** delivers email by passing the generated RFC 822 message to the local **sendmail** command (or a compatible mail transfer agent such as Postfix or Exim). The message is piped directly to the program's standard input. This is the same mechanism used by PHP's `mail()` function.

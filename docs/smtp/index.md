@@ -1,6 +1,7 @@
 ---
 title: SMTP transport
 sidebar_position: 4
+description: Main transport in Nodemailer for delivering messages via the SMTP protocol.
 ---
 
 SMTP is the main transport in Nodemailer for delivering messages. SMTP (Simple Mail Transfer Protocol) is also the standard protocol that email servers use to communicate with each other, making it truly universal. Almost every email delivery provider supports SMTP-based sending, even when they primarily advertise API-based sending. While APIs may offer additional features, they also create vendor lock-in. With SMTP, you can switch providers by simply changing your configuration object or connection URL.

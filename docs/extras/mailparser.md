@@ -1,6 +1,7 @@
 ---
 title: MailParser
 sidebar_position: 3
+description: Streaming email parser that converts RFC 822 messages into structured JavaScript objects.
 ---
 
 MailParser is a streaming email parser for Node.js that can handle very large messages (100MB+) with minimal memory overhead. It is the counterpart to [Mailcomposer](./mailcomposer), which composes RFC 822 messages. MailParser is commonly used with [SMTP Server](./smtp-server) to process incoming mail.

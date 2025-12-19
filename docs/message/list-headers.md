@@ -1,6 +1,7 @@
 ---
 title: List headers
 sidebar_position: 16
+description: Add RFC 2369 List-* headers for mailing list functionality like unsubscribe links.
 ---
 
 Mailing lists use special [RFC 2369](https://www.rfc-editor.org/rfc/rfc2369) **`List-*` headers** (such as `List-Help`, `List-Unsubscribe`, and others) to help email clients display useful actions like "Unsubscribe" buttons. Instead of manually constructing these headers using the [custom headers](./custom-headers) option, you can use Nodemailer's **`list`** option to define them in a simple, declarative way.

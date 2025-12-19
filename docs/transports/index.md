@@ -1,6 +1,7 @@
 ---
 title: Other transports
 sidebar_position: 5
+description: Alternative delivery mechanisms - sendmail, SES, stream, and community transports.
 ---
 
 # Other transports
@@ -68,7 +69,9 @@ These transports are maintained by the community in separate npm packages. Insta
 - **Mailgun** - Send email through Mailgun's HTTP API ([npm](https://www.npmjs.com/package/nodemailer-mailgun-transport))
 - **Custom** - Build your own transport to implement business-specific logic. See [creating custom transports](../plugins/create/#transports).
 
-> **Note:** Third-party transports are not maintained by the Nodemailer team. Check each project's README for installation instructions and usage details.
+:::note
+Third-party transports are not maintained by the Nodemailer team. Check each project's README for installation instructions and usage details.
+:::
 
 ---
 

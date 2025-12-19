@@ -1,6 +1,7 @@
 ---
 title: Nodemailer
 sidebar_position: 1
+description: Send e-mails with Node.JS – easy as cake with zero runtime dependencies.
 ---
 
 # Nodemailer
@@ -79,7 +80,9 @@ const transporter = nodemailer.createTransport({
 })();
 ```
 
-> **Tip:** Ethereal provides a preview URL for every message sent, allowing you to view the rendered email in your browser. This is invaluable for testing email layouts and content during development.
+:::tip
+Ethereal provides a preview URL for every message sent, allowing you to view the rendered email in your browser. This is invaluable for testing email layouts and content during development.
+:::
 
 ## Source and License
 

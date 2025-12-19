@@ -1,6 +1,7 @@
 ---
 title: Attachments
 sidebar_position: 11
+description: Attach files using various content sources - strings, buffers, streams, files, or URLs.
 ---
 
 To attach files to an email, use the `attachments` option of the [message object](../). The `attachments` option accepts an array of attachment objects, and you can include **as many files as you need**.

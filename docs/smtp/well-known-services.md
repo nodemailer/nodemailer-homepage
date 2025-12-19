@@ -1,6 +1,7 @@
 ---
 title: Well-Known Services
 sidebar_position: 23
+description: Connection presets for 60+ popular SMTP providers like Gmail, SendGrid, and AWS SES.
 ---
 
 Nodemailer includes built-in connection presets for many popular email providers. Instead of manually looking up each provider's SMTP server hostname, port number, and security settings, you can simply specify a **`service`** name when creating a transport. Nodemailer automatically configures all the connection details for you.

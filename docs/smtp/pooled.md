@@ -1,6 +1,7 @@
 ---
 title: Pooled SMTP Connections
 sidebar_position: 21
+description: Keep TCP/TLS connections open and reuse them for high-volume email sending.
 ---
 
 **Pooled SMTP** maintains a fixed number of persistent TCP/TLS connections to your SMTP server and reuses them across multiple messages. Instead of opening a new connection for each email (which requires a full TLS handshake every time), pooled connections stay open and ready for the next message. This is an extension of the standard [SMTP transport](./index.md).

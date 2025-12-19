@@ -1,6 +1,7 @@
 ---
 title: Extra modules
 sidebar_position: 8
+description: Companion libraries for receiving, composing, parsing, and previewing email.
 ---
 
 In addition to Nodemailer itself, several companion libraries extend what you can do with email in Node.js. These tools help you receive incoming mail, compose messages programmatically, parse raw email content, and preview emails during development.
@@ -26,4 +27,6 @@ These are independent open-source projects that complement Nodemailer and may be
 
 ---
 
-> **Note:** The first four packages (smtp-server, smtp-connection, mailparser, and mailcomposer) are maintained within the Nodemailer GitHub organization and follow the same release cycle as Nodemailer. The remaining projects are maintained by the broader open-source community.
+:::note
+The first four packages (smtp-server, smtp-connection, mailparser, and mailcomposer) are maintained within the Nodemailer GitHub organization and follow the same release cycle as Nodemailer. The remaining projects are maintained by the broader open-source community.
+:::

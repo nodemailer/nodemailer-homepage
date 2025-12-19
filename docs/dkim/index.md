@@ -1,6 +1,7 @@
 ---
 title: DKIM
 sidebar_position: 7
+description: Add cryptographic DKIM signatures to outgoing messages for domain verification.
 ---
 
 # DKIM Signing
@@ -58,7 +59,7 @@ const nodemailer = require("nodemailer");
 const fs = require("fs");
 ```
 
-### 1 - Sign every message
+### 1. Sign every message
 
 This example configures DKIM signing at the transport level, so all messages
 sent through this transporter are automatically signed:
@@ -82,7 +83,7 @@ To verify that your DNS record is correctly configured, run:
 dig TXT 2017._domainkey.example.com
 ```
 
-### 2 - Sign with multiple keys
+### 2. Sign with multiple keys
 
 Use multiple keys when rotating DKIM keys or when sending mail on behalf of
 different subdomains:
@@ -110,7 +111,7 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-### 3 - Sign a specific message only
+### 3. Sign a specific message only
 
 If you do not want to sign all messages, you can configure DKIM on individual
 messages instead:
@@ -136,7 +137,7 @@ const info = await transporter.sendMail({
 });
 ```
 
-### 4 - Cache large messages on disk
+### 4. Cache large messages on disk
 
 When sending messages with large attachments, you can reduce memory usage by
 enabling disk caching. Nodemailer will store message content exceeding the
@@ -157,7 +158,7 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-### 5 - Skip mutable headers
+### 5. Skip mutable headers
 
 Some email service providers, such as **[Amazon SES](../transports/ses)**, replace headers like
 `Message-ID` and `Date` after you submit the message. If these headers are

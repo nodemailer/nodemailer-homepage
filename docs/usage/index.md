@@ -1,6 +1,7 @@
 ---
 title: Usage
 sidebar_position: 2
+description: Get started with Nodemailer - installation, creating transporters, and sending messages.
 ---
 
 # Usage

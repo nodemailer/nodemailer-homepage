@@ -1,6 +1,7 @@
 ---
 title: SMTP envelope
 sidebar_position: 20
+description: Control MAIL FROM and RCPT TO commands independently from visible message headers.
 ---
 
 When Nodemailer delivers an email over SMTP, it sends **two distinct layers** of information:

@@ -1,6 +1,7 @@
 ---
 title: Address object
 sidebar_position: 13
+description: Email address formats - plain string, formatted with display name, or object notation.
 ---
 
 Nodemailer accepts email addresses in **three interchangeable formats**. You can use any of these formats (or mix them together) in any address field, including `from`, `to`, `cc`, `bcc`, `replyTo`, and `sender`. For a complete list of message fields, see [message configuration](./index.md).

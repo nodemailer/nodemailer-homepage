@@ -1,6 +1,7 @@
 ---
 title: SMTP Connection
 sidebar_position: 2
+description: Low-level SMTP client for establishing outbound connections to mail servers.
 ---
 
 A low-level SMTP client for establishing outbound SMTP connections. This module is the foundation that powers Nodemailer's [SMTP transport](/smtp/) internally. Use it when you need direct, fine-grained control over the SMTP session lifecycle.

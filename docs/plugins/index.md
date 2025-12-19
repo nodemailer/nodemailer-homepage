@@ -1,6 +1,7 @@
 ---
 title: Plugins
 sidebar_position: 6
+description: Extend Nodemailer with custom logic at compile, stream, or transport phases.
 ---
 
 Nodemailer is designed to be **extensible**. You can inject custom logic at three well-defined phases of a message's lifecycle:

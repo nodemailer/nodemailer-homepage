@@ -1,6 +1,7 @@
 ---
 title: Alternatives
 sidebar_position: 12
+description: Include alternative representations of content like Markdown in multipart/alternative.
 ---
 
 In addition to plain text and HTML, you can include **alternative representations** of your email content. These are different formats of the same message, such as Markdown or a calendar invite. When recipients open your email, their email client automatically selects and displays the best format it supports.

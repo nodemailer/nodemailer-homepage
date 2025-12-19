@@ -1,6 +1,7 @@
 ---
 title: Create plugins
 sidebar_position: 30
+description: Write custom plugins for message pre-processing, stream transformation, or transport.
 ---
 
 Nodemailer provides three extension points in the email delivery pipeline where you can attach [plugins](./index.md) to customize behavior:
@@ -93,7 +94,9 @@ transporter.use("compile", (mail, done) => {
 - Modify `mail.message` directly (for example, to add or change headers)
 - Pipe the output through additional Transform streams using `mail.message.transform()`
 
-> **Note:** Modifying `mail.data` at this stage usually has **no effect** because the MIME tree has already been built from it. The exception is if your custom transport explicitly reads properties from `mail.data`.
+:::note
+Modifying `mail.data` at this stage usually has **no effect** because the MIME tree has already been built from it. The exception is if your custom transport explicitly reads properties from `mail.data`.
+:::
 
 ### Example: Replace all tabs with spaces in the outgoing stream
 
