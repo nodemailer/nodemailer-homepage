@@ -26,7 +26,8 @@ However, if you need precise control over the envelope, you can override the def
     to:   [                                    // becomes RCPT TO:
       'alice@example.com',
       'Bob <bob@example.net>'
-    ]
+    ],
+    requireTLSExtensionEnabled: true
   }
 }
 ```
@@ -37,6 +38,7 @@ However, if you need precise control over the envelope, you can override the def
 | `to`   | `string \| string[]` | Address(es) added to the **`RCPT TO`** list (the actual delivery destinations). |
 | `cc`   | `string \| string[]` | _Optional._ These addresses are merged into the `to` list when the envelope is generated. |
 | `bcc`  | `string \| string[]` | _Optional._ These addresses are merged into the `to` list when the envelope is generated. |
+| `requireTLSExtensionEnabled` | `boolean` | _Optional._ If `true`, the `REQUIRETLS` extension is used (RFC 8689). This requires a TLS connection. |
 
 Nodemailer accepts any [address format](../message/addresses) it supports: plain email addresses like `user@example.com`, name-address pairs like `Name <address>`, or internationalized addresses with UTF-8 domains.
 
