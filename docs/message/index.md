@@ -54,7 +54,7 @@ These options provide additional ways to control the message content:
 - **amp** - An AMP4EMAIL-specific HTML version of the message. Works the same way as `text` and `html`. See the [AMP example below](#amp-example) for usage, or read [this blog post](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for more details about sending and rendering AMP emails.
 - **icalEvent** - An iCalendar event to include as an alternative content type. This is useful for sending calendar invitations. See [Calendar events](/message/calendar-events) for details.
 - **alternatives** - An array of alternative content representations (in addition to the text and HTML parts). See [Using alternative content](/message/alternatives) for details.
-- **encoding** - Specifies the encoding used for text and HTML strings. Defaults to `'utf-8'`. Other valid values are `'hex'` and `'base64'`.
+- **encoding** - Sets the `Content-Transfer-Encoding` header for text and HTML parts. When specified, this value is used directly as the transfer encoding (e.g., `'base64'`, `'quoted-printable'`, `'7bit'`, `'8bit'`). This is different from `textEncoding`, which controls how text content is automatically encoded.
 - **raw** - An existing MIME message to send instead of generating a new one. Use this when you have a pre-built email message. See [Custom source](/message/custom-source) for details.
 - **textEncoding** - Forces a specific content-transfer-encoding for text content. Valid values are `'quoted-printable'` or `'base64'`. By default, Nodemailer automatically chooses the best option: `quoted-printable` for content with mostly ASCII characters, and `base64` otherwise.
 
@@ -84,6 +84,7 @@ These options are rarely needed but provide fine-grained control over the genera
 - **baseBoundary** - A shared base string used when generating unique MIME boundaries. Defaults to a random hex string. All boundaries in the message will be derived from this value.
 - **newline** - Controls the line ending style in the generated message. Set to `'windows'` (or `'dos'`, `'win'`, `'\r\n'`) for Windows-style CRLF line endings, or `'unix'` (or `'linux'`, `'\n'`) for Unix-style LF line endings.
 - **xMailer** - A custom value for the X-Mailer header, which typically identifies the software that generated the email. Set to `false` to omit this header entirely.
+- **dkim** - Per-message DKIM signing configuration that overrides the transport-level settings. See [DKIM signing](/dkim/) for details.
 
 The following example demonstrates setting a custom header and a specific date:
 

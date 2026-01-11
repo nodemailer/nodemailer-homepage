@@ -60,6 +60,7 @@ These transports are included with Nodemailer and require no additional packages
 | **sendmail** | Pipes the generated message to a local `sendmail`-compatible binary on your server.  | [Docs](/transports/sendmail) |
 | **SES**      | Sends mail through the Amazon SES API using the AWS SDK v3.                          | [Docs](/transports/ses)      |
 | **stream**   | Returns the generated RFC 5322 message as a stream instead of sending it. Useful for testing or custom processing. | [Docs](/transports/stream)   |
+| **JSON**     | Returns a JSON representation of the message instead of sending it. Useful for debugging, storing messages, or passing to other systems. | [Docs](/transports/stream#json-transport) |
 
 ### Community transports
 

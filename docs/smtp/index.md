@@ -47,7 +47,7 @@ When you specify a hostname, Nodemailer resolves it using DNS before connecting.
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `secure`         | `boolean` | `false` | See **General options** above.                                                                                                 |
 | `tls`            | `object`  | --      | Additional options passed directly to [Node.js `TLSSocket`](https://nodejs.org/api/tls.html#class-tlstlssocket). For example, `{ rejectUnauthorized: false }` to accept self-signed certificates. |
-| `tls.servername` | `string`  | --      | The hostname to use for TLS certificate validation. Required when `host` is set to an IP address.                              |
+| `tls.servername` | `string`  | --      | The hostname to use for TLS certificate validation. Required when `host` is set to an IP address. Can also be set as a top-level `servername` option outside the `tls` object. |
 | `ignoreTLS`      | `boolean` | `false` | If `true`, Nodemailer will not use STARTTLS even if the server advertises support for it. The connection remains unencrypted.  |
 | `requireTLS`     | `boolean` | `false` | If `true`, Nodemailer requires a STARTTLS upgrade. If the server does not support STARTTLS, sending fails with an error.       |
 
@@ -66,15 +66,18 @@ Setting **`secure: false`** does **not** mean your emails are sent unencrypted. 
 | `socketTimeout`     | 600000 ms      | How long a connection can remain idle (in milliseconds) before Nodemailer closes it. The default is 10 minutes.                                |
 | `dnsTimeout`        | 30000 ms       | Maximum time (in milliseconds) to wait for DNS lookups to complete.                                                                            |
 | `lmtp`              | `false`        | If `true`, use the LMTP (Local Mail Transfer Protocol) instead of SMTP. LMTP is typically used for local mail delivery.                        |
-| `opportunisticTLS`  | `false`        | If `true`, Nodemailer continues with an unencrypted connection when STARTTLS upgrade fails, instead of aborting.                               |
-| `forceAuth`         | `false`        | If `true`, attempt authentication even when the server does not advertise AUTH capability. Some misconfigured servers require this.            |
+| `opportunisticTLS`               | `false`        | If `true`, Nodemailer continues with an unencrypted connection when STARTTLS upgrade fails, instead of aborting.                               |
+| `forceAuth`                      | `false`        | If `true`, attempt authentication even when the server does not advertise AUTH capability. Some misconfigured servers require this.            |
+| `allowInternalNetworkInterfaces` | `false`        | If `true`, allows connections to internal/private network interfaces during DNS resolution. By default, Nodemailer skips private IP addresses when resolving hostnames. |
 
 ### Debug options
 
-| Name     | Type                 | Description                                                                                                                                  |
-| -------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `logger` | `object` / `boolean` | Set to `true` to enable console logging, or pass a [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance for custom logging. Set to `false` or leave unset to disable logging. |
-| `debug`  | `boolean`            | If `true`, logs the raw SMTP protocol traffic (commands and responses). When `false`, only high-level transaction events are logged.         |
+| Name             | Type                 | Description                                                                                                                                  |
+| ---------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `logger`         | `object` / `boolean` | Set to `true` to enable console logging, or pass a [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance for custom logging. Set to `false` or leave unset to disable logging. |
+| `debug`          | `boolean`            | If `true`, logs the raw SMTP protocol traffic (commands and responses). When `false`, only high-level transaction events are logged.         |
+| `transactionLog` | `boolean`            | If `true`, logs SMTP commands and responses at the transaction level. Similar to `debug` but can be used independently for lighter logging without full protocol traces. |
+| `component`      | `string`             | The component name used in log output (e.g., `'smtp-transport'`, `'smtp-pool'`). Useful when running multiple transporters to identify which one generated a log entry. |
 
 **Custom logger**
 
