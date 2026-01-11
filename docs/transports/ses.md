@@ -88,6 +88,35 @@ When the email is sent successfully, the promise resolves (or the callback recei
 | `response`  | The raw Message ID string as returned by SES (without angle brackets or domain suffix)             |
 | `raw`       | A `Buffer` containing the complete raw RFC 822 message that was sent to SES                        |
 
+:::note Memory usage
+The entire message (including attachments) is buffered in memory before being sent to SES. For messages with very large attachments, ensure your application has sufficient memory available.
+:::
+
+## Rate limiting
+
+The SES transport does **not** include built-in rate limiting, queuing, or concurrency controls. Each `sendMail()` call immediately initiates a send operation to AWS.
+
+If you need to send bulk emails, you must implement your own rate limiting to stay within your [SES sending limits](https://docs.aws.amazon.com/ses/latest/dg/manage-sending-quotas.html). The AWS SDK v3 handles automatic retries with exponential backoff for transient errors.
+
+:::tip
+For high-volume sending, consider using a job queue (such as Bull, Bee-Queue, or AWS SQS) to manage send operations and respect SES rate limits.
+:::
+
+## DKIM signing
+
+When using [DKIM signing](../dkim/) with the SES transport, Nodemailer automatically excludes the `Date` and `Message-ID` headers from the DKIM signature. This is necessary because SES may modify these headers, which would otherwise invalidate the signature.
+
+```javascript
+const transporter = nodemailer.createTransport({
+  SES: { sesClient, SendEmailCommand },
+  dkim: {
+    domainName: "example.com",
+    keySelector: "mail",
+    privateKey: fs.readFileSync("dkim-private.pem", "utf8"),
+  },
+});
+```
+
 ## Troubleshooting
 
 ### "User is not authorized to perform: ses:SendRawEmail"
