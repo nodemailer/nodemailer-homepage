@@ -33,6 +33,32 @@ Example error object:
 
 Nodemailer uses specific error codes to categorize different types of failures. These codes are set on the `error.code` property.
 
+### Quick reference
+
+| Code | Category | Description |
+| ---- | -------- | ----------- |
+| `ECONNECTION` | Connection | Connection closed unexpectedly |
+| `ETIMEDOUT` | Connection | Connection or operation timed out |
+| `EDNS` | Connection | DNS resolution failed |
+| `ESOCKET` | Connection | Socket-level error |
+| `ETLS` | TLS/Security | TLS handshake or STARTTLS failed |
+| `EREQUIRETLS` | TLS/Security | REQUIRETLS not supported (RFC 8689) |
+| `EAUTH` | Authentication | Authentication failed |
+| `ENOAUTH` | Authentication | Authentication not provided |
+| `EOAUTH2` | Authentication | OAuth2 token error |
+| `EENVELOPE` | Envelope | Invalid mail envelope |
+| `EMESSAGE` | Message | Message delivery error |
+| `ESTREAM` | Stream | Stream processing error |
+| `EPROTOCOL` | Protocol | Invalid SMTP server response |
+| `EMAXLIMIT` | Pool | Pool resource limit reached |
+| `ECONFIG` | Configuration | Invalid configuration |
+| `EPROXY` | Proxy | Proxy connection error |
+| `EFILEACCESS` | Content | File access rejected |
+| `EURLACCESS` | Content | URL access rejected |
+| `EFETCH` | Content | HTTP fetch error |
+| `ESENDMAIL` | Transport | Sendmail command error |
+| `ESES` | Transport | AWS SES error |
+
 ### Connection errors
 
 #### ECONNECTION
@@ -179,13 +205,44 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-#### NoAuth
+#### ENOAUTH
 
-Authentication credentials were not provided when the server requires authentication.
+Authentication credentials were not provided when the server requires authentication (and `forceAuth` option is set).
 
 **Troubleshooting:**
 - Add the `auth` object to your transport configuration
 - Ensure both `user` and `pass` properties are set
+
+#### EOAUTH2
+
+An OAuth2-specific error occurred during token generation or refresh.
+
+**Common causes:**
+- Missing required options (`privateKey` and `user` for service accounts)
+- Refresh token is invalid or revoked
+- JWT signing failed
+- OAuth server returned an error response
+- No access token in server response
+
+**Troubleshooting:**
+- Verify your OAuth2 credentials are correct
+- Check if the refresh token is still valid
+- For service accounts, ensure the private key is properly formatted
+- Review the error message for specific OAuth server error details
+
+```javascript
+// OAuth2 configuration example
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    type: "OAuth2",
+    user: "your.email@gmail.com",
+    clientId: "your-client-id",
+    clientSecret: "your-client-secret",
+    refreshToken: "your-refresh-token",
+  },
+});
+```
 
 ### Envelope errors
 
@@ -294,15 +351,158 @@ The connection pool has reached its maximum number of connections or send retrie
 - Reduce message sending rate
 - Check for connection leaks (connections not being released)
 
-### Transport-specific errors
+### Configuration errors
 
-#### LegacyConfig
+#### ECONFIG
 
-The transport configuration uses a legacy format that is no longer supported.
+The transport configuration is invalid or uses a deprecated format.
+
+**Common causes:**
+- Using legacy SES configuration format (pre-v7.0.0)
+- Invalid transport options
 
 **Troubleshooting:**
 - Update your configuration to use the current API format
+- For SES, use `@aws-sdk/client-sesv2` instead of the legacy SDK
 - Review the Nodemailer documentation for current options
+
+### Proxy errors
+
+#### EPROXY
+
+An error occurred while connecting through a proxy server.
+
+**Common causes:**
+- Invalid proxy URL or configuration
+- Proxy server returned an error response
+- SOCKS module not loaded for SOCKS proxy
+- Unknown proxy protocol
+
+**Troubleshooting:**
+- Verify your proxy URL is correct (e.g., `http://proxy.example.com:3128`)
+- For SOCKS proxies, ensure the `socks` module is installed
+- Check proxy server logs for connection issues
+
+```javascript
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 587,
+  proxy: "http://proxy.example.com:3128",
+});
+```
+
+### Content access errors
+
+#### EFILEACCESS
+
+File access was rejected because `disableFileAccess` option is enabled.
+
+**When this occurs:**
+- Attempting to use a file path for attachment content when `disableFileAccess: true`
+- This is a security feature to prevent reading local files
+
+**Troubleshooting:**
+- If you need file attachments, set `disableFileAccess: false` (default)
+- Use Buffer or stream content instead of file paths
+
+```javascript
+// This will throw EFILEACCESS if disableFileAccess is true
+const message = {
+  attachments: [{ path: "/path/to/file.pdf" }],
+};
+
+// Safe alternative - use content directly
+const message = {
+  attachments: [{ content: fs.readFileSync("/path/to/file.pdf") }],
+};
+```
+
+#### EURLACCESS
+
+URL access was rejected because `disableUrlAccess` option is enabled.
+
+**When this occurs:**
+- Attempting to use a URL for attachment content when `disableUrlAccess: true`
+- This is a security feature to prevent fetching remote content
+
+**Troubleshooting:**
+- If you need URL-based attachments, set `disableUrlAccess: false` (default)
+- Fetch the content yourself and pass it as a Buffer
+
+```javascript
+// This will throw EURLACCESS if disableUrlAccess is true
+const message = {
+  attachments: [{ href: "https://example.com/file.pdf" }],
+};
+```
+
+#### EFETCH
+
+An HTTP fetch error occurred when retrieving remote content.
+
+**Common causes:**
+- Network error while fetching URL content
+- HTTP request timeout
+- Invalid status code from server
+- Maximum redirect count exceeded
+
+**Troubleshooting:**
+- Verify the URL is accessible
+- Check network connectivity
+- Ensure the server returns a successful status code
+
+### TLS extension errors
+
+#### EREQUIRETLS
+
+The REQUIRETLS extension (RFC 8689) was requested but not supported by the server.
+
+**When this occurs:**
+- `requireTLSExtensionEnabled: true` is set in the message options
+- The SMTP server does not advertise REQUIRETLS capability
+
+**Troubleshooting:**
+- Check if your SMTP server supports RFC 8689 REQUIRETLS
+- Remove `requireTLSExtensionEnabled` option if the server does not support it
+- Use a server that supports REQUIRETLS for high-security email delivery
+
+```javascript
+const message = {
+  from: "sender@example.com",
+  to: "recipient@example.com",
+  subject: "Secure message",
+  text: "This requires TLS throughout delivery",
+  requireTLSExtensionEnabled: true, // Requires server support
+};
+```
+
+### Transport-specific errors
+
+#### ESENDMAIL
+
+An error occurred with the sendmail transport.
+
+**Common causes:**
+- Sendmail binary not found (exit code 127)
+- Sendmail process exited with non-zero code
+- Invalid envelope addresses (addresses starting with `-`)
+- Sendmail binary could not be spawned
+
+**Troubleshooting:**
+- Verify sendmail is installed and in the system PATH
+- Check the sendmail path configuration
+- Ensure envelope addresses are valid
+
+```javascript
+const transporter = nodemailer.createTransport({
+  sendmail: true,
+  path: "/usr/sbin/sendmail", // Explicit path if needed
+});
+```
+
+#### ESES
+
+An error occurred with the AWS SES transport. These are typically errors passed through from the AWS SDK.
 
 ## SMTP response codes
 
@@ -355,7 +555,7 @@ These indicate permanent failures. The operation will not succeed without change
 
 ## SES transport errors
 
-When using the Amazon SES transport, errors from the AWS SDK are passed through. Common SES error codes include:
+When using the Amazon SES transport, errors have the code `ESES` and include the underlying AWS SDK error. Common SES error codes include:
 
 | Code                   | Meaning                                            |
 | ---------------------- | -------------------------------------------------- |
@@ -364,7 +564,7 @@ When using the Amazon SES transport, errors from the AWS SDK are passed through.
 
 ## Sendmail transport errors
 
-When using the sendmail transport, errors are generated based on the sendmail process exit code:
+When using the sendmail transport, errors have the code `ESENDMAIL`. Errors are generated based on the sendmail process exit code:
 
 | Exit Code | Error Message                                           |
 | --------- | ------------------------------------------------------- |
@@ -377,7 +577,7 @@ Additional sendmail errors:
 
 ## OAuth2 errors
 
-When using OAuth2 authentication, these errors may occur:
+When using OAuth2 authentication, errors have the code `EOAUTH2`. Common error messages include:
 
 | Error Message                                      | Cause                                              |
 | -------------------------------------------------- | -------------------------------------------------- |
@@ -387,7 +587,7 @@ When using OAuth2 authentication, these errors may occur:
 | `No access token`                                  | OAuth server response did not include access token |
 | `Options "privateKey" and "user" are required...`  | Missing required options for service account       |
 
-OAuth error responses from the server follow RFC 6749 format:
+OAuth error responses from the server follow RFC 6749 format and are included in the error message:
 ```
 error: error_description (error_uri)
 ```
@@ -419,13 +619,21 @@ try {
   switch (err.code) {
     case 'ECONNECTION':
     case 'ETIMEDOUT':
+    case 'EDNS':
+    case 'ESOCKET':
       console.error('Network error - will retry later');
       // Schedule retry
       break;
 
     case 'EAUTH':
+    case 'ENOAUTH':
       console.error('Authentication failed - check credentials');
       // Do not retry without fixing credentials
+      break;
+
+    case 'EOAUTH2':
+      console.error('OAuth2 error - check token configuration');
+      // Refresh token or re-authenticate
       break;
 
     case 'EENVELOPE':
@@ -436,6 +644,22 @@ try {
     case 'EMESSAGE':
       console.error('Message rejected by server');
       // Check message content
+      break;
+
+    case 'ETLS':
+    case 'EREQUIRETLS':
+      console.error('TLS/Security error');
+      // Check TLS configuration
+      break;
+
+    case 'ECONFIG':
+      console.error('Configuration error');
+      // Review transport configuration
+      break;
+
+    case 'ESENDMAIL':
+      console.error('Sendmail error');
+      // Check sendmail installation
       break;
 
     default:
