@@ -51,6 +51,7 @@ While the SES service presets below use SMTP credentials, Nodemailer also offers
 | Forward Email      | Forward Email                     | smtp.forwardemail.net                   | 465  |
 | GandiMail          | Gandi Mail                        | mail.gandi.net                          | 587  |
 | Gmail              | Gmail / Google Workspace          | smtp.gmail.com                          | 465  |
+| GmailWorkspace     | Gmail Workspace (SMTP relay)      | smtp-relay.gmail.com                    | 465  |
 | GMX                | GMX Mail                          | mail.gmx.com                            | 587  |
 | Godaddy            | GoDaddy (US)                      | smtpout.secureserver.net                | 25   |
 | GodaddyAsia        | GoDaddy (Asia)                    | smtp.asia.secureserver.net              | 25   |

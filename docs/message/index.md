@@ -44,6 +44,7 @@ These options control how the email is addressed and how replies are handled:
 - **inReplyTo** - The Message-ID of the email this message is replying to. This helps email clients thread conversations together.
 - **references** - A list of Message-IDs that this email references. Can be an array of strings or a space-separated string. Used for threading related messages together.
 - **envelope** - A custom SMTP envelope, if the automatically generated envelope is not suitable for your needs. See [SMTP envelope](/smtp/envelope) for details.
+- **requireTLSExtensionEnabled** - When set to `true`, the SMTP `REQUIRETLS` extension (RFC 8689) is used. This ensures TLS encryption is required for the entire delivery chain, not just the first hop. The connection must already be using TLS, and the server must advertise REQUIRETLS support. Can also be set inside the [envelope](/smtp/envelope) object.
 
 ##### Content options
 

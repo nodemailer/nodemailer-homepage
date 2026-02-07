@@ -41,6 +41,20 @@ const transporter = nodemailer.createTransport({
 
 The `service: "gmail"` option is a convenient shortcut that automatically configures Gmail's SMTP server settings. See [Well-Known Services](../smtp/well-known-services) for more details and a full list of supported providers.
 
+:::info Google Workspace SMTP Relay
+If you are using **Google Workspace** and need to send from custom addresses without Gmail rewriting the `From:` header, use the dedicated `"GmailWorkspace"` service instead. This connects to `smtp-relay.gmail.com`, which supports sending as any address in your Workspace domain. See Google's [SMTP relay service documentation](https://support.google.com/a/answer/176600) for setup instructions.
+
+```js
+const transporter = nodemailer.createTransport({
+  service: "GmailWorkspace",
+  auth: {
+    user: "me@mydomain.com",
+    pass: process.env.GOOGLE_APP_PASSWORD,
+  },
+});
+```
+:::
+
 For a complete walkthrough on setting up OAuth 2.0 credentials, including how to obtain your client ID, client secret, and refresh token, see the dedicated guide: [SMTP / OAuth 2.0](../smtp/oauth2).
 
 ### App Password (requires 2-Step Verification)
