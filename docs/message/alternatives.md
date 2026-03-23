@@ -1,6 +1,6 @@
 ---
 title: Alternatives
-sidebar_position: 12
+sidebar_position: 5
 description: Include alternative representations of content like Markdown in multipart/alternative.
 ---
 

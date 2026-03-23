@@ -1,6 +1,6 @@
 ---
 title: SMTP envelope
-sidebar_position: 20
+sidebar_position: 4
 description: Control MAIL FROM and RCPT TO commands independently from visible message headers.
 ---
 

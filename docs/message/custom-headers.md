@@ -1,6 +1,6 @@
 ---
 title: Custom headers
-sidebar_position: 17
+sidebar_position: 6
 description: Add or override message headers at message level or for individual attachments.
 ---
 

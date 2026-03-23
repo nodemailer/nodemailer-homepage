@@ -1,6 +1,6 @@
 ---
 title: Create plugins
-sidebar_position: 30
+sidebar_position: 1
 description: Write custom plugins for message pre-processing, stream transformation, or transport.
 ---
 

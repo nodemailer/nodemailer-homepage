@@ -1,6 +1,6 @@
 ---
 title: Stream transport
-sidebar_position: 28
+sidebar_position: 3
 description: Generate RFC 822 messages as streams, Buffers, or JSON objects for testing or custom delivery workflows.
 ---
 

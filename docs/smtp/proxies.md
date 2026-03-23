@@ -1,6 +1,6 @@
 ---
 title: Proxy support
-sidebar_position: 25
+sidebar_position: 5
 description: Use HTTP, SOCKS or custom proxy handlers with Nodemailer SMTP transports.
 ---
 

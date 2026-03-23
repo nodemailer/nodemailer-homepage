@@ -1,6 +1,6 @@
 ---
 title: Sendmail transport
-sidebar_position: 27
+sidebar_position: 2
 description: Pipe generated RFC 822 messages to local sendmail or compatible binary.
 ---
 

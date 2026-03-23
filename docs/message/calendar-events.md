@@ -1,6 +1,6 @@
 ---
 title: Calendar events
-sidebar_position: 14
+sidebar_position: 4
 description: Embed iCalendar files in emails for calendar integration with Accept/Decline controls.
 ---
 

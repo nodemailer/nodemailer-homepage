@@ -1,6 +1,6 @@
 ---
 title: Pooled SMTP Connections
-sidebar_position: 21
+sidebar_position: 3
 description: Keep TCP/TLS connections open and reuse them for high-volume email sending.
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Delivery Status Notifications (DSN)
 description: Request delivery, delay, or failure status notifications for outgoing email messages using the SMTP DSN extension.
-sidebar_position: 10
+sidebar_position: 8
 ---
 
 :::info

@@ -1,6 +1,6 @@
 ---
 title: Custom authentication
-sidebar_position: 25
+sidebar_position: 6
 description: Extend SMTP transport with custom authentication mechanisms like NTLM or CRAM-MD5.
 ---
 

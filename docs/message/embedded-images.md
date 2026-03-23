@@ -1,6 +1,6 @@
 ---
 title: Embedded images
-sidebar_position: 15
+sidebar_position: 3
 description: Embed images directly inside HTML body using Content-ID (cid:) URL scheme.
 ---
 

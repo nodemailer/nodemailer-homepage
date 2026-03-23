@@ -1,6 +1,6 @@
 ---
 title: SES transport
-sidebar_position: 29
+sidebar_position: 1
 description: Deliver email through Amazon SES using the official AWS SDK v3.
 ---
 

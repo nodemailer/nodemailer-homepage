@@ -1,6 +1,6 @@
 ---
 title: Address object
-sidebar_position: 13
+sidebar_position: 1
 description: Email address formats - plain string, formatted with display name, or object notation.
 ---
 

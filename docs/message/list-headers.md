@@ -1,6 +1,6 @@
 ---
 title: List headers
-sidebar_position: 16
+sidebar_position: 7
 description: Add RFC 2369 List-* headers for mailing list functionality like unsubscribe links.
 ---
 

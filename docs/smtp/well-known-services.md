@@ -1,6 +1,6 @@
 ---
 title: Well-Known Services
-sidebar_position: 23
+sidebar_position: 1
 description: Connection presets for 80+ popular SMTP providers like Gmail, SendGrid, and AWS SES.
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: OAuth2
-sidebar_position: 24
+sidebar_position: 2
 description: Use OAuth2 access tokens instead of passwords for secure SMTP authentication.
 ---
 
