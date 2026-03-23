@@ -1,6 +1,6 @@
 ---
 title: Testing with Ethereal
-sidebar_position: 3
+sidebar_position: 1
 description: Use Ethereal.email to test email sending without delivering to real recipients.
 ---
 
@@ -184,6 +184,44 @@ test("sends welcome email", async () => {
   console.log("Preview:", nodemailer.getTestMessageUrl(info));
 });
 ```
+
+## Switch transports based on environment
+
+A common pattern is to centralize your transport configuration in one place. This makes it easy to use Ethereal during development and testing while using a production email service in production:
+
+```javascript
+const nodemailer = require("nodemailer");
+
+function createTransport() {
+  if (process.env.NODE_ENV === "production") {
+    // Production: send real emails
+    return nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USERNAME,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
+
+  // Development/Testing: capture emails with Ethereal
+  return nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.ETHEREAL_USERNAME,
+      pass: process.env.ETHEREAL_PASSWORD,
+    },
+  });
+}
+
+module.exports = createTransport;
+```
+
+For alternative testing approaches, you can also use the [stream transport](/transports/stream) to capture generated messages without any network connection, or run your own local mail server using [smtp-server](/extras/smtp-server).
 
 ## Comparison with other testing options
 

@@ -83,7 +83,7 @@ The object returned by `sendMail()` always includes an `envelope` property showi
 
 ### When should I override the envelope?
 
-- **VERP or bounce management** - Route bounces to a unique per-message or per-recipient address so you can track which specific email bounced. For automated bounce notifications, see also [Delivery Status Notifications (DSN)](./dsn).
+- **VERP or bounce management** - Route bounces to a unique per-message or per-recipient address so you can track which specific email bounced. For automated bounce notifications, see also [Delivery Status Notifications (DSN)](../message/dsn).
 - **Mailing lists** - Deliver the same message to many recipients while keeping their addresses hidden from each other (not shown in the headers).
 - **Different return path** - Display one address in the `From:` header but route bounces to a different address for centralized bounce processing.
 

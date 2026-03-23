@@ -6,7 +6,7 @@ description: Generate RFC 822 messages as streams, Buffers, or JSON objects for 
 
 Stream transport is **not** a real SMTP transport. Instead of delivering your message to a remote mail server, it _generates_ the complete RFC 822 formatted email and returns it to you. This makes it ideal for:
 
-- **[Testing](../smtp/testing)** - Examine the exact bytes that would be sent over the wire, create snapshot tests, or forward the output to another system for validation.
+- **[Testing](../guides/testing-with-ethereal)** - Examine the exact bytes that would be sent over the wire, create snapshot tests, or forward the output to another system for validation.
 - **Custom delivery pipelines** - Apply Nodemailer plugins (such as DKIM signing or list headers) to your message, then handle delivery yourself through an internal API, archive messages for audit logging, or process them in any custom way.
 
 For an overview of all available transports, see the [transports documentation](./index.md).

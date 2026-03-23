@@ -106,4 +106,4 @@ let message = {
 
 ---
 
-For a complete working example, combine the `message` object above with [`nodemailer.createTransport()`](../usage/index.md#quick-example) and call `transporter.sendMail()`.
+For a complete working example, combine the `message` object above with [`nodemailer.createTransport()`](../) and call `transporter.sendMail()`.

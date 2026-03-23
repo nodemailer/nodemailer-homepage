@@ -19,12 +19,26 @@ const transporter = nodemailer.createTransport(options[, defaults]);
 - **`options`** - an object that defines the SMTP connection settings (detailed in the sections below).
 - **`defaults`** - an optional object whose properties are merged into every [message](/message/) you send. This is useful for setting a common **from** address or other repeated values.
 
-Instead of an options object, you can also pass a connection URL. Use the **smtp:** protocol for standard connections or **smtps:** for connections that use TLS from the start (typically port 465).
+Instead of an options object, you can also pass a connection URL. Use the **smtp:** protocol for standard connections, **smtps:** for connections that use TLS from the start (typically port 465), or **direct:** to connect directly to the recipient's MX server (bypassing your own SMTP relay).
 
 ```javascript
-const poolConfig = "smtps://username:password@smtp.example.com/?pool=true";
-const transporter = nodemailer.createTransport(poolConfig);
+// Pooled connection via TLS
+const transporter = nodemailer.createTransport(
+  "smtps://username:password@smtp.example.com/?pool=true"
+);
+
+// Direct delivery to the recipient's MX server (no relay)
+const transporter = nodemailer.createTransport("direct:?name=hostname.example.com");
 ```
+
+You can pass any transport option as a query parameter in the URL:
+
+| Parameter        | Example                 | Description                                |
+| ---------------- | ----------------------- | ------------------------------------------ |
+| `pool`           | `pool=true`             | Enable connection pooling                  |
+| `maxConnections` | `maxConnections=5`      | Maximum simultaneous pool connections      |
+| `maxMessages`    | `maxMessages=100`       | Messages per connection before reconnecting|
+| `service`        | `service=gmail`         | Use a well-known service preset            |
 
 ### General options
 
@@ -65,6 +79,7 @@ Setting **`secure: false`** does **not** mean your emails are sent unencrypted. 
 | `greetingTimeout`   | 30000 ms       | How long to wait (in milliseconds) for the server to send its initial greeting after the connection is established.                            |
 | `socketTimeout`     | 600000 ms      | How long a connection can remain idle (in milliseconds) before Nodemailer closes it. The default is 10 minutes.                                |
 | `dnsTimeout`        | 30000 ms       | Maximum time (in milliseconds) to wait for DNS lookups to complete.                                                                            |
+| `dnsTtl`            | 300000 ms      | How long (in milliseconds) to cache DNS lookup results. The default is 5 minutes.                                                              |
 | `lmtp`              | `false`        | If `true`, use the LMTP (Local Mail Transfer Protocol) instead of SMTP. LMTP is typically used for local mail delivery.                        |
 | `opportunisticTLS`               | `false`        | If `true`, Nodemailer continues with an unencrypted connection when STARTTLS upgrade fails, instead of aborting.                               |
 | `forceAuth`                      | `false`        | If `true`, attempt authentication even when the server does not advertise AUTH capability. Some misconfigured servers require this.            |

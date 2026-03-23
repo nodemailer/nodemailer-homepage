@@ -1,6 +1,6 @@
 ---
 title: DKIM
-sidebar_position: 7
+sidebar_position: 5
 description: Add cryptographic DKIM signatures to outgoing messages for domain verification.
 ---
 

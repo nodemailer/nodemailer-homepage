@@ -4,7 +4,7 @@ sidebar_position: 1
 description: Create custom SMTP and LMTP server instances with authentication and message handling.
 ---
 
-Create SMTP and LMTP server instances on the fly. The _smtp-server_ module is **not** a full-blown mail server application like [Haraka](https://haraka.github.io/). Instead, it provides a convenient way to add custom SMTP or LMTP listeners to your Node.js application. It is the successor to the server portion of the now-deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [SMTP Connection](./smtp-connection). This module is also useful for [testing email functionality](../smtp/testing) in development environments.
+Create SMTP and LMTP server instances on the fly. The _smtp-server_ module is **not** a full-blown mail server application like [Haraka](https://haraka.github.io/). Instead, it provides a convenient way to add custom SMTP or LMTP listeners to your Node.js application. It is the successor to the server portion of the now-deprecated [simplesmtp](https://www.npmjs.com/package/simplesmtp) module. For a matching SMTP client, see [SMTP Connection](./smtp-connection). This module is also useful for [testing email functionality](../guides/testing-with-ethereal) in development environments.
 
 ## Usage
 

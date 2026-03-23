@@ -1,5 +1,6 @@
 ---
 title: License
+sidebar_position: 10
 description: MIT No Attribution license information and donation options for Nodemailer.
 ---
 

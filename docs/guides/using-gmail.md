@@ -1,6 +1,6 @@
 ---
 title: Using Gmail
-sidebar_position: 8
+sidebar_position: 2
 description: Send email through Gmail using OAuth2 or App Passwords with important caveats.
 ---
 
@@ -39,7 +39,7 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-The `service: "gmail"` option is a convenient shortcut that automatically configures Gmail's SMTP server settings. See [Well-Known Services](../smtp/well-known-services) for more details and a full list of supported providers.
+The `service: "gmail"` option is a convenient shortcut that automatically configures Gmail's SMTP server settings. See [Well-Known Services](/smtp/well-known-services) for more details and a full list of supported providers.
 
 :::info Google Workspace SMTP Relay
 If you are using **Google Workspace** and need to send from custom addresses without Gmail rewriting the `From:` header, use the dedicated `"GmailWorkspace"` service instead. This connects to `smtp-relay.gmail.com`, which supports sending as any address in your Workspace domain. See Google's [SMTP relay service documentation](https://support.google.com/a/answer/176600) for setup instructions.
@@ -55,7 +55,7 @@ const transporter = nodemailer.createTransport({
 ```
 :::
 
-For a complete walkthrough on setting up OAuth 2.0 credentials, including how to obtain your client ID, client secret, and refresh token, see the dedicated guide: [SMTP / OAuth 2.0](../smtp/oauth2).
+For a complete walkthrough on setting up OAuth 2.0 credentials, including how to obtain your client ID, client secret, and refresh token, see the dedicated guide: [SMTP / OAuth 2.0](/smtp/oauth2).
 
 ### App Password (requires 2-Step Verification)
 
@@ -108,7 +108,7 @@ If you exceed these limits, Gmail returns SMTP error **454 4.7.0** ("Too many re
 
 ## 3. Production alternatives
 
-For reliable email delivery at higher volumes, consider switching to a dedicated email service provider such as SendGrid, Postmark, [Amazon SES](../transports/ses), or Mailgun. These services are designed for automated sending and offer several advantages over Gmail:
+For reliable email delivery at higher volumes, consider switching to a dedicated email service provider such as SendGrid, Postmark, [Amazon SES](/transports/ses), or Mailgun. These services are designed for automated sending and offer several advantages over Gmail:
 
 - No aggressive login security that blocks legitimate server connections
 - Higher sending limits (many offer free tiers of 100-300 emails per day)

@@ -29,7 +29,7 @@ Use this method when your SMTP server accepts a standard username and access tok
 > **Token scopes**
 > Different email providers require different OAuth scopes to allow SMTP access:
 >
-> - **Gmail** - your token must include the `https://mail.google.com/` scope (see [Using Gmail](../usage/using-gmail) for complete setup instructions)
+> - **Gmail** - your token must include the `https://mail.google.com/` scope (see [Using Gmail](../guides/using-gmail) for complete setup instructions)
 > - **Outlook** - your token must include the `https://outlook.office.com/SMTP.Send` scope
 
 ```js
@@ -53,7 +53,7 @@ When using a non-pooled transport (the default), you can override the authentica
 
 ### Gmail-specific helpers {#oauth-gmail}
 
-Nodemailer includes built-in helpers that automate OAuth2 token management specifically for Gmail. These helpers can automatically refresh expired tokens, generate new tokens using service accounts, or integrate with your custom token provider. For general Gmail setup guidance, including App Passwords as an alternative authentication method, see [Using Gmail](../usage/using-gmail).
+Nodemailer includes built-in helpers that automate OAuth2 token management specifically for Gmail. These helpers can automatically refresh expired tokens, generate new tokens using service accounts, or integrate with your custom token provider. For general Gmail setup guidance, including App Passwords as an alternative authentication method, see [Using Gmail](../guides/using-gmail).
 
 #### 3-legged OAuth2 authentication {#oauth-3lo}
 

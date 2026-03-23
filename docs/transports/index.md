@@ -1,10 +1,10 @@
 ---
-title: Other transports
-sidebar_position: 5
+title: Transports
+sidebar_position: 4
 description: Alternative delivery mechanisms - sendmail, SES, stream, and community transports.
 ---
 
-# Other transports
+# Transports
 
 Nodemailer includes a fully-featured [SMTP transport](../smtp/) that is enabled by default, but you are not limited to SMTP. A _transport_ is the mechanism Nodemailer uses to deliver a fully-constructed email message. This could involve piping the message to the local `sendmail` binary, posting it to an HTTPS API like Amazon SES, or using any other delivery method you choose.
 

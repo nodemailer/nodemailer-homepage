@@ -51,7 +51,19 @@ export default {
         redirects: [
           {
             to: "/",
-            from: ["/about"],
+            from: ["/about", "/usage"],
+          },
+          {
+            to: "/guides/using-gmail",
+            from: ["/usage/using-gmail"],
+          },
+          {
+            to: "/guides/testing-with-ethereal",
+            from: ["/usage/testing-with-ethereal", "/smtp/testing"],
+          },
+          {
+            to: "/message/dsn",
+            from: ["/smtp/dsn"],
           },
         ],
       },

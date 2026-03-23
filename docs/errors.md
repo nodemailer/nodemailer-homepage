@@ -1,6 +1,6 @@
 ---
 title: Error reference
-sidebar_position: 11
+sidebar_position: 9
 ---
 
 This page documents all error codes and error types that Nodemailer and related packages can produce. Understanding these errors will help you diagnose issues and implement proper error handling in your application.

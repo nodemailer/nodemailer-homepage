@@ -1,7 +1,7 @@
 ---
 title: Delivery Status Notifications (DSN)
 description: Request delivery, delay, or failure status notifications for outgoing email messages using the SMTP DSN extension.
-sidebar_position: 26
+sidebar_position: 10
 ---
 
 :::info
@@ -10,7 +10,7 @@ The SMTP **Delivery Status Notification** (DSN) extension (defined in [RFC 3461]
 
 Delivery Status Notifications allow you to receive automatic email reports about what happens to your messages after they leave your server. You can request notifications when a message is successfully delivered, when delivery is delayed, or when delivery fails permanently (bounces).
 
-To request DSN for a message, add a **`dsn`** object to your [message configuration](/message/) when calling `transporter.sendMail()`.
+To request DSN for a message, add a **`dsn`** object to your [message configuration](./) when calling `transporter.sendMail()`.
 
 ## `dsn` object fields
 
@@ -90,5 +90,5 @@ await transporter.sendMail({
 
 ## Troubleshooting
 
-- **Not receiving DSN reports?** Verify that your [SMTP server](./index.md) supports the DSN extension by checking its `EHLO` response. The server must list `DSN` as one of its supported extensions. Also ensure you are not forcing a downgrade to the legacy `HELO` command, which does not support extensions.
+- **Not receiving DSN reports?** Verify that your [SMTP server](/smtp/) supports the DSN extension by checking its `EHLO` response. The server must list `DSN` as one of its supported extensions. Also ensure you are not forcing a downgrade to the legacy `HELO` command, which does not support extensions.
 - **Incomplete or missing information in reports?** Some email service providers only support a subset of DSN options or may modify certain values. Check your provider's documentation for any limitations or provider-specific behavior.
