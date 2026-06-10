@@ -85,8 +85,8 @@ Address fields (`from`, `to`, `cc`, `bcc`, `replyTo`) are returned as address ob
       "address": "jane@example.com"
     }
   ],
-  "html": "<span class=\"mp_address_name\">Jane Doe</span> &lt;<a href=\"mailto:jane@example.com\" class=\"mp_address_email\">jane@example.com</a>&gt;",
-  "text": "Jane Doe <jane@example.com>"
+  "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Jane Doe</span> &lt;<a href=\"mailto:jane@example.com\" class=\"mp_address_email\">jane@example.com</a>&gt;</span>",
+  "text": "\"Jane Doe\" <jane@example.com>"
 }
 ```
 
@@ -166,7 +166,7 @@ The following options can be passed to both `simpleParser()` and `new MailParser
 | Option                 | Default      | Description                                                            |
 | ---------------------- | ------------ | ---------------------------------------------------------------------- |
 | `skipHtmlToText`       | `false`      | Do not generate `text` from HTML when no plain text part exists        |
-| `maxHtmlLengthToParse` | `Infinity`   | Maximum HTML size in bytes to process for text conversion              |
+| `maxHtmlLengthToParse` | `Infinity`   | Maximum HTML length (in characters of the decoded body) to convert to text. If exceeded, an `'error'` event is emitted (rejecting `simpleParser`) and the HTML part is dropped from the output |
 | `formatDateString`     | `undefined`  | Custom function to format Date objects as strings                      |
 | `skipImageLinks`       | `false`      | Keep `cid:` image URLs as-is instead of converting to data URIs        |
 | `skipTextToHtml`       | `false`      | Do not generate `textAsHtml` from plain text                           |
@@ -182,7 +182,7 @@ When using the `MailParser` stream API, attachment objects have the same propert
 
 - **`content`** is a **Readable stream**, not a Buffer. You must consume this stream to get the attachment data.
 - **You must call `attachment.release()`** when you are finished processing the attachment. Parsing is paused until every attachment is released, which prevents memory from growing unbounded.
-- **`related`** is only available after parsing completes (in the `'end'` event), not when the attachment is first emitted.
+- **`checksum`** and **`size`** are populated only after the `content` stream has been fully consumed — read them after the stream's `'end'` event.
 
 ```javascript
 const fs = require("fs");
@@ -211,7 +211,7 @@ parser.on("end", () => {
 
 ## Character set decoding
 
-MailParser uses [iconv-lite](https://www.npmjs.com/package/iconv-lite) for converting character encodings to UTF-8. The exceptions are **ISO-2022-JP** and **EUC-JP** encodings, which are handled by [encoding-japanese](https://www.npmjs.com/package/encoding-japanese) for better accuracy.
+MailParser uses [iconv-lite](https://www.npmjs.com/package/iconv-lite) for converting character encodings to UTF-8. The exceptions are charsets labelled `ISO-2022-JP`, `JIS*`, or `EUCJP` (without a hyphen), which are handled by [encoding-japanese](https://www.npmjs.com/package/encoding-japanese) for better accuracy. Note that the standard hyphenated `EUC-JP` label currently falls through to iconv-lite.
 
 If you prefer to use [`node-iconv`](https://www.npmjs.com/package/iconv) instead of iconv-lite (for example, to support additional encodings), you can inject it via the `Iconv` option:
 
@@ -229,4 +229,4 @@ simpleParser(rfc822Message, { Iconv })
 
 ## License
 
-MailParser is dual-licensed under the **MIT License** or **EUPL v1.1+** (European Union Public License). You may choose whichever license best suits your project.
+MailParser is licensed under the **MIT License**.

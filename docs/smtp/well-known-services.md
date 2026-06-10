@@ -10,7 +10,7 @@ Nodemailer includes built-in connection presets for many popular email providers
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "Gmail", // Use any Service ID from the table below (case-insensitive)
+  service: "Gmail", // Use any Service ID from the table below (matching is case-insensitive)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -20,8 +20,10 @@ const transporter = nodemailer.createTransport({
 
 The `service` option is simply a convenient shortcut. You can always specify `host`, `port`, `secure`, and other connection options manually if you prefer. If your provider is not listed or if connection settings have changed, you have two options: submit a pull request to update the [services.json](https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json) file, or bypass the presets entirely and configure the connection details yourself.
 
+Matching is case-insensitive and ignores spaces and other special characters. Provider aliases (for example `"Google Mail"`, `"Outlook"`), known provider domains, and even full email addresses (for example `"user@googlemail.com"`) also resolve to a preset.
+
 :::info
-Most major email providers now require [OAuth 2.0 authentication](./oauth2) or app-specific passwords for security. The service presets only configure the server connection settings. You are still responsible for setting up the correct authentication method for your provider. For Gmail-specific setup instructions, see [Using Gmail](/guides/using-gmail).
+Most major email providers now require [OAuth 2.0 authentication](./oauth2) or app-specific passwords for security. The service presets only configure connection settings (and, for a few providers, the preferred SMTP AUTH mechanism). You are still responsible for setting up the correct authentication method for your provider. For Gmail-specific setup instructions, see [Using Gmail](/guides/using-gmail).
 :::
 
 :::tip AWS SES Users
@@ -56,14 +58,14 @@ While the SES service presets below use SMTP credentials, Nodemailer also offers
 | Godaddy            | GoDaddy (US)                      | smtpout.secureserver.net                | 25   |
 | GodaddyAsia        | GoDaddy (Asia)                    | smtp.asia.secureserver.net              | 25   |
 | GodaddyEurope      | GoDaddy (Europe)                  | smtp.europe.secureserver.net            | 25   |
-| hot.ee             | Hot.ee                            | mail.hot.ee                             | 25   |
+| hot.ee             | Hot.ee                            | mail.hot.ee                             | 587  |
 | Hotmail            | Microsoft Outlook / Hotmail       | smtp-mail.outlook.com                   | 587  |
 | iCloud             | Apple iCloud Mail                 | smtp.mail.me.com                        | 587  |
 | Infomaniak         | Infomaniak Mail                   | mail.infomaniak.com                     | 587  |
 | KolabNow           | KolabNow (secure email)           | smtp.kolabnow.com                       | 465  |
 | Loopia             | Loopia                            | mailcluster.loopia.se                   | 465  |
 | Loops              | Loops                             | smtp.loops.so                           | 587  |
-| mail.ee            | Mail.ee                           | smtp.mail.ee                            | 25   |
+| mail.ee            | Mail.ee                           | smtp.mail.ee                            | 587  |
 | Mail.ru            | Mail.ru                           | smtp.mail.ru                            | 465  |
 | Mailcatch.app      | Mailcatch.app (sandbox)           | sandbox-smtp.mailcatch.app              | 2525 |
 | Maildev            | Maildev (local)                   | localhost                               | 1025 |
@@ -77,7 +79,7 @@ While the SES service presets below use SMTP credentials, Nodemailer also offers
 | OhMySMTP           | OhMySMTP                          | smtp.ohmysmtp.com                       | 587  |
 | One                | one.com                           | send.one.com                            | 465  |
 | OpenMailBox        | OpenMailBox                       | smtp.openmailbox.org                    | 465  |
-| Outlook365         | Microsoft 365 / Outlook 365       | smtp.office365.com                      | 587  |
+| Outlook365         | Microsoft 365 / Office 365        | smtp.office365.com                      | 587  |
 | Postmark           | Postmark                          | smtp.postmarkapp.com                    | 2525 |
 | Proton             | Proton Mail                       | smtp.protonmail.ch                      | 587  |
 | qiye.aliyun        | Aliyun Enterprise (mxhichina)     | smtp.mxhichina.com                      | 465  |

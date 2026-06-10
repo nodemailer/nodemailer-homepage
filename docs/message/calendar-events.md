@@ -25,14 +25,19 @@ let message = {
 
 | Property   | Type                         | Default        | Description                                                                                                                                                |
 | ---------- | ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `method`   | `string`                     | `'PUBLISH'`    | The iCalendar [**METHOD**](https://www.rfc-editor.org/rfc/rfc5546#section-1.4) property. This is case-insensitive. Common values are `'REQUEST'` (for meeting invitations), `'REPLY'` (for responses), and `'CANCEL'` (for cancellations). |
+| `method`   | `string`                     | `'PUBLISH'`    | Sets the `method` parameter of the calendar part's `Content-Type` header (for example `text/calendar; method=REQUEST`). This is case-insensitive and should match the [**METHOD**](https://www.rfc-editor.org/rfc/rfc5546#section-1.4) property inside your `.ics` content. Common values are `'REQUEST'` (for meeting invitations), `'REPLY'` (for responses), and `'CANCEL'` (for cancellations). |
 | `filename` | `string`                     | `'invite.ics'` | The filename displayed in the email client for the attached calendar file.                                                                                 |
 | `content`  | `string \| Buffer \| Stream` | -              | The raw iCalendar data as a string, Buffer, or readable Stream.                                                                                            |
 | `path`     | `string`                     | -              | An absolute or relative file path to a local `.ics` file on disk.                                                                                          |
 | `href`     | `string`                     | -              | A URL (HTTP or HTTPS) from which Nodemailer will fetch the calendar data.                                                                                  |
+| `raw`      | `string \| Buffer \| Stream` | -              | A pre-built MIME part used verbatim, including headers. Overrides all other content sources.                                                               |
 | `encoding` | `string`                     | -              | The encoding of the `content` string, if applicable (for example, `'base64'` or `'hex'`).                                                                  |
 
-You must provide **exactly one** of `content`, `path`, or `href` to specify the calendar data source.
+Provide one of `content`, `path`, `href`, or `raw` as the calendar data source. If several are given, `raw` takes precedence, then `path`, `href`, and `content`. As a shorthand, you can also set `icalEvent` directly to a string or Buffer, which is equivalent to passing `{ content }`.
+
+:::warning Prefer `content` over `path`/`href`
+In current Nodemailer versions the `path` and `href` sources only populate the `text/calendar` alternative part — the additional `application/ics` attachment copy is generated empty when sending over SMTP, stream, or sendmail transports. For reliable results, read the calendar data yourself and pass it via `content`.
+:::
 
 :::note Best practice
 Calendar invitations can be sensitive to email structure. Adding extra file [attachments](./attachments) or complex alternative message bodies often causes email clients to display the calendar incorrectly or not at all. For the best compatibility across different email clients, keep your message simple: include only **text**, **html**, and a single **icalEvent**. Avoid adding other attachments to calendar invitation emails.

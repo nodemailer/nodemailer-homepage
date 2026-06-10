@@ -68,7 +68,7 @@ A general connection error occurred. This typically happens when:
 - The connection to the SMTP server failed to establish
 - The connection was closed unexpectedly during a transaction
 - The server terminated the connection (response code 421)
-- The socket encountered an error
+- Creating the socket failed (runtime socket errors are reported as `ESOCKET` instead)
 
 **Common causes:**
 - Incorrect hostname or port configuration
@@ -256,7 +256,7 @@ The message envelope is invalid. This relates to the MAIL FROM and RCPT TO comma
 - Invalid recipient address format
 - All recipients were rejected by the server
 - Server rejected the sender address
-- Internationalized email addresses when server does not support SMTPUTF8
+- An internationalized address was rejected by the server despite SMTPUTF8 being used
 
 **Error scenarios:**
 - `No recipients defined` - No valid recipients in the envelope
@@ -266,13 +266,13 @@ The message envelope is invalid. This relates to the MAIL FROM and RCPT TO comma
 - `Mail command failed` - Server rejected the sender address
 - `Recipient command failed` - Server rejected a recipient address
 - `Data command failed` - Server rejected the DATA command
-- `Internationalized mailbox name not allowed` - Unicode address used without SMTPUTF8 support
+- `Internationalized mailbox name not allowed` - The SMTPUTF8 extension was used for a Unicode address, but the server still rejected it (response code 550 for the sender, or 553 for a recipient)
 
 **Troubleshooting:**
 - Ensure at least one recipient is specified
 - Verify email addresses do not contain special characters like `<`, `>`, or newlines
 - Check server logs for why addresses were rejected
-- For rejected recipients, check the `rejected` and `rejectedErrors` arrays in the error
+- For rejected recipients, check the `rejected` and `rejectedErrors` arrays in the error (these are only attached when every recipient was rejected)
 
 ```javascript
 try {
@@ -326,7 +326,7 @@ The server response did not follow the expected SMTP protocol format.
 
 **Common causes:**
 - Invalid greeting response (not starting with 220)
-- Invalid EHLO/HELO response
+- Invalid HELO (or LMTP LHLO) response (a failed EHLO falls back to HELO or produces `ECONNECTION` instead)
 - Unexpected response to a command
 - Server is not actually an SMTP server
 
@@ -339,17 +339,12 @@ The server response did not follow the expected SMTP protocol format.
 
 #### EMAXLIMIT
 
-The connection pool has reached its maximum number of connections or send retries.
-
-**Common causes:**
-- All pooled connections are busy
-- Maximum retry limit reached after connection failures
-- Connection pool is exhausted
+A pooled connection reached the `maxMessages` limit (default 100) and was closed with the message `Resource exhausted`. This is normally handled internally by the pool — the connection is simply replaced with a fresh one.
 
 **Troubleshooting:**
-- Increase `maxConnections` in pool configuration
-- Reduce message sending rate
-- Check for connection leaks (connections not being released)
+- Increase `maxMessages` in the pool configuration if connections are recycled too aggressively
+
+Note that the `Reached maximum number of retries after connection was closed` failure (controlled by the `maxRequeues` pool option) is a plain `Error` without an error code.
 
 ### Configuration errors
 
@@ -460,6 +455,7 @@ The REQUIRETLS extension (RFC 8689) was requested but not supported by the serve
 **When this occurs:**
 - `requireTLSExtensionEnabled: true` is set in the message options
 - The SMTP server does not advertise REQUIRETLS capability
+- The connection is not TLS-encrypted (error: `REQUIRETLS can only be used over TLS connections (RFC 8689)`) — REQUIRETLS can only be requested on a connection that is already secured
 
 **Troubleshooting:**
 - Check if your SMTP server supports RFC 8689 REQUIRETLS
@@ -483,10 +479,9 @@ const message = {
 An error occurred with the sendmail transport.
 
 **Common causes:**
-- Sendmail binary not found (exit code 127)
-- Sendmail process exited with non-zero code
+- Sendmail process exited with a non-zero code (exit code 127 typically means an invoked wrapper script could not find sendmail)
 - Invalid envelope addresses (addresses starting with `-`)
-- Sendmail binary could not be spawned
+- Spawning returned no process handle (`sendmail was not found`); note that a missing binary usually surfaces as a `spawn ... ENOENT` system error without the `ESENDMAIL` code
 
 **Troubleshooting:**
 - Verify sendmail is installed and in the system PATH
@@ -502,7 +497,7 @@ const transporter = nodemailer.createTransport({
 
 #### ESES
 
-An error occurred with the AWS SES transport. These are typically errors passed through from the AWS SDK.
+Reserved for AWS SES transport errors. In practice, errors from the SES transport are raw AWS SDK errors passed through unchanged — inspect `err.name` (or `err.Code`) for AWS error identifiers rather than `err.code`.
 
 ## SMTP response codes
 
@@ -555,7 +550,7 @@ These indicate permanent failures. The operation will not succeed without change
 
 ## SES transport errors
 
-When using the Amazon SES transport, errors have the code `ESES` and include the underlying AWS SDK error. Common SES error codes include:
+When using the Amazon SES transport, errors from the AWS SDK are passed through unchanged — inspect `err.name` (or `err.Code`) for the AWS error identifier. (The `ESES` code is reserved in Nodemailer's error code list but is not currently attached to SES errors.) Common AWS error names include:
 
 | Code                   | Meaning                                            |
 | ---------------------- | -------------------------------------------------- |
@@ -573,7 +568,7 @@ When using the sendmail transport, errors have the code `ESENDMAIL`. Errors are 
 
 Additional sendmail errors:
 - `Can not send mail. Invalid envelope addresses.` - Address starts with `-` (security risk)
-- `sendmail was not found` - Sendmail binary could not be spawned
+- `sendmail was not found` - Spawning returned no process handle. Note: if spawning throws (for example `spawn ... ENOENT` for a missing binary), the original system error is returned without the `ESENDMAIL` code
 
 ## OAuth2 errors
 

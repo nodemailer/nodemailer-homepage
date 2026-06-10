@@ -32,7 +32,12 @@ const transporter = nodemailer.createTransport({
 | ----------------- | --------------------- | ------------ | -------------------------------------------------------------------------------------------------- |
 | `streamTransport` | `boolean`             | **required** | Set to `true` to enable Stream transport.                                                          |
 | `buffer`          | `boolean`             | `false`      | When `true`, returns the generated message as a `Buffer` instead of a `Readable` stream.           |
-| `newline`         | `'windows' \| 'unix'` | `'unix'`     | Line ending style for the generated message. Use `'windows'` for CRLF (`\r\n`) or `'unix'` for LF (`\n`). |
+
+To control line endings, set the **`newline` message option** in the object passed to `sendMail()`: `'windows'` (also accepts `'win'`, `'dos'`, `'\r\n'`) forces CRLF, any other truthy value (such as `'unix'` or `'\n'`) forces LF. If `newline` is not set, line breaks are kept as generated — headers and MIME structure use CRLF while body content keeps its original line endings.
+
+:::note
+The generated message retains the `Bcc:` header so that the output shows all recipients.
+:::
 
 :::note JSON Transport
 A separate **JSON transport** is also available. Enable it by setting `jsonTransport: true` (instead of `streamTransport`). JSON transport returns a serialized JSON representation of the message rather than the raw RFC 822 format. See the [JSON transport section](#json-transport) below for details.
@@ -61,7 +66,6 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   streamTransport: true,
-  newline: "windows", // Use CRLF (\r\n) line endings
 });
 
 transporter.sendMail(
@@ -70,6 +74,7 @@ transporter.sendMail(
     to: "recipient@example.com",
     subject: "Streamed message",
     text: "This message is streamed using CRLF line endings.",
+    newline: "windows", // Use CRLF (\r\n) line endings
   },
   (err, info) => {
     if (err) throw err;
@@ -83,15 +88,14 @@ transporter.sendMail(
 
 ### 2. Return a Buffer with Unix-style line endings
 
-When you need the entire message in memory at once, set `buffer: true`. This example also explicitly uses Unix-style LF line endings (the default).
+When you need the entire message in memory at once, set `buffer: true`. This example also explicitly forces Unix-style LF line endings via the message-level `newline` option.
 
 ```javascript
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   streamTransport: true,
-  buffer: true,    // Return a Buffer instead of a stream
-  newline: "unix", // Use LF (\n) line endings (this is the default)
+  buffer: true, // Return a Buffer instead of a stream
 });
 
 transporter.sendMail(
@@ -100,6 +104,7 @@ transporter.sendMail(
     to: "recipient@example.com",
     subject: "Buffered message",
     text: "This message is buffered using LF line endings.",
+    newline: "unix", // Force LF (\n) line endings
   },
   (err, info) => {
     if (err) throw err;
@@ -163,5 +168,5 @@ Use the following table to help decide which transport best fits your needs:
 | --------------------------------------------------- | --------------------------------------- |
 | Inspect or pipe raw RFC 822 SMTP content            | `streamTransport` (Stream or Buffer)    |
 | Store structured message data for later replay      | `jsonTransport`                         |
-| Apply Nodemailer plugins (DKIM, headers, etc.)      | Either (plugins run before output)      |
-| Need access to the `_raw` property (see [custom source](../message/custom-source)) | **Stream transport only** |
+| Apply Nodemailer plugins (DKIM, headers, etc.)      | `streamTransport` — DKIM signatures and message-stream transforms are not reflected in JSON output (only `compile`-stage plugins that modify message data affect `jsonTransport`) |
+| Need the `raw` message option rendered as output (see [custom source](../message/custom-source)) | **Stream transport only** |

@@ -68,10 +68,15 @@ In 3-legged OAuth2 (also known as "3LO"), your application requests permission f
   - **refreshToken** - the refresh token obtained during the user consent flow (required)
   - **accessToken** - a current access token (optional; Nodemailer will automatically generate one if not provided or if it has expired)
   - **expires** - UNIX timestamp (in milliseconds) indicating when the access token expires (optional)
-  - **accessUrl** - a custom token endpoint URL (optional; defaults to the Gmail token endpoint)
+  - **accessUrl** - a custom token endpoint URL (optional; defaults to Google's OAuth2 token endpoint, `https://accounts.google.com/o/oauth2/token`)
   - **timeout** - access token lifetime in seconds (optional; use this as an alternative to _expires_ when you know the token lifetime but not the exact expiration timestamp)
   - **customHeaders** - additional HTTP headers to include in token refresh requests (optional)
   - **customParams** - additional parameters to include in token refresh requests (optional)
+  - **tls** - TLS options for the HTTPS token request (optional; certificates are strictly validated by default — pass `{ rejectUnauthorized: false }` only for self-hosted OAuth endpoints using private CAs)
+
+:::note Automatic retry on rejected tokens
+If the SMTP server rejects the current access token during authentication, Nodemailer automatically requests a fresh token (using the refresh token, service account, or your provision callback with `renew = true`) and retries authentication once.
+:::
 
 #### 2LO authentication (service accounts) {#oauth-2lo}
 
@@ -84,17 +89,19 @@ In 3-legged OAuth2 (also known as "3LO"), your application requests permission f
   - **serviceClient** - the service account's `client_id` value from the service account JSON key file (required)
   - **privateKey** - the service account's private key in PEM format from the service account JSON key file (required)
   - **scope** - the OAuth scope to request (optional; defaults to `'https://mail.google.com/'`)
-  - **serviceRequestTimeout** - how long the generated token should be valid, in seconds (optional; defaults to 300 seconds, maximum 3600 seconds)
+  - **serviceRequestTimeout** - the requested validity of the generated token in seconds, used as the JWT expiration claim (optional; defaults to 300 seconds, maximum 3600 seconds)
+
+The `customHeaders` and `customParams` options described above for 3-legged OAuth2 apply to service account token requests as well.
 
 #### Using custom token handling {#custom-handling}
 
 If you have your own token management system, you can register a callback function that Nodemailer will call whenever it needs an access token. This gives you complete control over how tokens are obtained and managed.
 
-Register the callback using `transporter.set('oauth2_provision_cb', callback)`. Your callback receives three arguments:
+Register the callback using `transporter.set('oauth2_provision_cb', callback)` (alternatively, it can be supplied as `auth.provisionCallback` in the transport options). Your callback receives three arguments:
 
 - `user` - the email address that needs a token
 - `renew` - a boolean indicating whether the previous token failed and a fresh token is needed
-- `cb` - the callback function to call with the result: `cb(error, accessToken, expires)`
+- `cb` - the callback function to call with the result: `cb(error, accessToken, expires)` — `expires` is an optional absolute expiration time as a UNIX timestamp in milliseconds; omit it to disable caching of the token
 
 ```js
 transporter.set("oauth2_provision_cb", (user, renew, cb) => {
@@ -103,6 +110,10 @@ transporter.set("oauth2_provision_cb", (user, renew, cb) => {
   cb(null, token);
 });
 ```
+
+:::warning Non-pooled transports
+With a non-pooled transport, the provision callback is only consulted when you provide an `auth` object in the `sendMail()` call (for example `auth: { user: "user@example.com" }`) or when calling `transporter.verify()`. With a pooled transport (`pool: true`) it is used for every connection.
+:::
 
 #### Token update notifications {#update-notification}
 
@@ -141,7 +152,7 @@ let transporter = nodemailer.createTransport({
 
 2. **Custom handler** - token returned by your own service
 
-Use this approach when you have a separate token management service or database that provides tokens on demand.
+Use this approach when you have a separate token management service or database that provides tokens on demand. Note that with a non-pooled transport the callback is only consulted when the message itself includes an `auth` option, so pass the user with each `sendMail()` call:
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -153,6 +164,14 @@ let transporter = nodemailer.createTransport({
 
 transporter.set("oauth2_provision_cb", (user, renew, cb) => {
   cb(null, userTokens[user]);
+});
+
+transporter.sendMail({
+  from: "sender@example.com",
+  to: "recipient@example.com",
+  subject: "Message",
+  text: "Token provided by the custom handler",
+  auth: { user: "user@example.com" }, // triggers the provision callback
 });
 ```
 

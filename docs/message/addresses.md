@@ -31,7 +31,7 @@ Since address fields use commas to separate multiple recipients, you must wrap d
 '"Майлер, Ноде" <foobar@example.com>'
 ```
 
-Without the double quotes, Nodemailer would incorrectly interpret the comma as a separator between two addresses.
+Quoting is the reliable way to include commas. Nodemailer attempts to recombine display names that were split on an unquoted comma, but this heuristic only works when the name fragment is followed by an address in angle brackets — so always quote names containing commas or semicolons.
 :::
 
 ---
@@ -92,18 +92,20 @@ const message = {
 
 ## Internationalized email addresses
 
-Nodemailer supports internationalized domain names (IDNs) that contain non-ASCII characters. When you provide a Unicode domain, Nodemailer automatically converts it to the ASCII-compatible [Punycode](https://en.wikipedia.org/wiki/Punycode) encoding required by the email protocol:
+Nodemailer supports internationalized domain names (IDNs) that contain non-ASCII characters. When you provide a Unicode domain and the username (local part) is plain ASCII, Nodemailer automatically converts the domain to the ASCII-compatible [Punycode](https://en.wikipedia.org/wiki/Punycode) encoding required by the email protocol:
 
 ```javascript
-"андрис@уайлддак.орг"
-// Nodemailer converts the domain to punycode: андрис@xn--80aalaxjd5d.xn--c1avg
+"andris@уайлддак.орг"
+// Nodemailer converts the domain to punycode: andris@xn--80aalaxjd5d.xn--c1avg
 ```
+
+If the username itself contains non-ASCII characters, the whole address already requires the SMTPUTF8 extension (see below), so the domain is kept in Unicode form instead of being punycoded.
 
 ### Unicode usernames (EAI/SMTPUTF8)
 
-Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and sends the `SMTPUTF8` parameter with the `MAIL FROM` command. For more details about SMTP envelope handling, see [SMTP envelope](../smtp/envelope.md).
+Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and adds the `SMTPUTF8` parameter to the `MAIL FROM` command — but only when the server advertises SMTPUTF8 support. For more details about SMTP envelope handling, see [SMTP envelope](../smtp/envelope.md).
 
-If the server does not advertise SMTPUTF8 support, the message will be rejected with an `EENVELOPE` error to prevent delivery failures.
+If the server does not support SMTPUTF8, Nodemailer still attempts delivery without the parameter; servers that cannot handle internationalized addresses typically reject the `MAIL FROM` or `RCPT TO` command, which surfaces as an `EENVELOPE` error.
 
 ---
 

@@ -136,6 +136,10 @@ The AWS SES SDK is not bundled with Nodemailer. You need to install it as a sepa
 npm install @aws-sdk/client-sesv2
 ```
 
+### "Using legacy SES configuration, expecting @aws-sdk/client-sesv2"
+
+Nodemailer 7 and later no longer accept the Nodemailer 6 style `SES: { ses, aws }` configuration. `createTransport()` throws an `ECONFIG` error with this message when it detects the old shape. Replace it with `SES: { sesClient, SendEmailCommand }` using `@aws-sdk/client-sesv2`, as shown in the [quick start](#quick-start) above.
+
 ### Using the verify() method with SES
 
 The SES transport supports the `transporter.verify()` method to validate your configuration. Unlike [SMTP transports](../smtp/), which test the actual connection, the SES verify method works by attempting to send an invalid test message. If SES responds with an `InvalidParameterValue` or `MessageRejected` error, the verification is considered successful because it confirms your credentials and configuration are correct.

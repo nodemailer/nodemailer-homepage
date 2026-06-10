@@ -12,6 +12,8 @@ The **raw** option can be used at three different levels:
 2. **Per alternative** - Provide a pre-built MIME part for `text/plain`, `text/html`, or any other alternative content type.
 3. **Per attachment** - Provide a complete attachment including its MIME headers and body.
 
+At each level, `raw` accepts the same source forms as attachment content: a string, a `Buffer`, a readable stream, `{ path: "/path/to/message.eml" }`, or `{ href: "https://example.com/message.eml" }`.
+
 :::tip Always set an envelope
 When you use **raw** for the entire message, you must also provide `envelope.from` and `envelope.to` explicitly. Nodemailer does not parse these values from the raw message content. The envelope tells the [SMTP](../smtp/) server who the sender and recipients are during the mail transfer.
 :::
@@ -34,7 +36,7 @@ Hello world!`,
 };
 ```
 
-> When using a string, newlines are passed through as-is. If your mail server requires `\r\n` line endings (as per RFC 5321), make sure your raw content uses them.
+> Newlines in raw content are kept as-is when the message is generated. The SMTP transport normalizes bare `\n` to `\r\n` automatically while transmitting the message, but other transports (stream, SES) emit the content unchanged — set the message option `newline: 'windows'` if you need guaranteed CRLF output there.
 
 ### 2. EML file as the entire message
 

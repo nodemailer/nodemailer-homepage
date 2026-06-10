@@ -23,6 +23,10 @@ To request DSN for a message, add a **`dsn`** object to your [message configurat
 
 > Nodemailer automatically escapes special characters in DSN values according to the [xtext](https://datatracker.ietf.org/doc/html/rfc3461#section-4) encoding rules defined in RFC 3461.
 
+:::note Aliases and validation
+`ret`, `envid`, and `orcpt` are accepted as aliases of `return`, `id`, and `recipient`. `return` also accepts `'hdrs'` and `'body'` as synonyms of `'headers'` and `'full'`, and `notify` may be given as a comma-separated string. Invalid `return` or `notify` values reject the send with an `EENVELOPE` error — this validation runs even if the server does not support DSN.
+:::
+
 ## Examples
 
 ### 1. Request a notification when the message is delivered
@@ -90,5 +94,5 @@ await transporter.sendMail({
 
 ## Troubleshooting
 
-- **Not receiving DSN reports?** Verify that your [SMTP server](/smtp/) supports the DSN extension by checking its `EHLO` response. The server must list `DSN` as one of its supported extensions. Also ensure you are not forcing a downgrade to the legacy `HELO` command, which does not support extensions.
+- **Not receiving DSN reports?** Verify that your [SMTP server](/smtp/) supports the DSN extension by checking its `EHLO` response. The server must list `DSN` as one of its supported extensions. Nodemailer always sends `EHLO` first and only falls back to the legacy `HELO` command if the server rejects `EHLO` — and `HELO` does not support extensions, so DSN cannot be used with such servers.
 - **Incomplete or missing information in reports?** Some email service providers only support a subset of DSN options or may modify certain values. Check your provider's documentation for any limitations or provider-specific behavior.

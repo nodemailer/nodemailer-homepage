@@ -20,6 +20,10 @@ Many email clients block external images by default for privacy and security rea
 The **cid** value must be unique within the message. A recommended pattern is to use an email-like format with a domain you control, such as `logo@example.com` or `header-image@mycompany.com`. This format helps ensure uniqueness and follows email standards.
 :::
 
+:::note An HTML body is required
+Embedding via `cid` only takes effect when the message has an `html` body — the cid attachments are grouped together with the HTML part into a `multipart/related` container. Without an HTML body, `cid` attachments are delivered as regular attachments.
+:::
+
 #### Basic example
 
 This example shows how to embed a single image from a file path. The `cid` value in the attachment must match the value used in the HTML `src` attribute (without the `cid:` prefix).

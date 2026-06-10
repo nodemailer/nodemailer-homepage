@@ -4,7 +4,7 @@ sidebar_position: 6
 description: Extend SMTP transport with custom authentication mechanisms like NTLM or CRAM-MD5.
 ---
 
-Nodemailer's [SMTP transport](./index.md) supports common authentication mechanisms like LOGIN, PLAIN, and [XOAUTH2](./oauth2) out of the box. However, some SMTP servers use proprietary or less common authentication methods that Nodemailer does not recognize. For these cases, you can create custom authentication handlers.
+Nodemailer's [SMTP transport](./index.md) supports common authentication mechanisms like LOGIN, PLAIN, CRAM-MD5, and [XOAUTH2](./oauth2) out of the box. However, some SMTP servers use proprietary or less common authentication methods that Nodemailer does not recognize. For these cases, you can create custom authentication handlers.
 
 ## When do I need a custom handler?
 
@@ -18,7 +18,7 @@ In this response, the server lists three available authentication methods. Nodem
 
 By providing a handler that matches the method name exactly, you enable Nodemailer to complete the authentication exchange.
 
-If a server supports multiple authentication methods, Nodemailer will choose one automatically. To override this behavior and force Nodemailer to use your custom method, set `auth.method` to match your handler's name.
+Nodemailer only auto-selects from the methods it recognizes (PLAIN, LOGIN, CRAM-MD5, XOAUTH2) — a custom-named method advertised by the server is never picked automatically. To use a custom method you must set `auth.method` to your handler's name; this also works to replace a built-in mechanism with your own handler.
 
 ---
 
@@ -49,7 +49,7 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    type: "custom",                // tells Nodemailer to use a custom handler
+    type: "custom",                // any value other than "OAuth2" works; the handler is selected via "method" below
     method: "MY-CUSTOM-METHOD",    // specifies which handler to use
     user: "username",
     pass: "verysecret",
@@ -78,7 +78,7 @@ The context object (`ctx`) provides everything you need to complete the authenti
 
 #### `ctx.auth`
 
-The complete `auth` object you passed to `createTransport()`. This includes any custom properties you added.
+A normalized authentication object containing `type`, `user`, `credentials`, and `method`. Custom top-level properties of the `auth` object are **not** preserved — put extra values in `auth.options`, which is exposed as `ctx.auth.credentials.options` (see below).
 
 #### `ctx.auth.credentials`
 
@@ -92,15 +92,15 @@ A convenient alias containing the authentication credentials:
 
 #### `ctx.method`
 
-The authentication method name being used (the same value as `auth.method`).
+The authentication method name being used (the value of `auth.method`, normalized to upper case).
 
 #### `ctx.extensions`
 
-An array of SMTP extensions supported by the server (such as `SIZE`, `STARTTLS`, `PIPELINING`). This can be useful if your authentication method depends on certain server capabilities.
+An array of SMTP extensions Nodemailer recognized in the server greeting. Possible values are `SMTPUTF8`, `DSN`, `8BITMIME`, `REQUIRETLS`, `PIPELINING`, and `SIZE`. This can be useful if your authentication method depends on certain server capabilities. Note that `STARTTLS` never appears here — it triggers a TLS upgrade instead of being recorded.
 
 #### `ctx.authMethods`
 
-An array of authentication methods the server advertised (such as `LOGIN`, `PLAIN`, [`XOAUTH2`](./oauth2)). You can check this to verify your expected method is available before attempting authentication.
+An array of the authentication methods Nodemailer recognized in the server greeting — only `PLAIN`, `LOGIN`, `CRAM-MD5`, and [`XOAUTH2`](./oauth2) are detected. Custom method names advertised by the server will **not** appear here, so do not rely on this list to check for your custom method.
 
 #### `ctx.maxAllowedSize`
 
@@ -192,4 +192,4 @@ The following packages provide ready-to-use handlers for specific authentication
 | Mechanism | Package                                                                      | Notes                                      |
 | --------- | ---------------------------------------------------------------------------- | ------------------------------------------ |
 | NTLM      | [`nodemailer-ntlm-auth`](https://github.com/nodemailer/nodemailer-ntlm-auth) | Windows integrated authentication (NTLM)  |
-| CRAM-MD5  | [`nodemailer-cram-md5`](https://github.com/nodemailer/nodemailer-cram-md5)   | Challenge-response authentication          |
+| CRAM-MD5  | [`nodemailer-cram-md5`](https://github.com/nodemailer/nodemailer-cram-md5)   | Legacy — CRAM-MD5 is supported natively in current Nodemailer versions, so this package is no longer needed |

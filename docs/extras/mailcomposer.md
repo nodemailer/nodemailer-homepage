@@ -60,6 +60,12 @@ mail.compile().build((err, message) => {
 });
 ```
 
+If no callback is provided, `build()` returns a Promise that resolves with the message Buffer:
+
+```js
+const message = await mail.compile().build();
+```
+
 ---
 
 ## Message fields
@@ -91,9 +97,12 @@ MailComposer accepts the same message options as Nodemailer's [message configura
 | **encoding**          | The transfer encoding to use for text parts (such as `quoted-printable` or `base64`).                                                                                                                                          |
 | **raw**               | Provide a pre-built raw message instead of having MailComposer generate one. When using this option, you must set headers and envelope manually. See [custom source](/message/custom-source) for more details.            |
 | **textEncoding**      | Force a specific encoding for text parts: `quoted-printable` or `base64`. If omitted, the encoding is detected automatically based on the content.                                                                             |
-| **disableUrlAccess**  | When set to `true`, MailComposer will throw an error if any part of the message tries to fetch content from a URL.                                                                                                             |
-| **disableFileAccess** | When set to `true`, MailComposer will throw an error if any part of the message tries to read content from the file system.                                                                                                    |
+| **disableUrlAccess**  | When set to `true`, message generation fails with an `EURLACCESS` error (delivered through the stream or `build()` callback) if any part of the message tries to fetch content from a URL.                                     |
+| **disableFileAccess** | When set to `true`, message generation fails with an `EFILEACCESS` error (delivered through the stream or `build()` callback) if any part of the message tries to read content from the file system.                           |
 | **newline**           | The line break style to use in the generated message. Valid values are `\r\n` (CRLF), `\n` (LF), or leave undefined to preserve the line breaks from your input.                                                               |
+| **baseBoundary**      | A shared base string used when generating unique MIME boundaries. Defaults to a random hex string.                                                                                                                             |
+| **boundaryPrefix**    | A custom prefix for MIME boundary strings. Defaults to `'--_NmP'`.                                                                                                                                                             |
+| **normalizeHeaderKey** | A function invoked as `normalizeHeaderKey(key, value)` for each header; return a non-empty string to replace the header key. Useful for custom header capitalization.                                                          |
 
 All text content is treated as UTF-8. Attachments are streamed as binary data.
 
@@ -106,12 +115,14 @@ Each attachment is defined as an object with the following properties:
 | Property                    | Description                                                                                                                                                                               |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **filename**                | The file name shown to recipients. Unicode characters are allowed. Set to `false` to omit the filename entirely.                                                                          |
-| **cid**                     | A Content-ID for embedding the attachment inline (used with `cid:` URLs in HTML). When you set **cid**, the attachment automatically uses `contentDisposition: 'inline'` and is placed in the `multipart/related` section. |
+| **cid**                     | A Content-ID for embedding the attachment inline (used with `cid:` URLs in HTML). When you set **cid**, the attachment is placed in the `multipart/related` section; image attachments (`image/*`) with a **cid** additionally default to `contentDisposition: 'inline'`. |
 | **content**                 | The attachment data as a `string`, `Buffer`, or readable `Stream`.                                                                                                                        |
 | **encoding**                | The encoding used to convert a string **content** into a Buffer. Common values include `base64` and `hex`.                                                                                |
 | **path**                    | A file path or URL to stream content from, instead of providing data directly via **content**. Supports local file paths, HTTP/HTTPS URLs, and data URIs. Ideal for large files.         |
-| **contentType**             | The MIME type of the attachment. If omitted, it is detected automatically from the **filename** or **path**.                                                                              |
-| **contentTransferEncoding** | The transfer encoding for this attachment (`quoted-printable`, `base64`, etc.). If omitted, it is detected automatically.                                                                 |
+| **href**                    | A URL to fetch the attachment content from (alternative to providing an HTTP(S) **path**).                                                                                               |
+| **httpHeaders**             | An object of custom HTTP headers sent when fetching **href**, for example `{ authorization: "Bearer ..." }`.                                                                              |
+| **contentType**             | The MIME type of the attachment. If omitted, it is detected automatically from the **filename**, **path**, or **href**, falling back to `application/octet-stream`.                       |
+| **contentTransferEncoding** | The transfer encoding for this attachment (`quoted-printable`, `base64`, `7bit`, `8bit`). If omitted, defaults to `base64` (`8bit` for `message/*` attachments). Set to `false` to let the encoding be detected automatically from the content. |
 | **contentDisposition**      | How the attachment should be presented: `attachment` (the default, shown as a downloadable file) or `inline` (displayed within the message body).                                         |
 | **headers**                 | Additional headers for this MIME part, for example: `{ 'X-Custom-Header': 'value' }`.                                                                                                     |
 | **raw**                     | Provide pre-built raw MIME content for this part. When set, all other attachment options are ignored. Accepts a `string`, `Buffer`, `Stream`, or another attachment-like object.          |
@@ -209,14 +220,14 @@ All address fields (including **from**) accept one or more addresses. You can mi
 }
 ```
 
-Internationalized domain names (IDN) are automatically converted to their ASCII-compatible encoding (punycode):
+Internationalized domain names (IDN) are automatically converted to their ASCII-compatible encoding (punycode) when the username (the part before `@`) is plain ASCII:
 
 ```
-"Андрис" <андрис@уайлддак.орг>
-// Domain converts to punycode: андрис@xn--80aalaxjd5d.xn--c1avg
+"Andris" <andris@уайлддак.орг>
+// Domain converts to punycode: andris@xn--80aalaxjd5d.xn--c1avg
 ```
 
-Note that email addresses with non-ASCII usernames (the part before `@`) require the receiving server to support the SMTPUTF8 extension.
+When the username contains non-ASCII characters, the whole address already requires the SMTPUTF8 extension on the receiving server, so the domain is kept in UTF-8 form instead of being punycoded.
 
 ---
 
@@ -236,7 +247,7 @@ const mailOptions = {
 ```
 
 :::note
-Some transports (such as AWS SES) ignore the `envelope` option and use the header addresses instead.
+Some transports may not honor all envelope settings. For example, the AWS SES transport uses the _From:_ header (falling back to `envelope.from`) for the SES `FromEmailAddress`, while the envelope recipients are used as the SES `Destination`.
 :::
 
 ---
@@ -284,4 +295,4 @@ mail.build((err, message) => {
 
 ## License
 
-[MIT](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)
+[MIT-0](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)

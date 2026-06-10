@@ -6,14 +6,14 @@ description: Extend Nodemailer with custom logic at compile, stream, or transpor
 
 Nodemailer is designed to be **extensible**. You can inject custom logic at three well-defined phases of a message's lifecycle:
 
-| Phase              | Keyword     | When it runs                                                                   | Typical uses                                                      |
+| Phase              | Stage       | When it runs                                                                   | Typical uses                                                      |
 | ------------------ | ----------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
 | **Pre-processing** | `compile`   | After the message object is created but _before_ the MIME source is generated | Templating, automatic plain-text alternatives, address validation |
 | **Processing**     | `stream`    | After MIME compilation, while the message stream is being prepared for sending | Inlining images, transforming HTML content                        |
-| **Sending**        | `transport` | When the message is ready to be delivered                                      | [SMTP](/smtp/), [SES](/transports/ses), SparkPost, custom HTTP APIs |
+| **Sending**        | transport   | When the message is ready to be delivered                                      | [SMTP](/smtp/), [SES](/transports/ses), SparkPost, custom HTTP APIs |
 
 :::tip
-Use _compile_ and _stream_ plugins when you want your plugin to work with any transport. Transport plugins are only needed when you want to define a completely custom delivery mechanism.
+Use _compile_ and _stream_ plugins when you want your plugin to work with any transport. These are the two valid keywords for `transporter.use()`. The transport stage is different: it is not registered with `use()` — a custom transport object is passed to `nodemailer.createTransport()` instead. Transport plugins are only needed when you want to define a completely custom delivery mechanism.
 :::
 
 ## Writing a plugin

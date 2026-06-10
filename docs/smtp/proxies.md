@@ -8,7 +8,7 @@ Nodemailer can route [SMTP](./index.md) connections **through an outbound proxy 
 
 Nodemailer includes built-in support for **HTTP CONNECT** proxies. For **SOCKS4/4a/5** proxies or other protocols, you have two options:
 
-1. Install the [`socks`](https://www.npmjs.com/package/socks) package and Nodemailer will use it automatically.
+1. Install the [`socks`](https://www.npmjs.com/package/socks) package and register it with the transporter via `transporter.set("proxy_socks_module", require("socks"))`.
 2. Write a custom proxy handler function for specialized requirements.
 
 ## Quick start
@@ -89,8 +89,10 @@ The `-N` flag tells SSH not to execute a remote command (just forward ports), an
 Then configure Nodemailer to use this proxy:
 
 ```javascript
-proxy: "socks5://localhost:1080"
+proxy: "socks5://127.0.0.1:1080"
 ```
+
+> Prefer an IP literal for the proxy address. Non-IP proxy hostnames are resolved with `dns.resolve()`, which queries DNS servers directly and does not consult `/etc/hosts`, so names like `localhost` may fail to resolve.
 
 ## Custom proxy handlers
 
@@ -128,7 +130,7 @@ The handler function receives three arguments:
 
 ### Pre-encrypted connections
 
-If your proxy connection is **already encrypted** (for example, you used `tls.connect()` instead of `net.connect()`), you must set `secured: true` in the result object. This tells Nodemailer that the connection is already secure and it should not attempt a STARTTLS upgrade.
+If your proxy connection is **already encrypted** (for example, you used `tls.connect()` instead of `net.connect()`), you must set `secured: true` in the result object. This tells Nodemailer that the socket is already TLS-encrypted, so it skips wrapping the socket in TLS again (the implicit upgrade normally performed when `secure: true` is set). Use this together with `secure: true` in the transport options.
 
 ```javascript
 const tls = require("tls");

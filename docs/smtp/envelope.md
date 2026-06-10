@@ -9,7 +9,7 @@ When Nodemailer delivers an email over SMTP, it sends **two distinct layers** of
 1. **Message headers** - the visible metadata that email clients display to recipients (`From:`, `To:`, `Subject:`, etc.).
 2. **SMTP envelope** - the routing instructions (`MAIL FROM`, `RCPT TO`) that mail servers use to deliver the message and handle bounces. These instructions are separate from the headers and are not visible to recipients.
 
-By default, Nodemailer **builds the envelope automatically** by extracting email addresses from the `from`, `to`, `cc`, and `bcc` fields you provide. For most use cases, this automatic behavior is exactly what you need.
+By default, Nodemailer **builds the envelope automatically** by extracting email addresses from the `from`, `to`, `cc`, and `bcc` fields you provide (if `from` is missing, the `replyTo` or `sender` address is used for `MAIL FROM`). For most use cases, this automatic behavior is exactly what you need.
 
 However, if you need precise control over the envelope, you can override the defaults with the `envelope` property. Common reasons to do this include:
 
@@ -38,7 +38,7 @@ However, if you need precise control over the envelope, you can override the def
 | `to`   | `string \| string[]` | Address(es) added to the **`RCPT TO`** list (the actual delivery destinations). |
 | `cc`   | `string \| string[]` | _Optional._ These addresses are merged into the `to` list when the envelope is generated. |
 | `bcc`  | `string \| string[]` | _Optional._ These addresses are merged into the `to` list when the envelope is generated. |
-| `requireTLSExtensionEnabled` | `boolean` | _Optional._ If `true`, the `REQUIRETLS` extension is used (RFC 8689). This requires a TLS connection. |
+| `requireTLSExtensionEnabled` | `boolean` | _Optional._ If `true`, the `REQUIRETLS` parameter (RFC 8689) is added to `MAIL FROM`. Sending fails with an `EREQUIRETLS` error unless the connection is encrypted **and** the server advertises the `REQUIRETLS` extension. |
 
 Nodemailer accepts any [address format](../message/addresses) it supports: plain email addresses like `user@example.com`, name-address pairs like `Name <address>`, or internationalized addresses with UTF-8 domains.
 

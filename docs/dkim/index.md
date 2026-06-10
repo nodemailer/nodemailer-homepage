@@ -45,7 +45,7 @@ precedence**.
 | `cacheTreshold`    | `number`                                         | `2097152` (2 MB)   | The number of bytes to keep in memory before switching to disk caching. Only applies when `cacheDir` is set to a valid path.                                  |
 
 :::warning
-The option `cacheTreshold` is intentionally misspelled (with an "o" instead of "e") to maintain backwards compatibility with older Nodemailer versions.
+The option `cacheTreshold` is intentionally misspelled (missing the "h" in "Threshold") to maintain backwards compatibility with older Nodemailer versions.
 :::
 
 ---

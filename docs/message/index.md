@@ -54,17 +54,17 @@ These options provide additional ways to control the message content:
 - **attachDataUrls** - When set to `true`, Nodemailer automatically converts `data:` URI images in your HTML content into embedded attachments. This is useful when your HTML contains inline images encoded as data URIs.
 - **watchHtml** - An Apple Watch-specific HTML version of the message. Note that modern Apple Watches render standard `text/html` content well, so this field is rarely needed.
 - **amp** - An AMP4EMAIL-specific HTML version of the message. Works the same way as `text` and `html`. See the [AMP example below](#amp-example) for usage, or read [this blog post](https://blog.nodemailer.com/2019/12/30/testing-amp4email-with-nodemailer/) for more details about sending and rendering AMP emails.
-- **icalEvent** - An iCalendar event to include as an alternative content type. This is useful for sending calendar invitations. See [Calendar events](/message/calendar-events) for details.
+- **icalEvent** - An iCalendar event to include. The event is added both as a `text/calendar` alternative and as an `application/ics` attachment (named `invite.ics` by default). This is useful for sending calendar invitations. See [Calendar events](/message/calendar-events) for details.
 - **alternatives** - An array of alternative content representations (in addition to the text and HTML parts). See [Using alternative content](/message/alternatives) for details.
-- **encoding** - Sets the `Content-Transfer-Encoding` header for text and HTML parts. When specified, this value is used directly as the transfer encoding (e.g., `'base64'`, `'quoted-printable'`, `'7bit'`, `'8bit'`). This is different from `textEncoding`, which controls how text content is automatically encoded.
+- **encoding** - Sets the `Content-Transfer-Encoding` header for text parts (`text`, `html`, `watchHtml`, `amp`). Only `'base64'` and `'quoted-printable'` are applied as-is; any other value is ignored and Nodemailer falls back to automatic detection (`7bit` for plain ASCII content with short lines, otherwise quoted-printable or base64). This is different from `textEncoding`, which controls which encoding the automatic detection prefers.
 - **raw** - An existing MIME message to send instead of generating a new one. Use this when you have a pre-built email message. See [Custom source](/message/custom-source) for details.
-- **textEncoding** - Forces a specific content-transfer-encoding for text content. Valid values are `'quoted-printable'` or `'base64'`. By default, Nodemailer automatically chooses the best option: `quoted-printable` for content with mostly ASCII characters, and `base64` otherwise.
+- **textEncoding** - Sets the preferred content-transfer-encoding to use when text content actually needs to be encoded. Valid values are `'quoted-printable'` or `'base64'`. Plain 7-bit ASCII content without overly long lines is still sent unencoded as `7bit`. By default, Nodemailer automatically chooses the best option: `quoted-printable` for content with mostly ASCII characters, and `base64` otherwise.
 
 ##### Header options
 
 These options let you customize the email headers:
 
-- **priority** - Sets the message importance level. Valid values are `'high'`, `'normal'` (the default), or `'low'`. This adds the appropriate `X-Priority`, `X-MSMail-Priority`, and `Importance` headers to your message.
+- **priority** - Sets the message importance level. Valid values are `'high'`, `'normal'` (the default), or `'low'`. Setting `'high'` or `'low'` adds the appropriate `X-Priority`, `X-MSMail-Priority`, and `Importance` headers to your message; for `'normal'` no priority headers are added.
 - **headers** - Custom header fields to add to the message. Can be an object like `{"X-Key-Name": "key value"}` or an array for multiple values with the same key: `[{key: "X-Key-Name", value: "val1"}, {key: "X-Key-Name", value: "val2"}]`. See [Custom headers](/message/custom-headers) for more details.
 - **messageId** - A custom Message-ID value for the email. If not provided, Nodemailer generates a random unique identifier automatically.
 - **date** - The date to use for the email's Date header. If not provided, the current date and time (in UTC) is used. You can pass a Date object or a date string.
@@ -85,7 +85,7 @@ These options are rarely needed but provide fine-grained control over the genera
 - **boundaryPrefix** - A custom prefix for MIME boundary strings. Defaults to `'--_NmP'`. Boundaries separate different parts of a multipart message.
 - **baseBoundary** - A shared base string used when generating unique MIME boundaries. Defaults to a random hex string. All boundaries in the message will be derived from this value.
 - **newline** - Controls the line ending style in the generated message. Set to `'windows'` (or `'dos'`, `'win'`, `'\r\n'`) for Windows-style CRLF line endings, or `'unix'` (or `'linux'`, `'\n'`) for Unix-style LF line endings.
-- **xMailer** - A custom value for the X-Mailer header, which typically identifies the software that generated the email. Set to `false` to omit this header entirely.
+- **xMailer** - A custom value for the X-Mailer header, which typically identifies the software that generated the email. Nodemailer does not add an X-Mailer header unless this option is set; setting it to `false` only matters for cancelling a value inherited from the transport `defaults`.
 - **dkim** - Per-message DKIM signing configuration that overrides the transport-level settings. See [DKIM signing](/dkim/) for details.
 
 The following example demonstrates setting a custom header and a specific date:

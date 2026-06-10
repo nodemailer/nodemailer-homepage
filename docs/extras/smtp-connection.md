@@ -74,8 +74,10 @@ connection.quit(); // or connection.close()
 | **socket**                      | `net.Socket`        | -                      | A pre-created socket to use instead of creating a new one. The socket should not yet be connected. |
 | **connection**                  | `net.Socket`        | -                      | An already-connected socket to use. Useful for connection pooling or [proxy](/smtp/proxies/) scenarios. |
 | **secured**                     | `Boolean`           | `false`                | Set to true when providing a socket via the `connection` option that has already been upgraded to TLS. |
-| **allowInternalNetworkInterfaces** | `Boolean`        | `false`                | If true, allows connections to internal or private network interfaces.                           |
+| **allowInternalNetworkInterfaces** | `Boolean`        | `false`                | If true, internal (loopback) network interfaces are also taken into account when detecting whether the machine supports IPv4/IPv6 for DNS resolution. Useful for localhost-only environments. |
 | **customAuth**                  | `Object`            | -                      | Custom authentication handlers for non-standard authentication methods (see [Custom Authentication](/smtp/customauth/)). |
+| **transactionLog**              | `Boolean`           | `false`                | Like `debug`, logs SMTP commands and responses to the logger, but without the message content.    |
+| **component**                   | `String`            | `'smtp-connection'`    | The component name used in log entries.                                                           |
 
 ---
 
@@ -95,14 +97,14 @@ SMTPConnection extends Node.js EventEmitter and emits the following events:
 
 ### `connect(callback)`
 
-Establishes a connection to the SMTP server. The callback is invoked when the connection is ready for commands (after the initial greeting and EHLO/HELO handshake).
+Establishes a connection to the SMTP server. The callback is invoked once, with no arguments, when the connection is ready for commands (after the initial greeting and EHLO/HELO handshake). Connection failures (DNS, TCP, TLS, greeting errors) are **not** passed to this callback — they are emitted on the `'error'` event, so always attach an error listener.
 
 ```javascript
-connection.connect((err) => {
-  if (err) {
-    console.error("Connection failed:", err);
-    return;
-  }
+connection.on("error", (err) => {
+  console.error("Connection failed:", err);
+});
+
+connection.connect(() => {
   console.log("Connected!");
 });
 ```
@@ -113,7 +115,7 @@ Authenticates with the SMTP server. Only call this method if the server requires
 
 - `user` - The username for authentication
 - `pass` - The password for authentication
-- `method` - The authentication method to use (optional). If not specified, the client automatically selects the best available method supported by the server
+- `method` - The authentication method to use (optional). If not specified, XOAUTH2 is used when an `oauth2` provider is given; otherwise the first advertised method in the order PLAIN, LOGIN, CRAM-MD5, XOAUTH2 is selected (PLAIN is the fallback)
 - `oauth2` - An [OAuth2](/smtp/oauth2/) token provider object for XOAUTH2 authentication
 
 ```javascript
@@ -159,7 +161,8 @@ The callback receives an `info` object with the following properties:
 
 - `accepted` - Array of recipient addresses that were accepted by the server
 - `rejected` - Array of recipient addresses that were rejected by the server
-- `rejectedErrors` - Array of Error objects with details for each rejected recipient
+- `rejectedErrors` - Array of Error objects with details for each rejected recipient (only present if at least one recipient was rejected)
+- `ehlo` - Array of extension lines from the server's EHLO response
 - `response` - The final response string from the server
 - `envelopeTime` - Time in milliseconds spent sending the envelope (MAIL FROM and RCPT TO commands)
 - `messageTime` - Time in milliseconds spent sending the message data
@@ -208,6 +211,7 @@ The envelope object defines the SMTP transaction parameters and supports the fol
 | **size**       | `Number`   | The message size in bytes. Used with the SIZE extension to check if the server accepts the message before sending. |
 | **use8BitMime**| `Boolean`  | If true, requests 8BITMIME encoding when the server supports it. |
 | **dsn**        | `Object`   | Delivery Status Notification options (see below).                |
+| **requireTLSExtensionEnabled** | `Boolean` | If true, appends the `REQUIRETLS` parameter (RFC 8689) to MAIL FROM. Fails with an `EREQUIRETLS` error if the connection is not secured or the server does not advertise REQUIRETLS. |
 
 ### DSN options
 
@@ -244,15 +248,11 @@ const connection = new SMTPConnection({
 });
 
 connection.on("error", (err) => {
+  // Connection failures (DNS, TCP, TLS, greeting) arrive here
   console.error("Connection error:", err);
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error("Failed to connect:", err);
-    return;
-  }
-
+connection.connect(() => {
   connection.login(
     {
       user: "username",
@@ -320,10 +320,10 @@ SMTPConnection supports the following authentication methods:
 - `XOAUTH2` - [OAuth 2.0](/smtp/oauth2/) authentication for services like Gmail
 - Custom methods via the `customAuth` option
 
-The client automatically selects the most secure available method unless you specify one explicitly.
+If no method is specified, XOAUTH2 is used when an `oauth2` provider is given; otherwise the client selects the first method advertised by the server in the order PLAIN, LOGIN, CRAM-MD5, XOAUTH2 (PLAIN is the fallback).
 
 ---
 
 ## License
 
-[MIT](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)
+[MIT-0](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)

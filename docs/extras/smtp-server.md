@@ -48,19 +48,19 @@ server.close(callback);
 | **heloResponse**                                                             | `String`            | `'%s Nice to meet you, %s'` | Format string for the HELO/EHLO greeting. Use `%s` placeholders: first = server name, second = client hostname.           |
 | **size**                                                                     | `Number`            | `0`                  | Maximum allowed message size in bytes. `0` means unlimited.                                                                      |
 | **hideSize**                                                                 | `Boolean`           | `false`              | Hides the SIZE limit from clients in EHLO response, but still tracks `stream.sizeExceeded` internally.                           |
-| **authMethods**                                                              | `String[]`          | `['PLAIN', 'LOGIN']` | Authentication mechanisms to offer. Add `'XOAUTH2'` and/or `'CRAM-MD5'` as needed.                                               |
+| **authMethods**                                                              | `String[]`          | `['LOGIN', 'PLAIN']` | Authentication mechanisms to offer. Add `'XOAUTH2'` and/or `'CRAM-MD5'` as needed.                                               |
 | **authOptional**                                                             | `Boolean`           | `false`              | Allow clients to proceed without authentication. When `false`, authentication is required before sending mail.                   |
 | **disabledCommands**                                                         | `String[]`          | -                    | SMTP commands to disable, e.g., `['AUTH']` to disable authentication entirely.                                                   |
 | **hideSTARTTLS / hidePIPELINING / hide8BITMIME / hideSMTPUTF8**              | `Boolean`           | `false`              | Hide the specified capability from the EHLO response.                                                                            |
 | **hideENHANCEDSTATUSCODES**                                                  | `Boolean`           | `true`               | When `true` (default), enhanced status codes (RFC 2034/3463) are not included in responses. Set to `false` to enable them.       |
 | **hideDSN**                                                                  | `Boolean`           | `true`               | When `true` (default), DSN (Delivery Status Notification) capability is hidden. Set to `false` to enable DSN support.            |
 | **hideREQUIRETLS**                                                           | `Boolean`           | `true`               | When `true` (default), REQUIRETLS capability (RFC 8689) is hidden. Set to `false` to advertise REQUIRETLS support.               |
-| **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication over unencrypted connections. Not recommended for production.                                               |
+| **allowInsecureAuth**                                                        | `Boolean`           | `false`              | Allow authentication over unencrypted connections. Not recommended for production. Note: if STARTTLS is hidden (`hideSTARTTLS`) or disabled via `disabledCommands`, AUTH is permitted on unencrypted connections even without this option. |
 | **disableReverseLookup**                                                     | `Boolean`           | `false`              | Skip reverse DNS lookup of the client IP address.                                                                                |
 | **sniOptions**                                                               | `Map \| Object`     | -                    | TLS options keyed by SNI hostname for serving different certificates based on the requested hostname.                            |
 | **logger**                                                                   | `Boolean \| Object` | `false`              | Set to `true` to log to the console, or provide a Bunyan-compatible logger instance.                                             |
 | **maxClients**                                                               | `Number`            | `Infinity`           | Maximum number of concurrent client connections.                                                                                 |
-| **useProxy**                                                                 | `Boolean`           | `false`              | Expect an HAProxy [PROXY protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt) header before the SMTP session.   |
+| **useProxy**                                                                 | `Boolean \| String[]` | `false`            | Expect an HAProxy [PROXY protocol](http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt) header before the SMTP session. Set to `true`, or to an array of trusted source IP addresses (`['*']` for any). |
 | **useXClient / useXForward**                                                 | `Boolean`           | `false`              | Enable Postfix [XCLIENT](http://www.postfix.org/XCLIENT_README.html) or [XFORWARD](http://www.postfix.org/XFORWARD_README.html) extensions. |
 | **lmtp**                                                                     | `Boolean`           | `false`              | Use LMTP (Local Mail Transfer Protocol) instead of SMTP.                                                                         |
 | **socketTimeout**                                                            | `Number`            | `60_000`             | Idle timeout in milliseconds before disconnecting an inactive client.                                                            |
@@ -157,6 +157,7 @@ The `onAuth` callback is invoked when a client attempts to authenticate. Use it 
 const server = new SMTPServer({
   onAuth(auth, session, callback) {
     // auth.method contains the authentication method: 'PLAIN', 'LOGIN', 'XOAUTH2', or 'CRAM-MD5'
+    // (when useXClient is enabled, it may also be 'XCLIENT' with password set to null)
     // Call callback(err) to reject, or callback(null, { user: ... }) to accept
   },
 });
@@ -184,6 +185,23 @@ const server = new SMTPServer({
       return callback(null, {
         data: { status: "401", schemes: "bearer" },
       });
+    }
+    callback(null, { user: auth.username });
+  },
+});
+```
+
+### Challenge-response authentication (`CRAM-MD5`)
+
+With CRAM-MD5 there is no cleartext password to compare. Instead of a `password` property, the `auth` object contains `username`, `challenge`, `challengeResponse`, and a `validatePassword(password)` helper that returns `true` when the response matches the password you know for that user:
+
+```javascript
+const server = new SMTPServer({
+  authMethods: ["CRAM-MD5"],
+  onAuth(auth, session, callback) {
+    const expectedPassword = lookupPassword(auth.username);
+    if (!expectedPassword || !auth.validatePassword(expectedPassword)) {
+      return callback(new Error("Invalid username or password"));
     }
     callback(null, { user: auth.username });
   },
@@ -260,7 +278,7 @@ onRcptTo(address, session, callback) {
 
 ## Processing incoming messages (`onData`)
 
-The `onData` callback receives a readable stream containing the email message data. The message is streamed verbatim as sent by the client. To parse the received message, you can use [MailParser](./mailparser).
+The `onData` callback receives a readable stream containing the email message data. The stream contains the message with SMTP dot-escaping already decoded (the terminating `<CRLF>.<CRLF>` is not included); no other modifications are made — no headers are added or changed. To parse the received message, you can use [MailParser](./mailparser).
 
 ```javascript
 onData(stream, session, callback) {
@@ -350,8 +368,7 @@ The `session.envelope` object contains data specific to the current mail transac
 {
   "mailFrom": {
     "address": "sender@example.com",
-    "args": { "SIZE": "12345", "RET": "HDRS", "BODY": "8BITMIME", "SMTPUTF8": true, "REQUIRETLS": true },
-    "dsn": { "ret": "HDRS", "envid": "abc123" }
+    "args": { "SIZE": "12345", "RET": "HDRS", "BODY": "8BITMIME", "SMTPUTF8": true, "REQUIRETLS": true }
   },
   "rcptTo": [
     {
@@ -387,14 +404,11 @@ Both `mailFrom` and each entry in `rcptTo` are address objects with the followin
 
 ```jsonc
 {
-  "address": "sender@example.com",
+  "address": "user1@example.com",
   "args": {
-    "SIZE": "12345",
-    "RET": "HDRS"
+    "NOTIFY": "SUCCESS,FAILURE"
   },
   "dsn": {
-    "ret": "HDRS",
-    "envid": "abc123",
     "notify": ["SUCCESS", "FAILURE"],
     "orcpt": "rfc822;original@example.com"
   }
@@ -405,16 +419,18 @@ Both `mailFrom` and each entry in `rcptTo` are address objects with the followin
 | ----------- | -------------------------------------------------------- |
 | **address** | The email address from the `MAIL FROM:` or `RCPT TO:` command. |
 | **args**    | Additional SMTP parameters (keys are uppercase).         |
-| **dsn**     | DSN-specific parameters (when DSN is enabled).           |
+| **dsn**     | DSN-specific parameters. Only present on `rcptTo` entries, and only when the client supplied NOTIFY/ORCPT parameters. |
 
 ### DSN object properties
 
-| Property   | Type       | Description                                           |
-| ---------- | ---------- | ----------------------------------------------------- |
-| **ret**    | `String`   | Return type: `'FULL'` or `'HDRS'` (from MAIL FROM).   |
-| **envid**  | `String`   | Envelope identifier (from MAIL FROM).                 |
-| **notify** | `String[]` | Notification conditions (from RCPT TO).               |
-| **orcpt**  | `String`   | Original recipient address (from RCPT TO).            |
+The MAIL FROM parameters `RET` and `ENVID` are stored on `session.envelope.dsn` (`ret`, `envid`); the RCPT TO parameters appear on each recipient's own `dsn` object:
+
+| Property   | Location                | Type       | Description                                |
+| ---------- | ----------------------- | ---------- | ------------------------------------------ |
+| **ret**    | `session.envelope.dsn`  | `String`   | Return type: `'FULL'` or `'HDRS'`.         |
+| **envid**  | `session.envelope.dsn`  | `String`   | Envelope identifier.                       |
+| **notify** | `rcptTo[i].dsn`         | `String[]` | Notification conditions for the recipient. |
+| **orcpt**  | `rcptTo[i].dsn`         | `String`   | Original recipient address.                |
 
 ---
 
@@ -511,10 +527,10 @@ const server = new SMTPServer({
 
   onRcptTo(address, session, callback) {
     // Access DSN parameters from RCPT TO
-    const notify = address.dsn.notify; // ['SUCCESS', 'FAILURE', 'DELAY']
-    const orcpt = address.dsn.orcpt; // Original recipient
+    // address.dsn only exists when the client sent NOTIFY/ORCPT parameters
+    const { notify, orcpt } = address.dsn || {};
 
-    console.log(`NOTIFY: ${notify.join(",")}, ORCPT: ${orcpt}`);
+    console.log(`NOTIFY: ${(notify || []).join(",")}, ORCPT: ${orcpt}`);
     callback();
   },
 });
@@ -541,8 +557,9 @@ const server = new SMTPServer({
   },
 
   onRcptTo(address, session, callback) {
-    const { notify, orcpt } = address.dsn;
-    console.log(`Rcpt to ${address.address}, NOTIFY=${notify.join(",")}, ORCPT=${orcpt}`);
+    // address.dsn is undefined unless the client supplied NOTIFY/ORCPT
+    const { notify, orcpt } = address.dsn || {};
+    console.log(`Rcpt to ${address.address}, NOTIFY=${(notify || []).join(",")}, ORCPT=${orcpt}`);
     callback();
   },
 
@@ -650,7 +667,7 @@ const server = new SMTPServer({
   },
 
   onRcptTo(address, session, callback) {
-    const { notify, orcpt } = address.dsn;
+    const { notify, orcpt } = address.dsn || {};
     console.log(`RCPT TO: ${address.address}, NOTIFY=${notify?.join(",")}, ORCPT=${orcpt}`);
     callback();
   },
@@ -744,11 +761,11 @@ const server = new SMTPServer({
 
 The `REQUIRETLS` parameter indicates that the client requires TLS encryption for the entire delivery chain, not just the client-to-server connection. This is useful when sending sensitive messages that must never be transmitted over unencrypted connections.
 
-**Important:** REQUIRETLS is disabled by default and must be explicitly enabled:
+**Important:** REQUIRETLS advertisement is hidden by default; set `hideREQUIRETLS: false` to advertise the capability in the EHLO response. Note that the server accepts the `REQUIRETLS` parameter on TLS connections regardless of this setting:
 
 ```javascript
 const server = new SMTPServer({
-  hideREQUIRETLS: false, // Enable REQUIRETLS support
+  hideREQUIRETLS: false, // Advertise REQUIRETLS in EHLO
   onMailFrom(address, session, callback) {
     if (session.envelope.requireTLS) {
       console.log("TLS required for entire delivery chain");
@@ -843,4 +860,4 @@ The `CHUNKING` extension (BDAT command) is **not** implemented.
 
 ## License
 
-[MIT](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)
+[MIT-0](https://github.com/nodemailer/smtp-server/blob/master/LICENSE)

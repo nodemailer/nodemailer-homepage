@@ -24,8 +24,13 @@ Setting `sendmail: true` activates the Sendmail transport. Nodemailer looks for 
 | Option    | Type                   | Default      | Description                                                                                                                                                                                                                                                                            |
 | --------- | ---------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `path`    | `String`               | `'sendmail'` | Path to the **sendmail** binary. Can be an absolute path (e.g., `/usr/sbin/sendmail`) or just the executable name if it is in your `PATH`.                                                                                                                                            |
-| `newline` | `'unix'` / `'windows'` | `'unix'`     | Line ending style for the generated message. Use `'unix'` for `\n` (LF) or `'windows'` for `\r\n` (CRLF). Most systems work fine with the default `'unix'` setting.                                                                                                                   |
 | `args`    | `String[]`             | _none_       | Custom command-line arguments for the sendmail binary. When you provide this array, it replaces Nodemailer's default arguments **except** for `-i` (which is always included) and the recipient addresses (which are always appended). See the examples below for common use cases. |
+
+To control line endings in the generated message, set the **`newline` message option** in the object passed to `sendMail()` (`'windows'` for CRLF, `'unix'` for LF).
+
+:::note
+Envelope addresses beginning with `-` are rejected with the error `Can not send mail. Invalid envelope addresses.` to prevent them from being interpreted as sendmail command-line flags. The generated message also retains the `Bcc:` header — sendmail strips that header line itself before delivery.
+:::
 
 When no custom `args` array is provided, Nodemailer executes the following command:
 
@@ -53,7 +58,7 @@ Note that the sendmail command does not produce output, so the `response` is a s
 
 ### Troubleshooting
 
-If Nodemailer cannot find the sendmail binary, you will receive an error with exit code 127. To resolve this:
+If Nodemailer cannot find the sendmail binary, you will receive a `spawn ... ENOENT` error (or, if a wrapper script is invoked that cannot find sendmail itself, an error stating the process exited with code 127). To resolve this:
 
 1. Verify that sendmail (or a compatible MTA like Postfix) is installed on your system
 2. Check that the binary is accessible via your `PATH`, or specify the full path using the `path` option
@@ -72,7 +77,6 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   sendmail: true,
-  newline: "unix",
   path: "/usr/sbin/sendmail",
 });
 

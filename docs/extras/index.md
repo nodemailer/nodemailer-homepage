@@ -21,12 +21,12 @@ These are independent open-source projects that complement Nodemailer and may be
 
 5. [EmailEngine](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=module-link) - A self-hosted application that provides a REST API for any IMAP mailbox. It handles email sending via SMTP and delivers real-time updates through webhooks, making it easier to integrate email functionality into your applications.
 6. [ImapFlow](https://imapflow.com/) - A modern, Promise-based IMAP client for Node.js. Originally built for EmailEngine, it works as a standalone library for reading and managing emails from any IMAP server.
-7. [mailauth](https://github.com/andris9/mailauth) - A comprehensive library for email authentication. It validates and generates SPF, DKIM, DMARC, ARC, and BIMI records, helping you verify email authenticity and improve deliverability.
+7. [mailauth](https://github.com/postalsys/mailauth) - A comprehensive library for email authentication. It validates and generates SPF, DKIM, DMARC, ARC, and BIMI records, helping you verify email authenticity and improve deliverability.
 8. [email-templates](https://github.com/forwardemail/email-templates) - A complete framework for managing email templates. It supports template rendering, preview in browsers and iOS Simulator, and integrates directly with Nodemailer for sending.
 9. [preview-email](https://github.com/forwardemail/preview-email) - A development tool that automatically opens emails in your browser for preview. It works with Nodemailer to help you inspect and debug email content before sending to real recipients.
 
 ---
 
 :::note
-The first four packages (smtp-server, smtp-connection, mailparser, and mailcomposer) are maintained within the Nodemailer GitHub organization and follow the same release cycle as Nodemailer. The remaining projects are maintained by the broader open-source community.
+smtp-connection and mailcomposer ship inside the Nodemailer package itself, so they are always in sync with your installed Nodemailer version. smtp-server and mailparser are separate packages maintained in the Nodemailer GitHub organization with their own release cycles. The remaining projects are maintained by the broader open-source community.
 :::

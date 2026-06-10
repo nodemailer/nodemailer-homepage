@@ -19,19 +19,16 @@ const transporter = nodemailer.createTransport(options[, defaults]);
 - **`options`** - an object that defines the SMTP connection settings (detailed in the sections below).
 - **`defaults`** - an optional object whose properties are merged into every [message](/message/) you send. This is useful for setting a common **from** address or other repeated values.
 
-Instead of an options object, you can also pass a connection URL. Use the **smtp:** protocol for standard connections, **smtps:** for connections that use TLS from the start (typically port 465), or **direct:** to connect directly to the recipient's MX server (bypassing your own SMTP relay).
+Instead of an options object, you can also pass a connection URL. Use the **smtp:** protocol for standard connections or **smtps:** for connections that use TLS from the start (typically port 465). The URL can also be supplied as the `url` property of the options object, in which case the remaining options are merged with the parsed URL values.
 
 ```javascript
 // Pooled connection via TLS
 const transporter = nodemailer.createTransport(
   "smtps://username:password@smtp.example.com/?pool=true"
 );
-
-// Direct delivery to the recipient's MX server (no relay)
-const transporter = nodemailer.createTransport("direct:?name=hostname.example.com");
 ```
 
-You can pass any transport option as a query parameter in the URL:
+You can pass any top-level transport option (and `tls.*` sub-options, e.g. `tls.rejectUnauthorized=false`) as a query parameter in the URL; other nested options are ignored:
 
 | Parameter        | Example                 | Description                                |
 | ---------------- | ----------------------- | ------------------------------------------ |
@@ -46,20 +43,22 @@ You can pass any transport option as a query parameter in the URL:
 | ------------ | --------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `host`       | `string`  | `"localhost"`                   | The hostname or IP address of the SMTP server to connect to.                                                                                                                        |
 | `port`       | `number`  | `587` (`465` if `secure: true`) | The port number to connect to.                                                                                                                                                      |
-| `secure`     | `boolean` | `false`                         | If `true`, the connection uses TLS immediately upon connecting. Set this to `true` when connecting to port 465. For port 587 or 25, leave this as `false` and let STARTTLS upgrade the connection. |
+| `secure`     | `boolean` | `false` (auto-`true` for port 465) | If `true`, the connection uses TLS immediately upon connecting. Set this to `true` when connecting to port 465 (if `secure` is left unset and `port` is 465, it defaults to `true` automatically). For port 587 or 25, leave this as `false` and let STARTTLS upgrade the connection. |
 | `service`    | `string`  | --                              | A shortcut to configure well-known email services like `"gmail"` or `"outlook"`. When set, this overrides `host`, `port`, and `secure` with predefined values. See the [well-known services list](/smtp/well-known-services). |
 | `auth`       | `object`  | --                              | Authentication credentials (see [Authentication](#authentication) below).                                                                                                           |
-| `authMethod` | `string`  | `"PLAIN"`                       | The preferred SASL authentication method. Common values include `"PLAIN"`, `"LOGIN"`, and `"CRAM-MD5"`.                                                                             |
+| `authMethod` | `string`  | first advertised method         | The preferred SASL authentication method. Common values include `"PLAIN"`, `"LOGIN"`, and `"CRAM-MD5"`. If unset, the first method advertised by the server is used (falling back to `"PLAIN"`). |
+| `customAuth` | `object`  | --                              | A map of custom SASL mechanism names to handler functions. See [Custom authentication](/smtp/customauth).                                                                            |
+| `url`        | `string`  | --                              | Connection URL (same syntax as the string form of `createTransport()`); other options are merged with the parsed URL values.                                                         |
 
 :::info
-When you specify a hostname, Nodemailer resolves it using DNS before connecting. If you use an IP address directly (or a hostname that only exists in **/etc/hosts** and not in DNS), you should also set `tls.servername` to the actual hostname. This ensures TLS certificate validation works correctly even when DNS lookup is skipped.
+When you specify a hostname, Nodemailer resolves it using DNS before connecting (falling back to the OS resolver, which also consults **/etc/hosts**). If you use an IP address as `host`, you should also set `tls.servername` to the server's hostname so TLS certificate validation works correctly.
 :::
 
 ### TLS options
 
 | Name             | Type      | Default | Description                                                                                                                    |
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `secure`         | `boolean` | `false` | See **General options** above.                                                                                                 |
+| `secure`         | `boolean` | `false` (auto-`true` for port 465) | See **General options** above.                                                                                                 |
 | `tls`            | `object`  | --      | Additional options passed directly to [Node.js `TLSSocket`](https://nodejs.org/api/tls.html#class-tlstlssocket). For example, `{ rejectUnauthorized: false }` to accept self-signed certificates. |
 | `tls.servername` | `string`  | --      | The hostname to use for TLS certificate validation. Required when `host` is set to an IP address. Can also be set as a top-level `servername` option outside the `tls` object. |
 | `ignoreTLS`      | `boolean` | `false` | If `true`, Nodemailer will not use STARTTLS even if the server advertises support for it. The connection remains unencrypted.  |
@@ -73,30 +72,30 @@ Setting **`secure: false`** does **not** mean your emails are sent unencrypted. 
 
 | Name                | Default        | Description                                                                                                                                    |
 | ------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`              | local hostname | The hostname sent in the `EHLO` (or `HELO`) greeting. The server uses this to identify your client. Defaults to your machine's hostname.      |
+| `name`              | local hostname | The hostname sent in the `EHLO` (or `HELO`) greeting. The server uses this to identify your client. Defaults to your machine's hostname if it is a fully-qualified domain name; otherwise `[127.0.0.1]` is used.      |
 | `localAddress`      | --             | The local network interface to bind when making the connection. Useful when your machine has multiple network interfaces.                      |
 | `connectionTimeout` | 120000 ms      | How long to wait (in milliseconds) for the TCP connection to be established before giving up.                                                  |
 | `greetingTimeout`   | 30000 ms       | How long to wait (in milliseconds) for the server to send its initial greeting after the connection is established.                            |
 | `socketTimeout`     | 600000 ms      | How long a connection can remain idle (in milliseconds) before Nodemailer closes it. The default is 10 minutes.                                |
 | `dnsTimeout`        | 30000 ms       | Maximum time (in milliseconds) to wait for DNS lookups to complete.                                                                            |
-| `dnsTtl`            | 300000 ms      | How long (in milliseconds) to cache DNS lookup results. The default is 5 minutes.                                                              |
+| `dnsTtl`            | 300000 ms      | DNS lookup results are cached for 5 minutes. This TTL is currently not configurable for the SMTP transport.                                    |
 | `lmtp`              | `false`        | If `true`, use the LMTP (Local Mail Transfer Protocol) instead of SMTP. LMTP is typically used for local mail delivery.                        |
 | `opportunisticTLS`               | `false`        | If `true`, Nodemailer continues with an unencrypted connection when STARTTLS upgrade fails, instead of aborting.                               |
 | `forceAuth`                      | `false`        | If `true`, attempt authentication even when the server does not advertise AUTH capability. Some misconfigured servers require this.            |
-| `allowInternalNetworkInterfaces` | `false`        | If `true`, allows connections to internal/private network interfaces during DNS resolution. By default, Nodemailer skips private IP addresses when resolving hostnames. |
+| `allowInternalNetworkInterfaces` | `false`        | If `true`, internal (loopback) network interfaces are also counted when Nodemailer determines whether the machine supports IPv4/IPv6 lookups. By default, an address family is only resolved if the machine has at least one non-internal interface of that family (relevant for offline or loopback-only environments). |
 
 ### Debug options
 
 | Name             | Type                 | Description                                                                                                                                  |
 | ---------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `logger`         | `object` / `boolean` | Set to `true` to enable console logging, or pass a [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance for custom logging. Set to `false` or leave unset to disable logging. |
-| `debug`          | `boolean`            | If `true`, logs the raw SMTP protocol traffic (commands and responses). When `false`, only high-level transaction events are logged.         |
-| `transactionLog` | `boolean`            | If `true`, logs SMTP commands and responses at the transaction level. Similar to `debug` but can be used independently for lighter logging without full protocol traces. |
+| `debug`          | `boolean`            | If `true`, logs the raw SMTP protocol traffic (commands and responses) **and the transmitted message content**. When `false`, only high-level transaction events are logged.         |
+| `transactionLog` | `boolean`            | If `true`, logs SMTP commands and responses like `debug`, but without the message content — lighter logging suitable for production. |
 | `component`      | `string`             | The component name used in log output (e.g., `'smtp-transport'`, `'smtp-pool'`). Useful when running multiple transporters to identify which one generated a log entry. |
 
 **Custom logger**
 
-If you want to use a logging library like [Pino](https://github.com/pinojs/pino) or another custom logger, you can wrap it in a Nodemailer-compatible logger object. The logger must implement methods for each log level: `trace`, `debug`, `info`, `warn`, `error`, and `fatal`.
+If you want to use a logging library like [Pino](https://github.com/pinojs/pino) or another custom logger, you can wrap it in a Nodemailer-compatible logger object. The logger should implement methods for each log level: `trace`, `debug`, `info`, `warn`, `error`, and `fatal`; if a level method is missing, Nodemailer falls back to another available level method instead of throwing.
 
 ```js
 const smtpLogger = {};
@@ -214,7 +213,7 @@ const transporter = nodemailer.createTransport({
 
 ### Login
 
-The most common authentication method uses a username and password. Nodemailer automatically selects the best available mechanism (PLAIN, LOGIN, or CRAM-MD5) based on what the server supports.
+The most common authentication method uses a username and password. Nodemailer automatically selects a mechanism supported by the server (preferring PLAIN, then LOGIN, then CRAM-MD5); use the `authMethod` option to force a specific one.
 
 ```javascript
 auth: {

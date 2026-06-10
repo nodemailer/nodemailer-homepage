@@ -102,7 +102,7 @@ Gmail enforces strict limits on the number of recipients you can email within a 
 
 Each recipient counts individually, regardless of how many messages you send. For example, a single email with one To: address and one Cc: address counts as **2 recipients** toward your limit.
 
-If you exceed these limits, Gmail returns SMTP error **454 4.7.0** ("Too many recipients"). You must wait for the quota to reset before sending more emails.
+If you exceed these limits, Gmail rejects further messages with an SMTP error (for example, `550 5.4.5 Daily user sending limit exceeded`). You must wait for the quota to reset before sending more emails.
 
 ---
 

@@ -6,13 +6,13 @@ description: Add or override message headers at message level or for individual 
 
 Nodemailer automatically generates all required email headers, so you typically do not need to set them manually. However, when you need to add custom headers or override default values, you can use the **`headers`** property. This works both at the message level and for individual [attachments](./attachments) or alternatives.
 
-- **`headers`** - an object where each key-value pair becomes an email header.
+- **`headers`** - an object where each key-value pair becomes an email header, or an array of `{ key, value }` objects (useful for repeating the same header key).
 
   - Keys are automatically converted to their standard capitalized form (for example, `x-my-key` becomes `X-My-Key`).
   - Values are automatically encoded for non-ASCII characters using MIME word encoding, and long lines are wrapped to comply with the 78-character line limit. You can disable this automatic processing by using the `prepared` option.
 
 :::warning
-Do **not** set protected headers such as `From`, `Sender`, `To`, `Cc`, `Bcc`, `Reply-To`, `In-Reply-To`, `References`, `Subject`, `Message-ID`, or `Date` using the `headers` property. Nodemailer manages these headers internally and will overwrite any values you set. Instead, use the dedicated [message properties](./) (for example, `from`, `to`, `subject`) to set these values.
+Do **not** set protected headers such as `From`, `Sender`, `To`, `Cc`, `Bcc`, `Reply-To`, `In-Reply-To`, `References`, `Subject`, `Message-ID`, or `Date` using the `headers` property. Whenever the corresponding message property (for example, `from`, `to`, `subject`) is set, Nodemailer overwrites the matching header from `headers`. Always use the dedicated [message properties](./) to set these values.
 :::
 
 ---
@@ -61,7 +61,7 @@ X-My-Key: value for row 3
 
 ### 3. Bypass Nodemailer's encoding and folding
 
-By default, Nodemailer encodes non-ASCII characters and wraps long lines to comply with email standards. If you have already encoded the header value yourself or need to include the raw value exactly as-is, set `prepared: true` to prevent any processing.
+By default, Nodemailer encodes non-ASCII characters and wraps long lines to comply with email standards. If you have already encoded the header value yourself or need to include the raw value exactly as-is, set `prepared: true` to prevent any processing. To keep line folding while skipping the MIME-word encoding, additionally set `foldLines: true`.
 
 ```javascript
 const message = {

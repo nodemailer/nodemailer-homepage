@@ -4,7 +4,7 @@ sidebar_position: 3
 description: Keep TCP/TLS connections open and reuse them for high-volume email sending.
 ---
 
-**Pooled SMTP** maintains a fixed number of persistent TCP/TLS connections to your SMTP server and reuses them across multiple messages. Instead of opening a new connection for each email (which requires a full TLS handshake every time), pooled connections stay open and ready for the next message. This is an extension of the standard [SMTP transport](./index.md).
+**Pooled SMTP** maintains up to `maxConnections` persistent TCP/TLS connections to your SMTP server, opened on demand and reused across multiple messages. Instead of opening a new connection for each email (which requires a full TLS handshake every time), pooled connections stay open and ready for the next message. This is an extension of the standard [SMTP transport](./index.md).
 
 This approach is ideal when:
 
@@ -60,14 +60,9 @@ Pooled connections work with all authentication methods, including [OAuth2](./oa
 | `pool`           | `boolean` | `false` | Set to `true` to enable connection pooling.                                                                                                     |
 | `maxConnections` | `number`  | `5`     | The maximum number of SMTP connections to open simultaneously. Messages are queued when all connections are busy.                               |
 | `maxMessages`    | `number`  | `100`   | How many messages to send on a single connection before closing and reopening it. This helps prevent long-lived connections from becoming stale.|
-| `maxRequeues`    | `number`  | `-1`    | How many times a message can be re-added to the queue if its connection closes unexpectedly mid-send. Set to `-1` (or omit) to allow unlimited retry attempts, or set to `0` to disable re-queuing entirely. |
-
-:::warning Deprecated
-The following options are **deprecated** and will be removed in a future major release:
-
-- `rateDelta` - The time window in milliseconds used for rate limiting (default: `1000`).
-- `rateLimit` - The maximum number of messages that can be sent within one `rateDelta` window. This limit applies across all pooled connections combined, not per connection.
-:::
+| `maxRequeues`    | `number`  | unlimited | How many times a message can be re-added to the queue if its connection closes unexpectedly mid-send. Set to `-1` (or omit) to allow unlimited retry attempts, or set to `0` to disable re-queuing entirely. |
+| `rateDelta`      | `number`  | `1000`  | The time window in milliseconds used for rate limiting.                                                                                          |
+| `rateLimit`      | `number`  | `0`     | The maximum number of messages that can be sent within one `rateDelta` window. This limit applies across all pooled connections combined, not per connection. Set to `0` (or omit) to disable rate limiting. |
 
 ---
 
@@ -75,11 +70,11 @@ The following options are **deprecated** and will be removed in a future major r
 
 ### `transporter.isIdle()` -> `boolean`
 
-Returns `true` when the transporter has capacity to accept more messages. This means either the internal queue has room, or at least one connection is available to send immediately.
+Returns `true` when the transporter has capacity to accept more messages. This requires both that the internal queue holds fewer than `maxConnections` pending messages and that a connection is free to send (or a new one can still be opened).
 
 ### `transporter.close()`
 
-Closes all active connections and clears any pending messages from the queue. Connections that have been idle will close automatically after `socketTimeout`, so calling `close()` manually is typically only needed during application shutdown.
+Closes all idle connections immediately. Connections that are currently sending a message are closed once that message finishes, and any messages still waiting in the queue are rejected with a `Connection pool was closed` error. Idle connections also close automatically after `socketTimeout`, so calling `close()` manually is typically only needed during application shutdown.
 
 ```javascript
 // Graceful shutdown example
@@ -93,7 +88,7 @@ process.on("SIGTERM", () => {
 
 ## Event: `idle`
 
-The transporter emits an `idle` event whenever it has capacity to accept more messages (either the queue has room or a connection becomes available). This enables a pull-based approach where you fetch messages from an external queue only when Nodemailer is ready to handle them, rather than loading everything into memory upfront:
+The transporter emits an `idle` event whenever it regains capacity to accept more messages (the queue has room and a connection is free or can be opened). This enables a pull-based approach where you fetch messages from an external queue only when Nodemailer is ready to handle them, rather than loading everything into memory upfront:
 
 ```javascript
 const { getNextMessage } = require("./messageQueue");
@@ -104,14 +99,18 @@ transporter.on("idle", async () => {
     const message = await getNextMessage();
     if (!message) return; // External queue is empty
 
-    try {
-      await transporter.sendMail(message);
-    } catch (err) {
+    // Do not await the send here - dispatching without waiting lets the
+    // pool fill all available connections instead of sending one at a time
+    transporter.sendMail(message).catch((err) => {
       console.error("Failed to send:", err);
-    }
+    });
   }
 });
 ```
+
+## Event: `clear`
+
+The transporter emits a `clear` event when the last open connection closes while the pool is idle. This is useful for detecting that all queued messages have been fully processed and no connections remain open.
 
 ---
 

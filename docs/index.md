@@ -24,7 +24,7 @@ npm install nodemailer
 - **Security focused** - designed to avoid remote code execution vulnerabilities that have affected other Node.js email libraries.
 - **Full Unicode support** - send messages with any characters, including emoji.
 - **Cross-platform** - works identically on Linux, macOS, and Windows with no native addons required (ideal for cloud environments like Azure).
-- **HTML and plain-text emails** - send rich HTML emails with automatic plain-text fallbacks.
+- **HTML and plain-text emails** - provide both `html` and `text` content and Nodemailer automatically builds the proper multipart message.
 - **[Attachments](./message/attachments/)** and **[embedded images](./message/embedded-images/)** - easily include files and inline images in your messages.
 - **Built-in TLS/STARTTLS encryption** - secure connections are handled automatically.
 - **Multiple [transports](./transports/)** - send via [SMTP](./smtp/), [Sendmail](./transports/sendmail/), [Amazon SES](./transports/ses/), [streams](./transports/stream/), and more.
@@ -137,8 +137,7 @@ The `info` object returned on success contains:
 | `envelope`       | An object containing the [SMTP envelope](./smtp/envelope) addresses (`from` and `to`). |
 | `accepted`       | An array of recipient addresses that the server accepted.                          |
 | `rejected`       | An array of recipient addresses that the server rejected.                          |
-| `rejectedErrors` | An array of error objects for each rejected recipient, with details about the rejection reason. |
-| `pending`        | With the _direct_ transport: addresses that received a temporary failure.          |
+| `rejectedErrors` | An array of error objects for each rejected recipient, with details about the rejection reason (only present if at least one recipient was rejected). |
 | `response`       | The final response string received from the SMTP server.                           |
 
 :::info Partial success
@@ -165,7 +164,8 @@ try {
       console.error("Authentication failed:", err.message);
       break;
     case "EENVELOPE":
-      console.error("Invalid recipients:", err.rejected);
+      // err.rejected is only present when every recipient was refused
+      console.error("Invalid envelope:", err.message, err.rejected || []);
       break;
     default:
       console.error("Send failed:", err.message);

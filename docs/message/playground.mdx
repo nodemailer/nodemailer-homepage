@@ -35,10 +35,10 @@ If you only provide a `text` field without `html`, the playground will automatic
 :::
 
 :::warning Attachment limitations
-The playground only supports attachments with base64-encoded content. Other content sources (file paths, URLs, streams, buffers) are not available in the browser environment. Each attachment must include:
-- `content` - Base64-encoded string
-- `encoding` - Must be set to `"base64"`
-- `filename` - Name of the file
+The playground only supports attachments with base64-encoded content. Other content sources (file paths, URLs, streams, buffers) are not available in the browser environment. Attachment fields:
+- `content` - Base64-encoded string (required)
+- `encoding` - Set to `"base64"` (recommended; may be omitted if the content is recognizably base64)
+- `filename` - Name of the file (optional, defaults to `"attachment"`)
 - `contentType` - MIME type (optional, detected from filename if omitted)
 - `cid` - Content-ID for embedding images in HTML (optional)
 

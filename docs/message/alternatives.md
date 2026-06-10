@@ -18,7 +18,7 @@ For calendar events specifically, use the dedicated **`icalEvent`** option inste
 
 ## How alternatives differ from attachments
 
-Alternative objects use the same fields as [attachment objects](./attachments), including `content`, `path`, `contentType`, `encoding`, and `headers`. The key difference is how they appear in the email structure:
+Alternative objects use the same content fields as [attachment objects](./attachments): `content`, `path`, `href`, `raw`, `contentType`, `contentTransferEncoding`, `encoding`, `filename`, and `headers`. Attachment-specific fields such as `cid`, `contentDisposition`, and `httpHeaders` are not applied to alternatives. The key difference is how they appear in the email structure:
 
 - **Attachments** are separate files that recipients download. They go in `multipart/mixed` or `multipart/related` containers.
 - **Alternatives** are different versions of the email body itself. They go in a `multipart/alternative` container, and the email client picks one to display.
@@ -30,7 +30,7 @@ Alternative objects use the same fields as [attachment objects](./attachments), 
 
 ## Usage
 
-Add an `alternatives` array to your message object. Each alternative needs at minimum a `contentType` and either `content` or `path`:
+Add an `alternatives` array to your message object. Each alternative needs a content source (`content`, `path`, `href`, or `raw`). Setting an explicit `contentType` is strongly recommended — if omitted, Nodemailer detects it from the filename or path, falling back to `text/plain`:
 
 ```javascript
 const message = {
@@ -51,6 +51,6 @@ In this example, the email includes both an HTML body and a Markdown alternative
 
 ### Ordering matters
 
-You can include as many alternatives as you need. According to the MIME standard (RFC 2046), you should place your preferred format last in the list. Email clients read alternatives from top to bottom and typically display the last format they can understand.
+You can include as many alternatives as you need. According to the MIME standard (RFC 2046), email clients read alternatives from top to bottom and typically display the last format they can understand.
 
-For example, if you include plain text, Markdown, and HTML in that order, most email clients will display the HTML version since it comes last and is widely supported.
+Nodemailer emits the body parts in a fixed order: `text`, `watchHtml`, `amp`, `html`, `icalEvent`, then everything in the `alternatives` array (in array order). This means custom alternatives always come after the HTML body — an alternative placed after HTML is preferred by clients that support it, while clients that do not understand it fall back to the HTML part.

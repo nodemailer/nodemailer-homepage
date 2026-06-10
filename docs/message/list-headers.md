@@ -22,8 +22,8 @@ Add a `list` object to your `transporter.sendMail()` call. Each property name in
 :::tip URL handling
 Nodemailer automatically formats URLs for you:
 - Email addresses like `admin@example.com` become `<mailto:admin@example.com>`
-- URLs starting with `http`, `https`, `mailto`, or `ftp` are wrapped in angle brackets as-is
-- Other strings are treated as domains and prefixed with `http://`
+- URLs with an `http:`, `https:`, `mailto:`, or `ftp:` scheme are wrapped in angle brackets as-is
+- Other strings (including bare hostnames like `ftp.example.com`) are treated as domains and prefixed with `http://`
 
 Comments containing non-ASCII characters are automatically encoded for email compatibility.
 :::
@@ -102,3 +102,5 @@ List-Subscribe: <mailto:admin@example.com?subject=subscribe>
 List-Subscribe: <http://example.com> (Subscribe)
 List-Post: <http://example.com/post>, <mailto:admin@example.com?subject=post> (Post)
 ```
+
+Long header lines may be physically folded onto continuation lines in the generated message; this does not change their meaning.

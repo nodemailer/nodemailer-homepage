@@ -49,7 +49,7 @@ The returned `testAccount` object contains:
 | `web`         | URL to the Ethereal web interface    |
 
 :::tip Reuse credentials
-Each call to `createTestAccount()` generates a new account. If you want to view all your test emails in one inbox, save the credentials and reuse them across test runs.
+Within a single process, repeat calls to `createTestAccount()` return the same cached account by default (set the `ETHEREAL_CACHE=no` environment variable to disable this). Each new process run generates a new account, so if you want to view all your test emails in one inbox across runs, save the credentials and reuse them.
 :::
 
 ## Preview sent messages
