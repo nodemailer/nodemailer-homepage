@@ -11,7 +11,7 @@ Each attachment object supports the following properties:
 | Property             | Type                         | Description                                                                                                                                       |
 | -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `filename`           | `string \| false`            | The filename that will be shown to recipients. Unicode characters are supported. If omitted, the filename is derived from `path`/`href` or auto-generated as `attachment-N.ext`. Set to `false` to omit the filename from the generated headers entirely. |
-| `content`            | `string \| Buffer \| Stream` | The attachment contents. Can be a string, a Buffer, or a readable stream.                                                                         |
+| `content`            | `string \| Buffer \| Stream` | The attachment contents. Can be a string, a Buffer, or a Node.js readable stream (`stream.Readable`). A WHATWG `ReadableStream` (such as the `body` returned by `fetch()`) is not accepted directly — convert it with `Readable.fromWeb()` first. |
 | `path`               | `string`                     | A file path, URL, or data URI. File paths are streamed from disk and HTTP(S) URLs are streamed from the network, making this the recommended approach for large files. Data URIs are decoded into memory and limited to 50&nbsp;MB of encoded data. |
 | `href`               | `string`                     | An HTTP or HTTPS URL. Nodemailer will fetch the content from this URL and include it as an attachment.                                            |
 | `httpHeaders`        | `object`                     | Custom HTTP headers to send when fetching content from `href`. For example: `{ authorization: 'Bearer token123' }`.                               |
@@ -65,7 +65,12 @@ attachments: [
   },
 
   // 5. Readable stream
-  // Provides full control over how content is read
+  // Provides full control over how content is read.
+  // This must be a Node.js stream.Readable. To use a WHATWG ReadableStream
+  // (for example the body returned by fetch()), convert it first:
+  //   const { Readable } = require("node:stream");
+  //   const response = await fetch("https://example.com/file.bin");
+  //   content: Readable.fromWeb(response.body)
   {
     filename: "notes.txt",
     content: fs.createReadStream("./notes.txt"),
