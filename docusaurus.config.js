@@ -70,10 +70,28 @@ export default {
     ],
   ],
 
+  // Plausible Analytics, loaded from www.nodemailer.com rather than direct.
+  //
+  // EasyPrivacy, which uBlock Origin and AdGuard both enable by default, carries
+  // ://plausible.*/js/script. and ://plausible.*/api/event|. Both match on the
+  // hostname prefix, so the direct plausible.emailengine.dev URLs load for nobody
+  // running a blocker. This site is GitHub Pages and cannot proxy for itself, so
+  // the proxy lives on www.nodemailer.com, which is a Caddy vhost on srv-04 (an
+  // otherwise plain redirect to this apex). Same registrable domain, so a blocker
+  // counts these as first-party: uBlock, AdGuard and EasyList all define
+  // third-party by eTLD+1, not by hostname.
+  //
+  // data-api must be absolute. A relative path would resolve against
+  // nodemailer.com, which is GitHub Pages and has no such route.
+  //
+  // data-domain is stated explicitly. Without it the script sends no domain and
+  // attribution depends on the server inferring it from the page URL.
   scripts: [
     {
-      src: "https://plausible.emailengine.dev/js/script.js",
+      src: "https://www.nodemailer.com/a/pv.js",
       defer: true,
+      "data-domain": "nodemailer.com",
+      "data-api": "https://www.nodemailer.com/a/e",
     },
   ],
 
