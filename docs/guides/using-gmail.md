@@ -57,6 +57,10 @@ const transporter = nodemailer.createTransport({
 
 For a complete walkthrough on setting up OAuth 2.0 credentials, including how to obtain your client ID, client secret, and refresh token, see the dedicated guide: [SMTP / OAuth 2.0](/smtp/oauth2).
 
+:::tip
+Setting up the OAuth2 app, consent screen, and token refresh is usually the hardest part of a Gmail integration. [**EmailEngine**](https://emailengine.app/?utm_source=nodemailer.com&utm_medium=inline&utm_campaign=oss-docs&utm_content=using-gmail), from the Nodemailer team, handles all of that for you and exposes the account over REST and SMTP.
+:::
+
 ### App Password (requires 2-Step Verification)
 
 If you have 2-Step Verification enabled on your Google account, you can generate a 16-character App Password specifically for Nodemailer. This password works like a regular SMTP password but is separate from your main Google account password.

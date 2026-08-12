@@ -131,7 +131,7 @@ export default {
     footer: {
       style: "dark",
 
-      copyright: `Copyright © 2010 - ${new Date().getFullYear()} Andris Reinman. Powered by <a href="https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=footer" class="footer__link-item">EmailEngine</a>.`,
+      copyright: `Copyright © 2010 - ${new Date().getFullYear()} Andris Reinman. Powered by <a href="https://emailengine.app/?utm_source=nodemailer.com&utm_medium=footer&utm_campaign=oss-docs" class="footer__link-item">EmailEngine</a>.`,
     },
     prism: {
       theme: lightCodeTheme,

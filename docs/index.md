@@ -14,8 +14,8 @@ Nodemailer is the most popular email sending library for Node.js. It makes sendi
 npm install nodemailer
 ```
 
-:::tip Looking for a complete email gateway solution?
-[**EmailEngine**](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=tip-link) is a self-hosted email gateway that provides REST API access to IMAP and SMTP accounts, webhooks for mailbox changes, and advanced features like OAuth2, delayed delivery, open and click tracking, bounce detection, and more.
+:::tip From the team behind Nodemailer
+[**EmailEngine**](https://emailengine.app/?utm_source=nodemailer.com&utm_medium=inline&utm_campaign=oss-docs&utm_content=index) is a self-hosted email API that turns any Gmail, Microsoft 365, or IMAP account into a REST endpoint, with managed OAuth2, webhooks for incoming mail, and built-in sending. Nodemailer development is sustained by EmailEngine licenses.
 :::
 
 ## Why Nodemailer?

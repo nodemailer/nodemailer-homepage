@@ -11,7 +11,7 @@ OAuth2 allows your application to authenticate with email servers using short-li
 
 :::tip
 
-Managing OAuth2 credentials can be complex and error-prone. Consider using **EmailEngine** to handle credential management for you. Once you register an account with EmailEngine, you can configure Nodemailer to send through EmailEngine without any authentication configuration. Learn more [here](https://emailengine.app/sending-emails?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=tip-link).
+Managing OAuth2 credentials can be complex and error-prone. [**EmailEngine**](https://emailengine.app/sending-emails?utm_source=nodemailer.com&utm_medium=inline&utm_campaign=oss-docs&utm_content=oauth2), from the Nodemailer team, registers the account, runs the OAuth2 flow, and keeps tokens refreshed. Nodemailer can then send through it without any authentication configuration.
 
 :::
 

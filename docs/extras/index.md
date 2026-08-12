@@ -15,18 +15,23 @@ These packages are maintained by the Nodemailer team and designed to work seamle
 3. [mailparser](/extras/mailparser) - Parse raw email messages (RFC 822 format) into structured JavaScript objects. The streaming parser efficiently handles large emails and extracts headers, body content, and attachments into an easy-to-use format.
 4. [mailcomposer](/extras/mailcomposer) - Generate RFC 822-compliant email messages from JavaScript objects. This is useful when you need to create a properly formatted [MIME message](/message/) without sending it immediately, such as for storing drafts or passing to another system.
 
-## Related projects
+## From the Nodemailer team
 
-These are independent open-source projects that complement Nodemailer and may be helpful depending on your use case.
+These projects are built and maintained by the same team as Nodemailer.
 
-5. [EmailEngine](https://emailengine.app/?utm_source=nodemailer&utm_campaign=nodemailer&utm_medium=module-link) - A self-hosted application that provides a REST API for any IMAP mailbox. It handles email sending via SMTP and delivers real-time updates through webhooks, making it easier to integrate email functionality into your applications.
-6. [ImapFlow](https://imapflow.com/) - A modern, Promise-based IMAP client for Node.js. Originally built for EmailEngine, it works as a standalone library for reading and managing emails from any IMAP server.
+5. [EmailEngine](https://emailengine.app/?utm_source=nodemailer.com&utm_medium=inline&utm_campaign=oss-docs&utm_content=extras) - A self-hosted email API that turns any Gmail, Microsoft 365, or IMAP account into a REST endpoint. It handles OAuth2 and token refresh, sends email via SMTP, and delivers real-time updates through webhooks. EmailEngine is commercial, source-available software, and its licenses sustain Nodemailer development.
+6. [ImapFlow](https://imapflow.com/) - A modern, Promise-based IMAP client for Node.js. Built as the IMAP engine for EmailEngine, it works as a standalone library for reading and managing emails on any IMAP server.
 7. [mailauth](https://github.com/postalsys/mailauth) - A comprehensive library for email authentication. It validates and generates SPF, DKIM, DMARC, ARC, and BIMI records, helping you verify email authenticity and improve deliverability.
+
+## Community projects
+
+These independent open-source projects complement Nodemailer and may be helpful depending on your use case.
+
 8. [email-templates](https://github.com/forwardemail/email-templates) - A complete framework for managing email templates. It supports template rendering, preview in browsers and iOS Simulator, and integrates directly with Nodemailer for sending.
 9. [preview-email](https://github.com/forwardemail/preview-email) - A development tool that automatically opens emails in your browser for preview. It works with Nodemailer to help you inspect and debug email content before sending to real recipients.
 
 ---
 
 :::note
-smtp-connection and mailcomposer ship inside the Nodemailer package itself, so they are always in sync with your installed Nodemailer version. smtp-server and mailparser are separate packages maintained in the Nodemailer GitHub organization with their own release cycles. The remaining projects are maintained by the broader open-source community.
+smtp-connection and mailcomposer ship inside the Nodemailer package itself, so they are always in sync with your installed Nodemailer version. smtp-server and mailparser are separate packages maintained in the Nodemailer GitHub organization with their own release cycles. EmailEngine, ImapFlow, and mailauth come from the same team; EmailEngine is commercial, source-available software, while the others are open source. email-templates and preview-email are maintained by the broader open-source community.
 :::
