@@ -33,7 +33,11 @@ const transporter = nodemailer.createTransport({
 | `streamTransport` | `boolean`             | **required** | Set to `true` to enable Stream transport.                                                          |
 | `buffer`          | `boolean`             | `false`      | When `true`, returns the generated message as a `Buffer` instead of a `Readable` stream.           |
 
-To control line endings, set the **`newline` message option** in the object passed to `sendMail()`: `'windows'` (also accepts `'win'`, `'dos'`, `'\r\n'`) forces CRLF, any other truthy value (such as `'unix'` or `'\n'`) forces LF. If `newline` is not set, line breaks are kept as generated — headers and MIME structure use CRLF while body content keeps its original line endings.
+| `newline`         | `string`              | _none_       | Forces a line ending style for every generated message (see below).                                |
+
+To control line endings, set `newline` either as a **transport option** (applies to every message) or as a **message option** in the object passed to `sendMail()`. `'windows'` (also accepts `'win'`, `'dos'`, `'\r\n'`) forces CRLF; any other truthy value (such as `'unix'` or `'\n'`) forces LF. If both are set, the transport option wins.
+
+If `newline` is not set at all, line breaks are kept as generated — headers and MIME structure use CRLF while body content keeps its original line endings.
 
 :::note
 The generated message retains the `Bcc:` header so that the output shows all recipients.

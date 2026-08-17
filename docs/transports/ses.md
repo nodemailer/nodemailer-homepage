@@ -119,11 +119,11 @@ const transporter = nodemailer.createTransport({
 
 ## Troubleshooting
 
-### "User is not authorized to perform: ses:SendRawEmail"
+### "User is not authorized to perform: ses:SendEmail"
 
 This error means your AWS credentials lack the required permissions. To resolve it:
 
-1. Verify that the IAM user or role associated with your credentials has the **ses:SendRawEmail** permission. See the [minimal IAM policy example](#example-2) below.
+1. Verify that the IAM user or role associated with your credentials has the **ses:SendEmail** permission. See the [minimal IAM policy example](#example-2) below.
 2. Ensure the **From** address (or its entire domain) is verified in the [SES console](https://console.aws.amazon.com/ses/). SES requires sender verification before you can send emails.
 3. If your SES account is still in sandbox mode, you must also verify each recipient address. Request production access to remove this restriction.
 4. In rare cases, AWS access keys containing special characters have caused authentication failures. If everything else looks correct, try regenerating your access keys.
@@ -194,7 +194,7 @@ transporter.sendMail(
 
 ### 2. Minimal IAM policy {#example-2}
 
-Your AWS IAM user or role needs permission to call `ses:SendRawEmail`. Here is the minimal IAM policy required:
+The transport calls the SES API v2 [`SendEmail`](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html) operation, so your IAM user or role needs `ses:SendEmail`:
 
 ```json
 {
@@ -202,11 +202,26 @@ Your AWS IAM user or role needs permission to call `ses:SendRawEmail`. Here is t
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "ses:SendRawEmail",
+      "Action": "ses:SendEmail",
       "Resource": "*"
     }
   ]
 }
 ```
 
-For production environments, consider restricting the `Resource` to specific verified identities rather than using `"*"`.
+If the same credentials are also used with SES SMTP credentials (through the [SMTP transport](../smtp/) and a `SES-*` [service preset](/smtp/well-known-services)), add `ses:SendRawEmail` as well, since the SMTP interface authorizes against that action. Granting both is what AWS's own [email-sending policy example](https://docs.aws.amazon.com/ses/latest/dg/control-user-access.html) does:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+For production environments, consider restricting the `Resource` to specific verified identities rather than using `"*"`. You can also narrow sending with the `ses:FromAddress` and `ses:Recipients` condition keys.

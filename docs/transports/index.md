@@ -66,7 +66,7 @@ These transports are included with Nodemailer and require no additional packages
 
 These transports are maintained by the community in separate npm packages. Install them with `npm install` and pass their exported function to `nodemailer.createTransport()`.
 
-- **Mailtrap** - Deliver messages to your Mailtrap inbox for safe email testing without sending to real recipients ([npm](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport))
+- **Mailtrap** - Deliver messages to your Mailtrap inbox for safe email testing without sending to real recipients ([GitHub](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport))
 - **Mailgun** - Send email through Mailgun's HTTP API ([npm](https://www.npmjs.com/package/nodemailer-mailgun-transport))
 - **Custom** - Build your own transport to implement business-specific logic. See [creating custom transports](../plugins/create/#transports).
 

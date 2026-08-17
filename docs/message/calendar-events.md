@@ -35,9 +35,7 @@ let message = {
 
 Provide one of `content`, `path`, `href`, or `raw` as the calendar data source. If several are given, `raw` takes precedence, then `path`, `href`, and `content`. As a shorthand, you can also set `icalEvent` directly to a string or Buffer, which is equivalent to passing `{ content }`.
 
-:::warning Prefer `content` over `path`/`href`
-In current Nodemailer versions the `path` and `href` sources only populate the `text/calendar` alternative part — the additional `application/ics` attachment copy is generated empty when sending over SMTP, stream, or sendmail transports. For reliable results, read the calendar data yourself and pass it via `content`.
-:::
+The event is included twice in the generated message: once as a `text/calendar` alternative next to your `text` and `html` bodies, and once as an `application/ics` attachment. Both copies carry the same data regardless of which source you use.
 
 :::note Best practice
 Calendar invitations can be sensitive to email structure. Adding extra file [attachments](./attachments) or complex alternative message bodies often causes email clients to display the calendar incorrectly or not at all. For the best compatibility across different email clients, keep your message simple: include only **text**, **html**, and a single **icalEvent**. Avoid adding other attachments to calendar invitation emails.

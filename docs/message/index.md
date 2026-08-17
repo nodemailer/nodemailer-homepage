@@ -1,6 +1,6 @@
 ---
 title: Message configuration
-sidebar_position: 3
+sidebar_position: 2
 description: Configure email message fields including from, to, subject, text, html, and attachments.
 ---
 

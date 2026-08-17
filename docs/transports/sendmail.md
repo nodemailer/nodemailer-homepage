@@ -25,8 +25,9 @@ Setting `sendmail: true` activates the Sendmail transport. Nodemailer looks for 
 | --------- | ---------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `path`    | `String`               | `'sendmail'` | Path to the **sendmail** binary. Can be an absolute path (e.g., `/usr/sbin/sendmail`) or just the executable name if it is in your `PATH`.                                                                                                                                            |
 | `args`    | `String[]`             | _none_       | Custom command-line arguments for the sendmail binary. When you provide this array, it replaces Nodemailer's default arguments **except** for `-i` (which is always included) and the recipient addresses (which are always appended). See the examples below for common use cases. |
+| `newline` | `String`               | _none_       | Forces a line ending style for every generated message: `'windows'` for CRLF, `'unix'` for LF.                                                                                                                                                                                     |
 
-To control line endings in the generated message, set the **`newline` message option** in the object passed to `sendMail()` (`'windows'` for CRLF, `'unix'` for LF).
+`newline` can also be set per message in the object passed to `sendMail()`. If both are set, the transport option wins. Left unset, headers and MIME structure use CRLF while body content keeps its original line endings.
 
 :::note
 Envelope addresses beginning with `-` are rejected with the error `Can not send mail. Invalid envelope addresses.` to prevent them from being interpreted as sendmail command-line flags. The generated message also retains the `Bcc:` header — sendmail strips that header line itself before delivery.

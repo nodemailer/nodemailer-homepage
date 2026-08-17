@@ -45,7 +45,7 @@ Every plugin function, including custom transport `send` methods, receives two a
 | `message`        | `stream`, **transport**            | A [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance representing the built message (see also [MailComposer](/extras/mailcomposer/)) |
 | `resolveContent` | `compile`, `stream`, **transport** | A helper method for converting Nodemailer content objects (streams, file paths, URLs) into a `String` or `Buffer`              |
 
-### `mail.resolveContent(obj, key[, options], callback)`
+### `mail.resolveContent(obj, key[, options][, callback])`
 
 Use this method to convert any [Nodemailer content type](/message/attachments/) (file path, URL, Stream, Buffer, data URI, etc.) into a plain `String` or `Buffer`. This is useful when you need to read and process content that might come from various sources.
 
@@ -57,6 +57,25 @@ mail.resolveContent(sourceObject, propertyName, (err, value) => {
   // value is a String or Buffer depending on the input type
 });
 ```
+
+Omit the callback to get a Promise back instead:
+
+```javascript
+transporter.use("compile", (mail, done) => {
+  // the plugin still signals completion through done(), never by returning
+  mail
+    .resolveContent(mail.data, "html")
+    .then((html) => {
+      mail.data.html = html.toString().replace(/OLD/g, "NEW");
+      done();
+    })
+    .catch(done);
+});
+```
+
+:::note
+Nodemailer ignores a plugin's return value, so a promise you return is never awaited. An `async` plugin function must still call `done()` itself and must not let a rejection escape.
+:::
 
 :::note
 If the value being resolved is a stream, the stream is consumed and replaced in place with the resolved Buffer (a stream can only be read once).

@@ -1,6 +1,7 @@
 ---
 title: Error reference
 sidebar_position: 9
+description: Every Nodemailer error code, what triggers it, and how to resolve it.
 ---
 
 This page documents all error codes and error types that Nodemailer and related packages can produce. Understanding these errors will help you diagnose issues and implement proper error handling in your application.
@@ -439,12 +440,16 @@ An HTTP fetch error occurred when retrieving remote content.
 - Network error while fetching URL content
 - HTTP request timeout
 - Invalid status code from server
-- Maximum redirect count exceeded
+- More than 5 redirects, or a redirect pointing at a non-HTTP(S) URL
+- TLS certificate validation failure on an `https:` URL (self-signed, expired, or hostname mismatch)
 
 **Troubleshooting:**
 - Verify the URL is accessible
 - Check network connectivity
 - Ensure the server returns a successful status code
+- For an internal host with a private CA, pin it with the per-attachment [`tls` option](/message/attachments#fetching-over-https) rather than disabling validation
+
+The error carries a `sourceUrl` property naming the URL that failed, which is useful when a message has several remote attachments.
 
 ### TLS extension errors
 
@@ -550,7 +555,7 @@ These indicate permanent failures. The operation will not succeed without change
 
 ## SES transport errors
 
-When using the Amazon SES transport, errors from the AWS SDK are passed through unchanged — inspect `err.name` (or `err.Code`) for the AWS error identifier. (The `ESES` code is reserved in Nodemailer's error code list but is not currently attached to SES errors.) Common AWS error names include:
+When using the Amazon SES transport, the original AWS SDK error object is passed through intact — inspect `err.name` for the AWS error identifier. AWS SDK v3 errors carry no `code` property of their own, so Nodemailer tags them with `code: 'ESES'` to keep transport errors uniformly identifiable. An error that already has a `code` keeps it. Common AWS error names include:
 
 | Code                   | Meaning                                            |
 | ---------------------- | -------------------------------------------------- |

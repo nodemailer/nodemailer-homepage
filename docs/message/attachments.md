@@ -15,6 +15,7 @@ Each attachment object supports the following properties:
 | `path`               | `string`                     | A file path, URL, or data URI. File paths are streamed from disk and HTTP(S) URLs are streamed from the network, making this the recommended approach for large files. Data URIs are decoded into memory and limited to 50&nbsp;MB of encoded data. |
 | `href`               | `string`                     | An HTTP or HTTPS URL. Nodemailer will fetch the content from this URL and include it as an attachment.                                            |
 | `httpHeaders`        | `object`                     | Custom HTTP headers to send when fetching content from `href`. For example: `{ authorization: 'Bearer token123' }`.                               |
+| `tls`                | `object`                     | TLS settings for an HTTPS `href` fetch, passed through to [`tls.connect()`](https://nodejs.org/api/tls.html#tlsconnectoptions-callback). Certificates are validated by default; see [Fetching over HTTPS](#fetching-over-https). |
 | `contentType`        | `string`                     | The [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the attachment. If not specified, Nodemailer will attempt to detect it from the `filename`, `path`, or `href`, falling back to `application/octet-stream`. |
 | `contentDisposition` | `string`                     | The Content-Disposition header value. Defaults to `'attachment'`, with two exceptions: attachments with a `message/*` content type and image attachments that have a `cid` default to `'inline'`. |
 | `cid`                | `string`                     | A Content-ID value for referencing the attachment in HTML content. Use this with `<img src="cid:your-cid-value"/>` to [embed images inline](./embedded-images). |
@@ -117,6 +118,35 @@ attachments: [
   },
 ];
 ```
+
+## Fetching over HTTPS
+
+When an attachment is fetched from an `https:` URL (via `href`, or a `path` that starts with `http://` or `https://`), Nodemailer validates the server's TLS certificate. A self-signed, expired, or hostname-mismatched certificate fails the send with an [`EFETCH`](/errors#efetch) error.
+
+This matters most when you pair `href` with `httpHeaders`: those headers often carry an API key or bearer token, and certificate validation is what stops a network-adjacent attacker from presenting a forged certificate and collecting them.
+
+To reach an internal host that legitimately uses a private CA, pin that CA rather than turning validation off:
+
+```javascript
+{
+  filename: "report.pdf",
+  href: "https://internal.example.com/report.pdf",
+  httpHeaders: { authorization: "Bearer token123" },
+  tls: { ca: fs.readFileSync("/etc/ssl/internal-ca.pem") },
+}
+```
+
+Disabling validation entirely is possible but leaves the fetch open to interception, so avoid it whenever credentials are attached:
+
+```javascript
+{
+  filename: "report.pdf",
+  href: "https://self-signed.example.com/report.pdf",
+  tls: { rejectUnauthorized: false },
+}
+```
+
+Nodemailer also drops `Authorization`, `Cookie`, and `Proxy-Authorization` headers if a redirect sends the request to a different host or downgrades it from HTTPS to HTTP, so those credentials are never handed to an unexpected destination.
 
 ## Embedding images
 

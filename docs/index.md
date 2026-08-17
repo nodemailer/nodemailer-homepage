@@ -139,6 +139,12 @@ The `info` object returned on success contains:
 | `rejected`       | An array of recipient addresses that the server rejected.                          |
 | `rejectedErrors` | An array of error objects for each rejected recipient, with details about the rejection reason (only present if at least one recipient was rejected). |
 | `response`       | The final response string received from the SMTP server.                           |
+| `ehlo`           | An array of the capability lines the server returned in its `EHLO` response, for example `['PIPELINING', '8BITMIME', 'SMTPUTF8', 'AUTH LOGIN PLAIN']`. Useful for checking whether an extension such as `DSN` is available. |
+| `envelopeTime`   | Milliseconds spent on the envelope exchange (`MAIL FROM` and `RCPT TO`).            |
+| `messageTime`    | Milliseconds spent streaming the message body after the envelope was accepted.      |
+| `messageSize`    | The size of the transferred message in bytes.                                       |
+
+These properties come from the SMTP transport. Other transports return what fits them, so the [stream transport](./transports/stream/) adds `message` and omits the SMTP-specific fields.
 
 :::info Partial success
 When a message has multiple recipients, it is considered **sent** as long as **at least one** recipient address was accepted by the server. Check the `rejected` array to see which addresses failed.

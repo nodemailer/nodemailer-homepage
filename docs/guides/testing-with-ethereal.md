@@ -39,14 +39,19 @@ const transporter = nodemailer.createTransport({
 
 The returned `testAccount` object contains:
 
-| Property      | Description                          |
-| ------------- | ------------------------------------ |
-| `user`        | The generated email address          |
-| `pass`        | The password for SMTP authentication |
-| `smtp.host`   | SMTP server hostname                 |
-| `smtp.port`   | SMTP server port                     |
-| `smtp.secure` | Whether to use TLS from the start    |
-| `web`         | URL to the Ethereal web interface    |
+| Property                            | Description                                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `user`                              | The generated email address                                                                    |
+| `pass`                              | The password, used for SMTP, IMAP, and POP3 alike                                              |
+| `smtp.host` / `smtp.port` / `smtp.secure` | SMTP connection settings (`smtp.ethereal.email:587`, STARTTLS)                            |
+| `imap.host` / `imap.port` / `imap.secure` | IMAP connection settings (`imap.ethereal.email:993`, implicit TLS), for reading messages back programmatically |
+| `pop3.host` / `pop3.port` / `pop3.secure` | POP3 connection settings (`pop3.ethereal.email:995`, implicit TLS)                        |
+| `web`                               | URL to the Ethereal web interface                                                              |
+| `mxEnabled`                         | Whether the address can receive mail from outside Ethereal. `false` for accounts created this way |
+
+:::note Where the messages go
+An Ethereal account never delivers anywhere. Whatever recipient you address, the message lands back in that same account's own mailbox, which is why you can safely send to made-up addresses. The `mxEnabled: false` flag is about the other direction: mail sent to the address from an external server is not accepted.
+:::
 
 :::tip Reuse credentials
 Within a single process, repeat calls to `createTestAccount()` return the same cached account by default (set the `ETHEREAL_CACHE=no` environment variable to disable this). Each new process run generates a new account, so if you want to view all your test emails in one inbox across runs, save the credentials and reuse them.

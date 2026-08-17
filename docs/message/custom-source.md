@@ -56,6 +56,12 @@ const message = {
 
 The path can be absolute or relative to the current working directory (`process.cwd()`).
 
+:::warning Never build `raw` from untrusted input
+A `raw` value is delivered verbatim, so `{ path }` reads any file the process can read and `{ href }` fetches any HTTP(S) URL, and the result becomes the whole message. If the value can be influenced by a user, that is arbitrary file disclosure and server-side request forgery.
+
+Set [`disableFileAccess` and `disableUrlAccess`](./#security-options) when handling untrusted message data. Both are enforced for `raw` exactly as they are for attachments, rejecting the send with `EFILEACCESS` or `EURLACCESS`.
+:::
+
 ### 3. String as an attachment
 
 When using **raw** inside the `attachments` array, you must include all of the MIME headers yourself. Nodemailer does not add `Content-Type`, `Content-Disposition`, or any other headers automatically.

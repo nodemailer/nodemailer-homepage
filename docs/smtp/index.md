@@ -1,6 +1,6 @@
 ---
 title: SMTP transport
-sidebar_position: 4
+sidebar_position: 3
 description: Main transport in Nodemailer for delivering messages via the SMTP protocol.
 ---
 

@@ -28,6 +28,25 @@ Nodemailer automatically formats URLs for you:
 Comments containing non-ASCII characters are automatically encoded for email compatibility.
 :::
 
+### `List-ID` is formatted differently
+
+[RFC 2919](https://www.rfc-editor.org/rfc/rfc2919) gives `List-ID` its own syntax: an optional quoted phrase followed by a bare list identifier in angle brackets, rather than the URL-and-parenthesised-comment shape of the other `List-*` headers. Nodemailer special-cases the `id` key to match, stripping any scheme you pass and moving the comment in front of the identifier:
+
+```javascript
+list: {
+  // List-ID: "My List" <list.example.com>
+  id: { url: "list.example.com", comment: "My List" },
+}
+```
+
+| Input                                              | Generated header                       |
+| -------------------------------------------------- | -------------------------------------- |
+| `id: 'list.example.com'`                            | `List-ID: <list.example.com>`          |
+| `id: { url: 'list.example.com', comment: 'My List' }` | `List-ID: "My List" <list.example.com>` |
+| `id: { url: 'http://list.example.com' }`            | `List-ID: <list.example.com>`          |
+
+Compare this with any other key, where the same input keeps the scheme and appends the comment in parentheses, for example `List-Unsubscribe: <http://list.example.com> (My List)`.
+
 ## Complete example
 
 ```javascript

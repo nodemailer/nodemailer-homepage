@@ -4,6 +4,9 @@ sidebar_position: 2
 description: Use OAuth2 access tokens instead of passwords for secure SMTP authentication.
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 OAuth2 allows your application to authenticate with email servers using short-lived access tokens instead of storing passwords. This approach is more secure because tokens are scoped to specific permissions, can be revoked at any time, and can be regenerated if compromised. If a token is leaked, the potential damage is limited and contained, unlike a leaked password which could grant broader access.
 
 1. [Provider-agnostic OAuth2 authentication](#oauth-token)
@@ -111,9 +114,7 @@ transporter.set("oauth2_provision_cb", (user, renew, cb) => {
 });
 ```
 
-:::warning Non-pooled transports
-With a non-pooled transport, the provision callback is only consulted when you provide an `auth` object in the `sendMail()` call (for example `auth: { user: "user@example.com" }`) or when calling `transporter.verify()`. With a pooled transport (`pool: true`) it is used for every connection.
-:::
+The callback is resolved at send time, so it applies to every connection regardless of whether the transport is pooled, and regardless of whether you pass a per-message `auth` object. Registering it after `createTransport()` is fine.
 
 #### Token update notifications {#update-notification}
 
@@ -133,9 +134,10 @@ transporter.on("token", (t) => {
 The examples below use explicit `host`, `port`, and `secure` settings. For Gmail and other popular providers, you can simplify this by using `service: "gmail"` instead. See [Well-Known Services](./well-known-services) for the full list of supported providers.
 :::
 
-1. **Authenticate with an existing token**
+<Tabs groupId="oauth2-setup">
+<TabItem value="token" label="Existing token">
 
-Use this approach when you already have a valid access token and simply want to authenticate with it.
+Use this when you already have a valid access token and simply want to authenticate with it. Nodemailer will not refresh it, so the send fails once the token expires.
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -150,9 +152,10 @@ let transporter = nodemailer.createTransport({
 });
 ```
 
-2. **Custom handler** - token returned by your own service
+</TabItem>
+<TabItem value="callback" label="Custom handler">
 
-Use this approach when you have a separate token management service or database that provides tokens on demand. Note that with a non-pooled transport the callback is only consulted when the message itself includes an `auth` option, so pass the user with each `sendMail()` call:
+Use this when a separate token service or database hands out tokens on demand. The callback is consulted for every connection, so no per-message `auth` is needed.
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -171,13 +174,13 @@ transporter.sendMail({
   to: "recipient@example.com",
   subject: "Message",
   text: "Token provided by the custom handler",
-  auth: { user: "user@example.com" }, // triggers the provision callback
 });
 ```
 
-3. **Full 3-legged setup** - Nodemailer refreshes tokens automatically
+</TabItem>
+<TabItem value="3lo" label="Refresh token (3LO)">
 
-Use this approach when you have obtained OAuth2 credentials from Google Cloud Console and a refresh token from the user consent flow. Nodemailer will automatically refresh the access token when it expires.
+Use this when you have OAuth2 client credentials and a refresh token from the user consent flow. Nodemailer refreshes the access token automatically as it expires, and emits a [`token` event](#update-notification) each time.
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -196,9 +199,10 @@ let transporter = nodemailer.createTransport({
 });
 ```
 
-4. **Service account** - token re-generated via 2LO
+</TabItem>
+<TabItem value="2lo" label="Service account (2LO)">
 
-Use this approach for server-to-server authentication without user interaction. The service account impersonates the specified user and generates tokens automatically.
+Use this for server-to-server sending without user interaction. The service account impersonates `user` and Nodemailer generates tokens as needed.
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -216,9 +220,10 @@ let transporter = nodemailer.createTransport({
 });
 ```
 
-5. **Per-message auth** - single transport, many users
+</TabItem>
+<TabItem value="per-message" label="Per-message auth">
 
-Use this approach when you need to send emails on behalf of multiple users through a single transporter. You define the client credentials once in the transporter configuration, then provide user-specific tokens with each message.
+Use this to send on behalf of many users through one transporter. Client credentials live on the transport, and each message carries its own user and tokens.
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -245,6 +250,9 @@ transporter.sendMail({
   },
 });
 ```
+
+</TabItem>
+</Tabs>
 
 :::info
 

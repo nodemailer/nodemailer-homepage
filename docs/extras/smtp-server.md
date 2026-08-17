@@ -576,135 +576,83 @@ const server = new SMTPServer({
 });
 ```
 
-### Production DSN implementation example
+### Returning a DSN with Nodemailer
 
-Here is a complete example showing how to implement DSN notifications using Nodemailer:
+The parameters above tell you *whether* to report and *where*; producing the report itself is a separate job. A delivery status notification is a [RFC 3464](https://www.rfc-editor.org/rfc/rfc3464) `multipart/report` message with a `message/delivery-status` part, and Nodemailer has no dedicated option for that structure, so build the report body yourself and hand the finished message to [`raw`](/message/custom-source).
 
 ```javascript
-const { SMTPServer } = require("smtp-server");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
-// Create a Nodemailer transporter for sending DSN notifications
-const dsnTransporter = nodemailer.createTransport({
-  host: "smtp.example.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: "dsn-sender@example.com",
-    pass: "your-password",
-  },
-});
+const transporter = nodemailer.createTransport({ host: "smtp.example.com", port: 587 });
 
-// DSN notification generator
-class DSNNotifier {
-  constructor(transporter) {
-    this.transporter = transporter;
-  }
-
-  async sendSuccessNotification(envelope, messageId, deliveryTime) {
-    // Only send if SUCCESS notification was requested
-    const needsSuccessNotification = envelope.rcptTo.some((rcpt) => rcpt.dsn.notify && rcpt.dsn.notify.includes("SUCCESS"));
-
-    if (!needsSuccessNotification || !envelope.mailFrom.address) {
-      return;
-    }
-
-    const dsnMessage = this.generateDSNMessage({
-      action: "delivered",
-      status: "2.0.0",
-      envelope,
-      messageId,
-      deliveryTime,
-      diagnosticCode: "smtp; 250 2.0.0 Message accepted for delivery",
-    });
-
-    await this.transporter.sendMail({
-      from: "postmaster@example.com",
-      to: envelope.mailFrom.address,
-      subject: "Delivery Status Notification (Success)",
-      text: dsnMessage.text,
-      headers: {
-        "Auto-Submitted": "auto-replied",
-        "Content-Type": "multipart/report; report-type=delivery-status",
-      },
-    });
-  }
-
-  generateDSNMessage({ action, status, envelope, messageId, deliveryTime, diagnosticCode }) {
-    const { dsn } = envelope;
-    const timestamp = deliveryTime || new Date().toISOString();
-
-    // Generate RFC 3464 compliant delivery status notification
-    const text = `This is an automatically generated Delivery Status Notification.
-
-Original Message Details:
-- Message ID: ${messageId}
-- Envelope ID: ${dsn.envid || "Not provided"}
-- Sender: ${envelope.mailFrom.address}
-- Recipients: ${envelope.rcptTo.map((r) => r.address).join(", ")}
-- Action: ${action}
-- Status: ${status}
-- Time: ${timestamp}
-
-${action === "delivered" ? "Your message has been successfully delivered to all recipients." : "Delivery failed for one or more recipients."}`;
-
-    return { text };
-  }
+function buildDsn({ from, to, reportingMta, envid, finalRecipient, action, status, diagnosticCode }) {
+  const boundary = "dsn-" + crypto.randomBytes(12).toString("hex");
+  return [
+    `From: ${from}`,
+    `To: ${to}`,
+    "Subject: Delivery Status Notification",
+    "Auto-Submitted: auto-generated",
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/report; report-type=delivery-status; boundary="${boundary}"`,
+    "",
+    `--${boundary}`,
+    "Content-Type: text/plain; charset=utf-8",
+    "",
+    `Delivery to ${finalRecipient} resulted in: ${action} (${status}).`,
+    "",
+    `--${boundary}`,
+    "Content-Type: message/delivery-status",
+    "",
+    `Reporting-MTA: dns; ${reportingMta}`,
+    ...(envid ? [`Original-Envelope-Id: ${envid}`] : []),
+    `Arrival-Date: ${new Date().toUTCString()}`,
+    "",
+    `Final-Recipient: rfc822; ${finalRecipient}`,
+    `Action: ${action}`,
+    `Status: ${status}`,
+    `Diagnostic-Code: ${diagnosticCode}`,
+    "",
+    `--${boundary}--`,
+    "",
+  ].join("\r\n");
 }
-
-// Create DSN notifier instance
-const dsnNotifier = new DSNNotifier(dsnTransporter);
-
-// SMTP Server with DSN support
-const server = new SMTPServer({
-  hideDSN: false, // Required to enable DSN
-  name: "mail.example.com",
-
-  onMailFrom(address, session, callback) {
-    const { dsn } = session.envelope;
-    console.log(`MAIL FROM: ${address.address}, RET=${dsn.ret}, ENVID=${dsn.envid}`);
-    callback();
-  },
-
-  onRcptTo(address, session, callback) {
-    const { notify, orcpt } = address.dsn || {};
-    console.log(`RCPT TO: ${address.address}, NOTIFY=${notify?.join(",")}, ORCPT=${orcpt}`);
-    callback();
-  },
-
-  async onData(stream, session, callback) {
-    const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    stream.on("end", async () => {
-      try {
-        // Simulate message delivery
-        const deliveryTime = new Date();
-
-        // Send DSN success notification if requested
-        await dsnNotifier.sendSuccessNotification(session.envelope, messageId, deliveryTime);
-
-        callback(null, `Message ${messageId} accepted for delivery`);
-      } catch (error) {
-        callback(error);
-      }
-    });
-
-    stream.resume();
-  },
-});
-
-server.listen(2525, () => {
-  console.log("DSN-enabled SMTP server listening on port 2525");
-});
 ```
 
-This example demonstrates:
+Send it only when the sender asked for that class of report, and never to an empty return path, which is what stops two servers from bouncing at each other forever:
 
-- **Complete DSN workflow** from parameter parsing to notification sending
-- **RFC-compliant DSN messages** with proper headers and content
-- **Conditional notifications** based on NOTIFY parameters
-- **Integration with Nodemailer** for sending DSN notifications
-- **Production-ready structure** with error handling
+```javascript
+async function reportDelivery(session, recipient) {
+  const returnPath = session.envelope.mailFrom && session.envelope.mailFrom.address;
+  const notify = (recipient.dsn && recipient.dsn.notify) || [];
+
+  // an empty MAIL FROM is the null sender: it is already a bounce, so never reply to it
+  if (!returnPath || !notify.includes("SUCCESS")) {
+    return;
+  }
+
+  const raw = buildDsn({
+    from: "postmaster@example.com",
+    to: returnPath,
+    reportingMta: "mail.example.com",
+    envid: session.envelope.dsn.envid,
+    finalRecipient: recipient.address,
+    action: "delivered",
+    status: "2.0.0",
+    diagnosticCode: "smtp; 250 2.0.0 Message accepted for delivery",
+  });
+
+  // raw needs an explicit envelope, since Nodemailer does not parse one out of it
+  await transporter.sendMail({
+    envelope: { from: "postmaster@example.com", to: [returnPath] },
+    raw,
+  });
+}
+```
+
+:::note
+`Action` and `Status` are the fields receiving systems actually parse. Use the [RFC 3463](https://www.rfc-editor.org/rfc/rfc3463) enhanced status codes: `2.x.x` for success, `4.x.x` for a transient failure paired with `Action: delayed`, and `5.x.x` for a permanent one paired with `Action: failed`.
+:::
 
 ---
 
