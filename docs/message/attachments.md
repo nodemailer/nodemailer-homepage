@@ -11,7 +11,7 @@ Each attachment object supports the following properties:
 | Property             | Type                         | Description                                                                                                                                       |
 | -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `filename`           | `string \| false`            | The filename that will be shown to recipients. Unicode characters are supported. If omitted, the filename is derived from `path`/`href` or auto-generated as `attachment-N.ext`. Set to `false` to omit the filename from the generated headers entirely. |
-| `content`            | `string \| Buffer \| Stream` | The attachment contents. Can be a string, a Buffer, or a Node.js readable stream (`stream.Readable`). A WHATWG `ReadableStream` (such as the `body` returned by `fetch()`) is not accepted directly — convert it with `Readable.fromWeb()` first. |
+| `content`            | `string \| Buffer \| Stream` | The attachment contents. Can be a string, a Buffer, or a Node.js readable stream (`stream.Readable`). A WHATWG `ReadableStream` (such as the `body` returned by `fetch()`) is not accepted directly - convert it with `Readable.fromWeb()` first. |
 | `path`               | `string`                     | A file path, URL, or data URI. File paths are streamed from disk and HTTP(S) URLs are streamed from the network, making this the recommended approach for large files. Data URIs are decoded into memory and limited to 50&nbsp;MB of encoded data. |
 | `href`               | `string`                     | An HTTP or HTTPS URL. Nodemailer will fetch the content from this URL and include it as an attachment.                                            |
 | `httpHeaders`        | `object`                     | Custom HTTP headers to send when fetching content from `href`. For example: `{ authorization: 'Bearer token123' }`.                               |
@@ -168,3 +168,11 @@ The `cid` value can be any unique string. A common convention is to use an email
 ```
 
 When an attachment has a `cid` and the content type is an image, Nodemailer automatically sets the Content-Disposition to `inline` rather than `attachment`, so the image displays within the email body rather than appearing as a downloadable file.
+
+## See Also
+
+- [Embedded images](/message/embedded-images) - attachments referenced from HTML with `cid:`.
+- [Message configuration](/message/) - the message fields attachments sit alongside.
+- [Custom headers](/message/custom-headers) - add headers to an individual attachment.
+- [Calendar events](/message/calendar-events) - attaching an iCalendar invitation.
+- [Alternatives](/message/alternatives) - alternative body parts, which take the same content sources.

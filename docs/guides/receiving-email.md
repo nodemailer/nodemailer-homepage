@@ -103,3 +103,11 @@ If you would rather not own that infrastructure, [**EmailEngine**](https://email
 | Mail delivered to your own domain, in your process | [smtp-server](/extras/smtp-server) + [mailparser](/extras/mailparser) |
 | Read and monitor an existing mailbox | [ImapFlow](https://imapflow.com/) + [mailparser](/extras/mailparser) |
 | Many accounts, OAuth2, webhooks, production operation | [EmailEngine](https://emailengine.app/?utm_source=nodemailer.com&utm_medium=inline&utm_campaign=oss-docs&utm_content=receiving-email) |
+
+## See Also
+
+- [SMTP Server](/extras/smtp-server) - the module for accepting inbound SMTP yourself.
+- [MailParser](/extras/mailparser) - turn the received message into structured fields.
+- [Extra modules](/extras/) - the companion packages compared side by side.
+- [Nodemailer](/) - the sending side, which is what this package itself does.
+- [Testing with Ethereal](/guides/testing-with-ethereal) - a mailbox to send test messages into.

@@ -296,3 +296,11 @@ mail.build((err, message) => {
 ## License
 
 [MIT-0](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)
+
+## See Also
+
+- [Message configuration](/message/) - the message object Mailcomposer accepts is the one `sendMail()` takes.
+- [Custom source](/message/custom-source) - send a message you built yourself.
+- [Stream transport](/transports/stream) - get the same generated message back through a transport.
+- [MailParser](/extras/mailparser) - the reverse direction, raw message to structured object.
+- [Attachments](/message/attachments) - the attachment shapes Mailcomposer understands.

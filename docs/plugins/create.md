@@ -42,7 +42,7 @@ Every plugin function, including custom transport `send` methods, receives two a
 | Property         | Available at                       | Description                                                                                                                     |
 | ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `data`           | `compile`, `stream`, **transport** | The message options passed to `sendMail()` (a shallow copy, with the transporter `defaults` already applied)                    |
-| `message`        | `stream`, **transport**            | A [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/lib/mime-node/index.js) instance representing the built message (see also [MailComposer](/extras/mailcomposer/)) |
+| `message`        | `stream`, **transport**            | A [`MimeNode`](https://github.com/nodemailer/nodemailer/blob/master/src/mime-node/index.ts) instance representing the built message (see also [MailComposer](/extras/mailcomposer/)) |
 | `resolveContent` | `compile`, `stream`, **transport** | A helper method for converting Nodemailer content objects (streams, file paths, URLs) into a `String` or `Buffer`              |
 
 ### `mail.resolveContent(obj, key[, options][, callback])`
@@ -264,3 +264,11 @@ If the transport object is an EventEmitter, its `'error'` and `'idle'` events ar
 1. Choose the stage (`compile`, `stream`, or custom **transport**) that best fits your needs.
 2. Write a plugin function that accepts **`(mail, done)`** and register it with `transporter.use()`, or implement `transport.send()` for a custom transport.
 3. Always call `done()` when your plugin completes. Pass an `Error` to abort the send operation.
+
+## See Also
+
+- [Plugins](/plugins/) - which stage to choose before writing anything.
+- [Message configuration](/message/) - the fields available on `mail.data`.
+- [Mailcomposer](/extras/mailcomposer) - the message builder behind `mail.message`.
+- [Transports](/transports/) - the built-in transports to model a custom one on.
+- [Error reference](/errors) - the error codes a plugin should raise.

@@ -13,7 +13,7 @@ Nodemailer is designed to be **extensible**. You can inject custom logic at thre
 | **Sending**        | transport   | When the message is ready to be delivered                                      | [SMTP](/smtp/), [SES](/transports/ses), SparkPost, custom HTTP APIs |
 
 :::tip
-Use _compile_ and _stream_ plugins when you want your plugin to work with any transport. These are the two valid keywords for `transporter.use()`. The transport stage is different: it is not registered with `use()` — a custom transport object is passed to `nodemailer.createTransport()` instead. Transport plugins are only needed when you want to define a completely custom delivery mechanism.
+Use _compile_ and _stream_ plugins when you want your plugin to work with any transport. These are the two valid keywords for `transporter.use()`. The transport stage is different: it is not registered with `use()` - a custom transport object is passed to `nodemailer.createTransport()` instead. Transport plugins are only needed when you want to define a completely custom delivery mechanism.
 :::
 
 ## Writing a plugin
@@ -73,3 +73,11 @@ Looking for something else? Try [searching npm for "nodemailer plugin"](https://
 ---
 
 Need more control? See **[Creating plugins](/plugins/create)** for a detailed guide on the plugin API.
+
+## See Also
+
+- [Create plugins](/plugins/create) - the API for each stage, with worked examples.
+- [DKIM](/dkim/) - a stream-stage transform that ships with Nodemailer.
+- [Message configuration](/message/) - the message data compile-stage plugins operate on.
+- [Transports](/transports/) - the built-in transports a custom transport sits beside.
+- [Mailcomposer](/extras/mailcomposer) - the MIME builder plugins see the output of.

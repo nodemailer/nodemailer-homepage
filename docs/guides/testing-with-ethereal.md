@@ -238,3 +238,11 @@ For alternative testing approaches, you can also use the [stream transport](/tra
 | Real SMTP | Yes | N/A | Provider account |
 
 Ethereal is ideal for quick development and testing. For team collaboration or CI/CD pipelines, consider Mailtrap or a self-hosted solution like Mailhog.
+
+## See Also
+
+- [Stream transport](/transports/stream) - inspect generated messages without any network at all.
+- [SMTP transport](/smtp/) - point the same code at a real server once testing is done.
+- [Message configuration](/message/) - the message fields you will be exercising.
+- [Message Playground](/message/playground) - preview a message object in the browser.
+- [Error reference](/errors) - what a failed test send is telling you.

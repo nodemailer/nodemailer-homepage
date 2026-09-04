@@ -48,6 +48,7 @@ Nodemailer uses specific error codes to categorize different types of failures. 
 | `ENOAUTH` | Authentication | Authentication not provided |
 | `EOAUTH2` | Authentication | OAuth2 token error |
 | `EENVELOPE` | Envelope | Invalid mail envelope |
+| `EMAXRECIPIENTS` | Envelope | Recipient count exceeds maxRecipients |
 | `EMESSAGE` | Message | Message delivery error |
 | `ESTREAM` | Stream | Stream processing error |
 | `EPROTOCOL` | Protocol | Invalid SMTP server response |
@@ -286,6 +287,30 @@ try {
 }
 ```
 
+#### EMAXRECIPIENTS
+
+The message has more envelope recipients than `maxRecipients` allows. The check runs after the envelope is built and before the transport is given the message, so nothing is sent.
+
+Recipients are counted across `to`, `cc`, and `bcc` together, after duplicates are removed. The limit defaults to `100000` and can be set per message or on the transporter; `0` removes it. See [maxRecipients](/message/#security-options).
+
+**Error scenario:**
+- `Message has N recipients, which is over the M allowed by maxRecipients`
+
+**Troubleshooting:**
+- Split the recipient list across several messages, which is what most providers expect in any case. RFC 5321 only asks a server to accept 100 recipients per message.
+- Raise `maxRecipients` if the large list is intentional, or set it to `0` to remove the limit.
+- If the count is higher than you expect, check for the same address appearing in more than one field, and remember that `bcc` recipients are counted too.
+
+```javascript
+try {
+  await transporter.sendMail({ ...message, maxRecipients: 500 });
+} catch (err) {
+  if (err.code === 'EMAXRECIPIENTS') {
+    console.error('Recipient list too large:', err.message);
+  }
+}
+```
+
 ### Message errors
 
 #### EMESSAGE
@@ -340,7 +365,7 @@ The server response did not follow the expected SMTP protocol format.
 
 #### EMAXLIMIT
 
-A pooled connection reached the `maxMessages` limit (default 100) and was closed with the message `Resource exhausted`. This is normally handled internally by the pool — the connection is simply replaced with a fresh one.
+A pooled connection reached the `maxMessages` limit (default 100) and was closed with the message `Resource exhausted`. This is normally handled internally by the pool - the connection is replaced with a fresh one.
 
 **Troubleshooting:**
 - Increase `maxMessages` in the pool configuration if connections are recycled too aggressively
@@ -460,7 +485,7 @@ The REQUIRETLS extension (RFC 8689) was requested but not supported by the serve
 **When this occurs:**
 - `requireTLSExtensionEnabled: true` is set in the message options
 - The SMTP server does not advertise REQUIRETLS capability
-- The connection is not TLS-encrypted (error: `REQUIRETLS can only be used over TLS connections (RFC 8689)`) — REQUIRETLS can only be requested on a connection that is already secured
+- The connection is not TLS-encrypted (error: `REQUIRETLS can only be used over TLS connections (RFC 8689)`) - REQUIRETLS can only be requested on a connection that is already secured
 
 **Troubleshooting:**
 - Check if your SMTP server supports RFC 8689 REQUIRETLS
@@ -502,7 +527,7 @@ const transporter = nodemailer.createTransport({
 
 #### ESES
 
-Reserved for AWS SES transport errors. In practice, errors from the SES transport are raw AWS SDK errors passed through unchanged — inspect `err.name` (or `err.Code`) for AWS error identifiers rather than `err.code`.
+Reserved for AWS SES transport errors. In practice, errors from the SES transport are raw AWS SDK errors passed through unchanged - inspect `err.name` (or `err.Code`) for AWS error identifiers rather than `err.code`.
 
 ## SMTP response codes
 
@@ -555,7 +580,7 @@ These indicate permanent failures. The operation will not succeed without change
 
 ## SES transport errors
 
-When using the Amazon SES transport, the original AWS SDK error object is passed through intact — inspect `err.name` for the AWS error identifier. AWS SDK v3 errors carry no `code` property of their own, so Nodemailer tags them with `code: 'ESES'` to keep transport errors uniformly identifiable. An error that already has a `code` keeps it. Common AWS error names include:
+When using the Amazon SES transport, the original AWS SDK error object is passed through intact - inspect `err.name` for the AWS error identifier. AWS SDK v3 errors carry no `code` property of their own, so Nodemailer tags them with `code: 'ESES'` to keep transport errors uniformly identifiable. An error that already has a `code` keeps it. Common AWS error names include:
 
 | Code                   | Meaning                                            |
 | ---------------------- | -------------------------------------------------- |
@@ -700,3 +725,11 @@ if (info.rejected && info.rejected.length > 0) {
   }
 }
 ```
+
+## See Also
+
+- [SMTP transport](/smtp/) - the connection, timeout, and TLS options behind most connection errors.
+- [SMTP envelope](/smtp/envelope) - how `MAIL FROM` and `RCPT TO` are built, which is what `EENVELOPE` reports on.
+- [Pooled connections](/smtp/pooled) - pool limits and the errors a saturated pool raises.
+- [OAuth2](/smtp/oauth2) - token refresh, the usual source of `EAUTH` against Gmail and Microsoft 365.
+- [Delivery Status Notifications](/message/dsn) - ask the server to report on delivery rather than inferring it from errors.

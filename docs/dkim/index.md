@@ -42,7 +42,7 @@ precedence**.
 | `headerFieldNames` | `string`                                         | RFC 4871 defaults  | A colon-separated list of header field names to include in the signature (for example, `from:to:subject`). By default, Nodemailer signs the standard headers recommended by RFC 4871. |
 | `skipFields`       | `string`                                         | -                  | A colon-separated list of header field names to **exclude** from signing. Use this when your email service provider modifies certain headers after signing (for example, `message-id:date`). |
 | `cacheDir`         | `string \| false`                                | `false`            | A directory path for temporary files when processing large messages. Set to `false` to disable disk caching entirely.                                         |
-| `cacheTreshold`    | `number`                                         | `2097152` (2 MB)   | The number of bytes to keep in memory before switching to disk caching. Only applies when `cacheDir` is set to a valid path.                                  |
+| `cacheTreshold`    | `number`                                         | `10485760` (10 MB) | The number of bytes to keep in memory before switching to disk caching. Only applies when `cacheDir` is set to a valid path. The default was 2 MB before Nodemailer 10. |
 
 :::warning
 The option `cacheTreshold` is intentionally misspelled (missing the "h" in "Threshold") to maintain backwards compatibility with older Nodemailer versions.
@@ -52,7 +52,7 @@ The option `cacheTreshold` is intentionally misspelled (missing the "h" in "Thre
 
 ## Usage examples
 
-The following examples use CommonJS syntax and require **Node.js v6** or later:
+The following examples use CommonJS syntax:
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -198,3 +198,11 @@ const transporter = nodemailer.createTransport({
   [dkimvalidator.com](https://dkimvalidator.com) or
   [mail-tester.com](https://www.mail-tester.com). These services send a test
   email and provide detailed feedback about your DKIM setup.
+
+## See Also
+
+- [Message configuration](/message/) - where the `dkim` option sits among the other message fields.
+- [SMTP transport](/smtp/) - set signing keys once on the transporter instead of per message.
+- [Custom source](/message/custom-source) - how signing behaves when you supply your own RFC 822 source.
+- [Create plugins](/plugins/create) - the stream stage DKIM itself is built on.
+- [Error reference](/errors) - what a failed signing attempt reports.

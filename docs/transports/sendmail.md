@@ -30,7 +30,7 @@ Setting `sendmail: true` activates the Sendmail transport. Nodemailer looks for 
 `newline` can also be set per message in the object passed to `sendMail()`. If both are set, the transport option wins. Left unset, headers and MIME structure use CRLF while body content keeps its original line endings.
 
 :::note
-Envelope addresses beginning with `-` are rejected with the error `Can not send mail. Invalid envelope addresses.` to prevent them from being interpreted as sendmail command-line flags. The generated message also retains the `Bcc:` header — sendmail strips that header line itself before delivery.
+Envelope addresses beginning with `-` are rejected with the error `Can not send mail. Invalid envelope addresses.` to prevent them from being interpreted as sendmail command-line flags. The generated message also retains the `Bcc:` header - sendmail strips that header line itself before delivery.
 :::
 
 When no custom `args` array is provided, Nodemailer executes the following command:
@@ -111,3 +111,11 @@ const transporter = nodemailer.createTransport({
 ```
 
 When using `args`, remember that you are replacing Nodemailer's default arguments. If you need the `-f` flag for the envelope sender, you must include it explicitly as shown above.
+
+## See Also
+
+- [Transports](/transports/) - the other delivery mechanisms, and when to pick each.
+- [SMTP transport](/smtp/) - deliver over the network instead of through a local binary.
+- [SMTP envelope](/smtp/envelope) - the envelope addresses passed on the command line.
+- [Message configuration](/message/) - the message object this transport renders.
+- [Error reference](/errors) - what a failed sendmail invocation reports.

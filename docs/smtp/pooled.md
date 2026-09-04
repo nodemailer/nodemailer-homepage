@@ -120,3 +120,11 @@ The transporter emits a `clear` event when the last open connection closes while
 - **Match `maxConnections` and `maxMessages` to your SMTP provider's limits.** Many providers restrict the number of concurrent connections or messages per connection. Check your provider's documentation or the [well-known services list](./well-known-services.md) for common providers.
 - **Use the `idle` event for high-volume sending.** Instead of queuing thousands of messages in memory, use the pull-based pattern shown above to fetch messages only when the transporter is ready.
 - **Close the pool during application shutdown.** Call `transporter.close()` in your shutdown handler to ensure connections are properly terminated and your process can exit cleanly.
+
+## See Also
+
+- [SMTP transport](/smtp/) - every option a pooled transport inherits.
+- [Error reference](/errors) - the errors a saturated or closed pool raises.
+- [Well-known services](/smtp/well-known-services) - provider limits worth pooling against.
+- [Proxy support](/smtp/proxies) - pooling connections that run through a proxy.
+- [Message configuration](/message/) - the messages you are queueing.

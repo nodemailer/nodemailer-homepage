@@ -123,3 +123,11 @@ List-Post: <http://example.com/post>, <mailto:admin@example.com?subject=post> (P
 ```
 
 Long header lines may be physically folded onto continuation lines in the generated message; this does not change their meaning.
+
+## See Also
+
+- [Custom headers](/message/custom-headers) - set any header the `list` option does not cover.
+- [Message configuration](/message/) - where `list` sits among the message fields.
+- [Addresses](/message/addresses) - the address forms these headers accept.
+- [DKIM](/dkim/) - signing the headers a mailing list adds.
+- [Delivery Status Notifications](/message/dsn) - bounce handling for list mail.

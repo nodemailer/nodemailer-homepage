@@ -76,6 +76,7 @@ These options help protect your application when processing email data from untr
 
 - **disableFileAccess** - When set to `true`, prevents Nodemailer from reading files from the filesystem. Use this option when constructing emails from untrusted JSON data to prevent attackers from reading arbitrary files. If an attachment or message node attempts to read from a file path, the send operation will return an error. Note: If this option is also set in the transport configuration, the transport-level setting takes precedence.
 - **disableUrlAccess** - When set to `true`, prevents Nodemailer from fetching content from URLs. This is useful for preventing server-side request forgery (SSRF) attacks when processing untrusted email data. Note: If this option is also set in the transport configuration, the transport-level setting takes precedence.
+- **maxRecipients** - The largest number of envelope recipients this message may have, counting `to`, `cc`, and `bcc` together after deduplication. Defaults to `100000`; set it to `0` to remove the limit. A message over the limit fails with an [`EMAXRECIPIENTS`](/errors#emaxrecipients) error before anything is sent. This is a backstop against a runaway or hostile recipient list rather than a delivery policy, since RFC 5321 only asks a server to accept 100 recipients per message. Setting it in the transport configuration applies it to every message.
 
 ##### Advanced options
 
@@ -144,3 +145,11 @@ const message = {
     </html>`,
 };
 ```
+
+## See Also
+
+- [Addresses](/message/addresses) - every accepted form of `from`, `to`, `cc`, and `bcc`.
+- [Attachments](/message/attachments) - attach files from strings, buffers, streams, paths, or URLs.
+- [Custom headers](/message/custom-headers) - add or override headers on the message or an attachment.
+- [SMTP envelope](/smtp/envelope) - send to addresses that differ from the visible headers.
+- [Message Playground](/message/playground) - see how a message object renders before sending it.

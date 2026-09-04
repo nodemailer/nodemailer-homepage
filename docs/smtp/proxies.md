@@ -142,3 +142,11 @@ transporter.set("proxy_handler_myproxys", (proxy, options, done) => {
   });
 });
 ```
+
+## See Also
+
+- [SMTP transport](/smtp/) - the transport options a proxy sits underneath.
+- [SMTP Connection](/extras/smtp-connection) - supply a socket to the low-level client directly.
+- [Pooled connections](/smtp/pooled) - how pooling and proxying interact.
+- [Error reference](/errors) - the errors a refused proxy connection raises.
+- [Create plugins](/plugins/create) - the same `getSocket` hook, in context.

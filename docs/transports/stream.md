@@ -37,7 +37,7 @@ const transporter = nodemailer.createTransport({
 
 To control line endings, set `newline` either as a **transport option** (applies to every message) or as a **message option** in the object passed to `sendMail()`. `'windows'` (also accepts `'win'`, `'dos'`, `'\r\n'`) forces CRLF; any other truthy value (such as `'unix'` or `'\n'`) forces LF. If both are set, the transport option wins.
 
-If `newline` is not set at all, line breaks are kept as generated — headers and MIME structure use CRLF while body content keeps its original line endings.
+If `newline` is not set at all, line breaks are kept as generated - headers and MIME structure use CRLF while body content keeps its original line endings.
 
 :::note
 The generated message retains the `Bcc:` header so that the output shows all recipients.
@@ -172,5 +172,13 @@ Use the following table to help decide which transport best fits your needs:
 | --------------------------------------------------- | --------------------------------------- |
 | Inspect or pipe raw RFC 822 SMTP content            | `streamTransport` (Stream or Buffer)    |
 | Store structured message data for later replay      | `jsonTransport`                         |
-| Apply Nodemailer plugins (DKIM, headers, etc.)      | `streamTransport` — DKIM signatures and message-stream transforms are not reflected in JSON output (only `compile`-stage plugins that modify message data affect `jsonTransport`) |
+| Apply Nodemailer plugins (DKIM, headers, etc.)      | `streamTransport` - DKIM signatures and message-stream transforms are not reflected in JSON output (only `compile`-stage plugins that modify message data affect `jsonTransport`) |
 | Need the `raw` message option rendered as output (see [custom source](../message/custom-source)) | **Stream transport only** |
+
+## See Also
+
+- [Transports](/transports/) - the other delivery mechanisms, and when to pick each.
+- [Testing with Ethereal](/guides/testing-with-ethereal) - send to a real inbox once the output looks right.
+- [Mailcomposer](/extras/mailcomposer) - build the same message outside a transport.
+- [Custom source](/message/custom-source) - feed your own RFC 822 source back in.
+- [Message Playground](/message/playground) - inspect a message object in the browser.

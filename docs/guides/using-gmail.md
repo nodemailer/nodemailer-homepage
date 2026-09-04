@@ -146,3 +146,11 @@ If your emails are not being sent, work through these steps:
    ```
 
    If this connection fails, the problem is likely with your network configuration or Google blocking your IP address.
+
+## See Also
+
+- [OAuth2](/smtp/oauth2) - the full reference for token configuration and refresh.
+- [Well-known services](/smtp/well-known-services) - the `service: "gmail"` preset and the others like it.
+- [SMTP transport](/smtp/) - the connection options underneath the Gmail preset.
+- [Error reference](/errors) - decoding the `EAUTH` responses Gmail returns.
+- [Testing with Ethereal](/guides/testing-with-ethereal) - test without spending Gmail's sending quota.

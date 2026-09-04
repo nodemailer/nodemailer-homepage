@@ -1,7 +1,7 @@
 ---
 title: Nodemailer
 sidebar_position: 1
-description: Send e-mails with Node.JS – easy as cake with zero runtime dependencies.
+description: Send e-mails with Node.js, easy as cake, with zero runtime dependencies.
 ---
 
 # Nodemailer
@@ -25,7 +25,7 @@ npm install nodemailer
 - **Full Unicode support** - send messages with any characters, including emoji.
 - **Cross-platform** - works identically on Linux, macOS, and Windows with no native addons required (ideal for cloud environments like Azure).
 - **HTML and plain-text emails** - provide both `html` and `text` content and Nodemailer automatically builds the proper multipart message.
-- **[Attachments](./message/attachments/)** and **[embedded images](./message/embedded-images/)** - easily include files and inline images in your messages.
+- **[Attachments](./message/attachments/)** and **[embedded images](./message/embedded-images/)** - include files and inline images in your messages.
 - **Built-in TLS/STARTTLS encryption** - secure connections are handled automatically.
 - **Multiple [transports](./transports/)** - send via [SMTP](./smtp/), [Sendmail](./transports/sendmail/), [Amazon SES](./transports/ses/), [streams](./transports/stream/), and more.
 - **[DKIM signing](./dkim/)** and **[OAuth2 authentication](./smtp/oauth2/)** - enterprise-ready email authentication.
@@ -35,13 +35,23 @@ npm install nodemailer
 
 ## Requirements
 
-- **Node.js v6.0.0 or later** (examples using async/await require Node.js v8.0.0 or later).
+Nodemailer 10 requires **Node.js 20 or later**. If you are on an older Node.js version, stay on the 9.x line. No additional system libraries, services, or build tools are needed.
 
-No additional system libraries, services, or build tools are needed.
+The package ships both an ES module and a CommonJS build, so either import style works:
+
+```javascript
+import nodemailer from "nodemailer";
+// or
+const nodemailer = require("nodemailer");
+```
+
+TypeScript definitions are bundled with the package. `@types/nodemailer` is only for Nodemailer 9 and earlier, and installing it alongside Nodemailer 10 causes conflicting declarations, so remove it when you upgrade.
+
+The examples throughout this documentation use `require()`. Replace those lines with the `import` form above if your project is an ES module.
 
 ## Quick start
 
-Sending an email with Nodemailer involves three simple steps:
+Sending an email with Nodemailer takes three steps:
 
 1. **Create a transporter** - Configure your [SMTP server](./smtp/) or another supported [transport method](./transports/).
 2. **Compose your message** - Define the sender, recipient(s), subject, and [content](./message/).
@@ -201,6 +211,14 @@ transporter.on("token", (token) => {
 ## Source and License
 
 Nodemailer is open source software, licensed under the [MIT No Attribution (MIT-0)](./license) license. This means you can use it freely in any project without attribution requirements. Browse the source code on [GitHub](https://github.com/nodemailer/nodemailer).
+
+## See Also
+
+- [SMTP transport](./smtp/) - every connection, authentication, and TLS option the default transport accepts.
+- [Message configuration](./message/) - the full list of message fields, from `from` and `to` through attachments and custom headers.
+- [Testing with Ethereal](./guides/testing-with-ethereal) - send real messages to a throwaway inbox instead of to live recipients.
+- [Error reference](./errors) - what each `err.code` means and how to recover from it.
+- [Well-known services](./smtp/well-known-services) - use a provider name instead of a host and port.
 
 ---
 

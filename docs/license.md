@@ -21,3 +21,9 @@ If you find Nodemailer useful, or if your business benefits from it, please cons
 - **Bitcoin wallet:** `15Z8ADxhssKUiwP3jbbqJwA21744KMCfTM`
 - **PayPal:** [Donate via PayPal](https://www.paypal.me/nodemailer)
 - **GitHub Sponsors:** [Become a sponsor](https://github.com/sponsors/andris9)
+
+## See Also
+
+- [Nodemailer](/) - installation, requirements, and a first message.
+- [Extra modules](/extras/) - the licenses of the companion packages differ from Nodemailer's own.
+- [Guides](/guides/) - worked setups for Gmail, testing, and receiving mail.

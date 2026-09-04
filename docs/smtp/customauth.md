@@ -18,7 +18,7 @@ In this response, the server lists three available authentication methods. Nodem
 
 By providing a handler that matches the method name exactly, you enable Nodemailer to complete the authentication exchange.
 
-Nodemailer only auto-selects from the methods it recognizes (PLAIN, LOGIN, CRAM-MD5, XOAUTH2) — a custom-named method advertised by the server is never picked automatically. To use a custom method you must set `auth.method` to your handler's name; this also works to replace a built-in mechanism with your own handler.
+Nodemailer only auto-selects from the methods it recognizes (PLAIN, LOGIN, CRAM-MD5, XOAUTH2) - a custom-named method advertised by the server is never picked automatically. To use a custom method you must set `auth.method` to your handler's name; this also works to replace a built-in mechanism with your own handler.
 
 ---
 
@@ -78,7 +78,7 @@ The context object (`ctx`) provides everything you need to complete the authenti
 
 #### `ctx.auth`
 
-A normalized authentication object containing `type`, `user`, `credentials`, and `method`. Custom top-level properties of the `auth` object are **not** preserved — put extra values in `auth.options`, which is exposed as `ctx.auth.credentials.options` (see below).
+A normalized authentication object containing `type`, `user`, `credentials`, and `method`. Custom top-level properties of the `auth` object are **not** preserved - put extra values in `auth.options`, which is exposed as `ctx.auth.credentials.options` (see below).
 
 #### `ctx.auth.credentials`
 
@@ -96,11 +96,11 @@ The authentication method name being used (the value of `auth.method`, normalize
 
 #### `ctx.extensions`
 
-An array of SMTP extensions Nodemailer recognized in the server greeting. Possible values are `SMTPUTF8`, `DSN`, `8BITMIME`, `REQUIRETLS`, `PIPELINING`, and `SIZE`. This can be useful if your authentication method depends on certain server capabilities. Note that `STARTTLS` never appears here — it triggers a TLS upgrade instead of being recorded.
+An array of SMTP extensions Nodemailer recognized in the server greeting. Possible values are `SMTPUTF8`, `DSN`, `8BITMIME`, `REQUIRETLS`, `PIPELINING`, and `SIZE`. This can be useful if your authentication method depends on certain server capabilities. Note that `STARTTLS` never appears here - it triggers a TLS upgrade instead of being recorded.
 
 #### `ctx.authMethods`
 
-An array of the authentication methods Nodemailer recognized in the server greeting — only `PLAIN`, `LOGIN`, `CRAM-MD5`, and [`XOAUTH2`](./oauth2) are detected. Custom method names advertised by the server will **not** appear here, so do not rely on this list to check for your custom method.
+An array of the authentication methods Nodemailer recognized in the server greeting - only `PLAIN`, `LOGIN`, `CRAM-MD5`, and [`XOAUTH2`](./oauth2) are detected. Custom method names advertised by the server will **not** appear here, so do not rely on this list to check for your custom method.
 
 #### `ctx.maxAllowedSize`
 
@@ -192,4 +192,12 @@ The following packages provide ready-to-use handlers for specific authentication
 | Mechanism | Package                                                                      | Notes                                      |
 | --------- | ---------------------------------------------------------------------------- | ------------------------------------------ |
 | NTLM      | [`nodemailer-ntlm-auth`](https://github.com/nodemailer/nodemailer-ntlm-auth) | Windows integrated authentication (NTLM)  |
-| CRAM-MD5  | [`nodemailer-cram-md5`](https://github.com/nodemailer/nodemailer-cram-md5)   | Legacy — CRAM-MD5 is supported natively in current Nodemailer versions, so this package is no longer needed |
+| CRAM-MD5  | [`nodemailer-cram-md5`](https://github.com/nodemailer/nodemailer-cram-md5)   | Legacy - CRAM-MD5 is supported natively in current Nodemailer versions, so this package is no longer needed |
+
+## See Also
+
+- [SMTP transport](/smtp/) - the `auth` options a custom handler replaces.
+- [OAuth2](/smtp/oauth2) - the built-in token mechanism, before writing your own.
+- [SMTP Connection](/extras/smtp-connection) - the client that runs the handler.
+- [Error reference](/errors) - reporting an authentication failure correctly.
+- [Create plugins](/plugins/create) - the wider extension points.

@@ -1,10 +1,10 @@
 ---
 title: Well-Known Services
 sidebar_position: 1
-description: Connection presets for 80+ popular SMTP providers like Gmail, SendGrid, and AWS SES.
+description: Built-in connection presets for popular SMTP providers such as Gmail, SendGrid, and AWS SES.
 ---
 
-Nodemailer includes built-in connection presets for many popular email providers. Instead of manually looking up each provider's SMTP server hostname, port number, and security settings, you can simply specify a **`service`** name when creating a transport. Nodemailer automatically configures all the connection details for you.
+Nodemailer includes built-in connection presets for many popular email providers. Instead of manually looking up each provider's SMTP server hostname, port number, and security settings, you can specify a **`service`** name when creating a transport. Nodemailer automatically configures all the connection details for you.
 
 ```js
 const nodemailer = require("nodemailer");
@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-The `service` option is simply a convenient shortcut. You can always specify `host`, `port`, `secure`, and other connection options manually if you prefer. If your provider is not listed or if connection settings have changed, you have two options: submit a pull request to update the [services.json](https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json) file, or bypass the presets entirely and configure the connection details yourself.
+The `service` option is a shortcut. You can always specify `host`, `port`, `secure`, and other connection options manually if you prefer. If your provider is not listed or if connection settings have changed, you have two options: submit a pull request to update the [services.json](https://github.com/nodemailer/nodemailer/blob/master/src/well-known/services.json) file, or bypass the presets entirely and configure the connection details yourself.
 
 Matching is case-insensitive and ignores spaces and other special characters. Provider aliases (for example `"Google Mail"`, `"Outlook"`), known provider domains, and even full email addresses (for example `"user@googlemail.com"`) also resolve to a preset.
 
@@ -124,3 +124,11 @@ The **Secure** column shows whether the preset opens a TLS connection immediatel
 | Tutanota           | Tutanota                          | smtp.tutanota.com                       | 465       | yes    |                     |
 | Yahoo              | Yahoo Mail                        | smtp.mail.yahoo.com                     | 465       | yes    |                     |
 | Yandex             | Yandex Mail                       | smtp.yandex.ru                          | 465       | yes    |                     |
+
+## See Also
+
+- [SMTP transport](/smtp/) - the host, port, and TLS options a preset fills in.
+- [Using Gmail](/guides/using-gmail) - the extra setup Gmail needs beyond the preset.
+- [OAuth2](/smtp/oauth2) - the authentication most of these providers now require.
+- [SES transport](/transports/ses) - the AWS SDK alternative to the SES SMTP presets.
+- [Error reference](/errors) - what a rejected connection to a provider means.

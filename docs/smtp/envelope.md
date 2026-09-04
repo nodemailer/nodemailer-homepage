@@ -88,3 +88,11 @@ The object returned by `sendMail()` always includes an `envelope` property showi
 - **Different return path** - Display one address in the `From:` header but route bounces to a different address for centralized bounce processing.
 
 If you do not have a specific reason to customize the envelope, let Nodemailer generate it automatically from your message headers.
+
+## See Also
+
+- [Addresses](/message/addresses) - the header addresses the envelope can differ from.
+- [Message configuration](/message/) - where the `envelope` option sits.
+- [Delivery Status Notifications](/message/dsn) - DSN parameters attach to the envelope commands.
+- [SMTP transport](/smtp/) - the transport that issues `MAIL FROM` and `RCPT TO`.
+- [Error reference](/errors) - `EENVELOPE`, raised when the envelope is refused.

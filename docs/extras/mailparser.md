@@ -182,7 +182,7 @@ When using the `MailParser` stream API, attachment objects have the same propert
 
 - **`content`** is a **Readable stream**, not a Buffer. You must consume this stream to get the attachment data.
 - **You must call `attachment.release()`** when you are finished processing the attachment. Parsing is paused until every attachment is released, which prevents memory from growing unbounded.
-- **`checksum`** and **`size`** are populated only after the `content` stream has been fully consumed — read them after the stream's `'end'` event.
+- **`checksum`** and **`size`** are populated only after the `content` stream has been fully consumed - read them after the stream's `'end'` event.
 
 ```javascript
 const fs = require("fs");
@@ -230,3 +230,11 @@ simpleParser(rfc822Message, { Iconv })
 ## License
 
 MailParser is licensed under the **MIT License**.
+
+## See Also
+
+- [Receiving email](/guides/receiving-email) - where parsing fits in a full inbound pipeline.
+- [SMTP Server](/extras/smtp-server) - the usual source of the streams MailParser reads.
+- [Mailcomposer](/extras/mailcomposer) - the reverse direction, structured object to raw message.
+- [Attachments](/message/attachments) - how the same attachment fields look when sending.
+- [Extra modules](/extras/) - the rest of the companion packages.

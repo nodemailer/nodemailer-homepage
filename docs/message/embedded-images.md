@@ -21,7 +21,7 @@ The **cid** value must be unique within the message. A recommended pattern is to
 :::
 
 :::note An HTML body is required
-Embedding via `cid` only takes effect when the message has an `html` body — the cid attachments are grouped together with the HTML part into a `multipart/related` container. Without an HTML body, `cid` attachments are delivered as regular attachments.
+Embedding via `cid` only takes effect when the message has an `html` body - the cid attachments are grouped together with the HTML part into a `multipart/related` container. Without an HTML body, `cid` attachments are delivered as regular attachments.
 :::
 
 #### Basic example
@@ -87,3 +87,11 @@ const message = {
   ],
 };
 ```
+
+## See Also
+
+- [Attachments](/message/attachments) - the full attachment reference, including every content source.
+- [Message configuration](/message/) - the `html` body that `cid:` references point into.
+- [Alternatives](/message/alternatives) - how the related and alternative containers nest.
+- [Message Playground](/message/playground) - see the resulting MIME tree.
+- [Mailcomposer](/extras/mailcomposer) - build the message without sending it.

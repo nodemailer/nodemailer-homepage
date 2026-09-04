@@ -88,3 +88,11 @@ While each transport has its own configuration options, the following options wo
 | `normalizeHeaderKey(key, value)` | `Function` | A callback function invoked for each header before it is written to the generated RFC 5322 message. Return a non-empty string to replace the header key. [Example](https://github.com/nodemailer/nodemailer/blob/3e3ba4f30ad5a73f037f45d3e36a9361ca43a318/examples/custom-headers.js#L13-L14) |
 | `logger`                  | `Object` / `Boolean` | Set to `true` to log to the console, or pass a [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance. Combine with `debug: true` for protocol-level logging where supported.                    |
 | `dkim`                    | `Object`   | DKIM signing options applied to all outgoing messages, regardless of transport. See [DKIM signing](/dkim/).                                                                                                                    |
+
+## See Also
+
+- [SMTP transport](/smtp/) - the default transport, and the one most readers want.
+- [SES transport](/transports/ses) - deliver through Amazon SES with the AWS SDK.
+- [Sendmail transport](/transports/sendmail) - pipe messages to a local binary.
+- [Stream transport](/transports/stream) - generate messages without delivering them.
+- [Create plugins](/plugins/create) - write a transport of your own.

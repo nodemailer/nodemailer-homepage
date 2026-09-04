@@ -75,7 +75,7 @@ In 3-legged OAuth2 (also known as "3LO"), your application requests permission f
   - **timeout** - access token lifetime in seconds (optional; use this as an alternative to _expires_ when you know the token lifetime but not the exact expiration timestamp)
   - **customHeaders** - additional HTTP headers to include in token refresh requests (optional)
   - **customParams** - additional parameters to include in token refresh requests (optional)
-  - **tls** - TLS options for the HTTPS token request (optional; certificates are strictly validated by default — pass `{ rejectUnauthorized: false }` only for self-hosted OAuth endpoints using private CAs)
+  - **tls** - TLS options for the HTTPS token request (optional; certificates are strictly validated by default - pass `{ rejectUnauthorized: false }` only for self-hosted OAuth endpoints using private CAs)
 
 :::note Automatic retry on rejected tokens
 If the SMTP server rejects the current access token during authentication, Nodemailer automatically requests a fresh token (using the refresh token, service account, or your provision callback with `renew = true`) and retries authentication once.
@@ -104,7 +104,7 @@ Register the callback using `transporter.set('oauth2_provision_cb', callback)` (
 
 - `user` - the email address that needs a token
 - `renew` - a boolean indicating whether the previous token failed and a fresh token is needed
-- `cb` - the callback function to call with the result: `cb(error, accessToken, expires)` — `expires` is an optional absolute expiration time as a UNIX timestamp in milliseconds; omit it to disable caching of the token
+- `cb` - the callback function to call with the result: `cb(error, accessToken, expires)` - `expires` is an optional absolute expiration time as a UNIX timestamp in milliseconds; omit it to disable caching of the token
 
 ```js
 transporter.set("oauth2_provision_cb", (user, renew, cb) => {
@@ -137,7 +137,7 @@ The examples below use explicit `host`, `port`, and `secure` settings. For Gmail
 <Tabs groupId="oauth2-setup">
 <TabItem value="token" label="Existing token">
 
-Use this when you already have a valid access token and simply want to authenticate with it. Nodemailer will not refresh it, so the send fails once the token expires.
+Use this when you already have a valid access token and want to authenticate with it. Nodemailer will not refresh it, so the send fails once the token expires.
 
 ```js
 let transporter = nodemailer.createTransport({
@@ -267,3 +267,11 @@ Per-message authentication only works with non-pooled transports. If you are usi
 - **"Invalid grant" or authentication errors with Gmail**: Make sure your access token was requested with the `https://mail.google.com/` scope. Tokens with other scopes will not work for SMTP access.
 - **"Access Not Configured" errors**: Verify that the Gmail API is enabled for your project in the Google Cloud Console under APIs & Services.
 - **Tokens expiring quickly**: Access tokens typically expire after one hour. If you are using a refresh token, Nodemailer will handle renewal automatically. If you are providing tokens directly, make sure to refresh them before they expire.
+
+## See Also
+
+- [Using Gmail](/guides/using-gmail) - a worked Gmail setup end to end.
+- [SMTP transport](/smtp/) - the connection options OAuth2 layers onto.
+- [Custom authentication](/smtp/customauth) - handle a mechanism Nodemailer does not implement.
+- [Well-known services](/smtp/well-known-services) - presets for the providers that require OAuth2.
+- [Error reference](/errors) - `EAUTH` and what a rejected token looks like.

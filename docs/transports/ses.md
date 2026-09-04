@@ -225,3 +225,11 @@ If the same credentials are also used with SES SMTP credentials (through the [SM
 ```
 
 For production environments, consider restricting the `Resource` to specific verified identities rather than using `"*"`. You can also narrow sending with the `ses:FromAddress` and `ses:Recipients` condition keys.
+
+## See Also
+
+- [Transports](/transports/) - the other delivery mechanisms, and when to pick each.
+- [Well-known services](/smtp/well-known-services) - the SES SMTP endpoints, as an alternative to the SDK.
+- [Message configuration](/message/) - the message object this transport renders.
+- [DKIM](/dkim/) - signing before handing the message to SES.
+- [Error reference](/errors) - `ESES` and how AWS SDK errors surface.

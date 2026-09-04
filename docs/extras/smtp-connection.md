@@ -97,7 +97,7 @@ SMTPConnection extends Node.js EventEmitter and emits the following events:
 
 ### `connect(callback)`
 
-Establishes a connection to the SMTP server. The callback is invoked once, with no arguments, when the connection is ready for commands (after the initial greeting and EHLO/HELO handshake). Connection failures (DNS, TCP, TLS, greeting errors) are **not** passed to this callback — they are emitted on the `'error'` event, so always attach an error listener.
+Establishes a connection to the SMTP server. The callback is invoked once, with no arguments, when the connection is ready for commands (after the initial greeting and EHLO/HELO handshake). Connection failures (DNS, TCP, TLS, greeting errors) are **not** passed to this callback - they are emitted on the `'error'` event, so always attach an error listener.
 
 ```javascript
 connection.on("error", (err) => {
@@ -327,3 +327,11 @@ If no method is specified, XOAUTH2 is used when an `oauth2` provider is given; o
 ## License
 
 [MIT-0](https://github.com/nodemailer/nodemailer/blob/master/LICENSE)
+
+## See Also
+
+- [SMTP transport](/smtp/) - the high-level transport built on this client, and the options it shares.
+- [SMTP envelope](/smtp/envelope) - the envelope object this client sends.
+- [Custom authentication](/smtp/customauth) - add an authentication mechanism to a connection.
+- [Proxy support](/smtp/proxies) - route a connection through HTTP or SOCKS.
+- [Error reference](/errors) - the error codes a connection raises.

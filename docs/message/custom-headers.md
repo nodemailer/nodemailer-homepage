@@ -83,7 +83,7 @@ X-Unprocessed: Header value is used exactly as provided, with no modifications
 
 ### 4. Headers on an attachment
 
-You can also add custom headers to individual [attachments](./attachments). This is useful for adding metadata or tracking information to specific files within an email. Simply include a `headers` object inside the attachment definition.
+You can also add custom headers to individual [attachments](./attachments). This is useful for adding metadata or tracking information to specific files within an email. Include a `headers` object inside the attachment definition.
 
 ```javascript
 const message = {
@@ -99,3 +99,11 @@ const message = {
   ],
 };
 ```
+
+## See Also
+
+- [Message configuration](/message/) - the fields Nodemailer sets for you before your headers are applied.
+- [List headers](/message/list-headers) - the `List-*` headers, which have a dedicated option.
+- [Attachments](/message/attachments) - attaching files that can carry their own headers.
+- [DKIM](/dkim/) - which headers get signed.
+- [Custom source](/message/custom-source) - supply the whole header block yourself.

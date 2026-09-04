@@ -35,3 +35,11 @@ These independent open-source projects complement Nodemailer and may be helpful 
 :::note
 smtp-connection and mailcomposer ship inside the Nodemailer package itself, so they are always in sync with your installed Nodemailer version. smtp-server and mailparser are separate packages maintained in the Nodemailer GitHub organization with their own release cycles. EmailEngine, ImapFlow, and mailauth come from the same team; EmailEngine is commercial, source-available software, while the others are open source. email-templates and preview-email are maintained by the broader open-source community.
 :::
+
+## See Also
+
+- [Receiving email](/guides/receiving-email) - which of these modules to reach for when you need inbound mail.
+- [SMTP Server](/extras/smtp-server) - accept inbound SMTP inside your own process.
+- [MailParser](/extras/mailparser) - turn a raw RFC 822 message into structured fields.
+- [Mailcomposer](/extras/mailcomposer) - build a message without sending it.
+- [SMTP Connection](/extras/smtp-connection) - drive an SMTP session directly.

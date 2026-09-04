@@ -31,7 +31,7 @@ Since address fields use commas to separate multiple recipients, you must wrap d
 '"Майлер, Ноде" <foobar@example.com>'
 ```
 
-Quoting is the reliable way to include commas. Nodemailer attempts to recombine display names that were split on an unquoted comma, but this heuristic only works when the name fragment is followed by an address in angle brackets — so always quote names containing commas or semicolons.
+Quoting is the reliable way to include commas. Nodemailer attempts to recombine display names that were split on an unquoted comma, but this heuristic only works when the name fragment is followed by an address in angle brackets - so always quote names containing commas or semicolons.
 :::
 
 ---
@@ -103,7 +103,7 @@ If the username itself contains non-ASCII characters, the whole address already 
 
 ### Unicode usernames (EAI/SMTPUTF8)
 
-Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and adds the `SMTPUTF8` parameter to the `MAIL FROM` command — but only when the server advertises SMTPUTF8 support. For more details about SMTP envelope handling, see [SMTP envelope](../smtp/envelope.md).
+Email addresses with non-ASCII characters in the local part (the username before the `@` symbol) require the receiving server to support the SMTPUTF8 extension. Nodemailer automatically detects when internationalized usernames are used and adds the `SMTPUTF8` parameter to the `MAIL FROM` command - but only when the server advertises SMTPUTF8 support. For more details about SMTP envelope handling, see [SMTP envelope](../smtp/envelope.md).
 
 If the server does not support SMTPUTF8, Nodemailer still attempts delivery without the parameter; servers that cannot handle internationalized addresses typically reject the `MAIL FROM` or `RCPT TO` command, which surfaces as an `EENVELOPE` error.
 
@@ -141,3 +141,11 @@ async function sendEmail() {
 
 sendEmail().catch(console.error);
 ```
+
+## See Also
+
+- [Message configuration](/message/) - the other fields that sit alongside the address fields.
+- [SMTP envelope](/smtp/envelope) - override the envelope addresses independently of the headers.
+- [List headers](/message/list-headers) - the `List-*` headers that take the same address forms.
+- [Delivery Status Notifications](/message/dsn) - per-recipient delivery reporting.
+- [Error reference](/errors) - what `EENVELOPE` means when an address is refused.

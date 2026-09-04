@@ -4,7 +4,7 @@ sidebar_position: 3
 description: Main transport in Nodemailer for delivering messages via the SMTP protocol.
 ---
 
-SMTP is the main transport in Nodemailer for delivering messages. SMTP (Simple Mail Transfer Protocol) is also the standard protocol that email servers use to communicate with each other, making it truly universal. Almost every email delivery provider supports SMTP-based sending, even when they primarily advertise API-based sending. While APIs may offer additional features, they also create vendor lock-in. With SMTP, you can switch providers by simply changing your configuration object or connection URL.
+SMTP is the main transport in Nodemailer for delivering messages. SMTP (Simple Mail Transfer Protocol) is also the standard protocol that email servers use to communicate with each other, making it truly universal. Almost every email delivery provider supports SMTP-based sending, even when they primarily advertise API-based sending. While APIs may offer additional features, they also create vendor lock-in. With SMTP, you can switch providers by changing your configuration object or connection URL.
 
 ## Creating a transport
 
@@ -90,7 +90,7 @@ Setting **`secure: false`** does **not** mean your emails are sent unencrypted. 
 | ---------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `logger`         | `object` / `boolean` | Set to `true` to enable console logging, or pass a [Bunyan](https://github.com/trentm/node-bunyan)-compatible logger instance for custom logging. Set to `false` or leave unset to disable logging. |
 | `debug`          | `boolean`            | If `true`, logs the raw SMTP protocol traffic (commands and responses) **and the transmitted message content**. When `false`, only high-level transaction events are logged.         |
-| `transactionLog` | `boolean`            | If `true`, logs SMTP commands and responses like `debug`, but without the message content — lighter logging suitable for production. |
+| `transactionLog` | `boolean`            | If `true`, logs SMTP commands and responses like `debug`, but without the message content - lighter logging suitable for production. |
 | `component`      | `string`             | The component name used in log output (e.g., `'smtp-transport'`, `'smtp-pool'`). Useful when running multiple transporters to identify which one generated a log entry. |
 
 **Custom logger**
@@ -130,6 +130,7 @@ These options restrict how Nodemailer handles attachments and content sources:
 | ------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
 | `disableFileAccess` | `boolean` | If `true`, prevents Nodemailer from reading attachment content from the filesystem (paths like `/path/to/file.pdf`). |
 | `disableUrlAccess`  | `boolean` | If `true`, prevents Nodemailer from fetching attachment content from URLs (like `https://example.com/file.pdf`).  |
+| `maxRecipients`     | `number`  | The largest number of envelope recipients a message may have, applied to every message sent through this transporter. Defaults to `100000`, and `0` removes the limit. See [maxRecipients](/message/#security-options). |
 
 ### Pooling options
 
@@ -262,3 +263,11 @@ transporter.verify((error, success) => {
 ```
 
 The `verify()` method tests DNS resolution, the TCP connection, TLS upgrade (if applicable), and authentication. However, it does **not** verify whether the server will accept messages from a specific sender address - that can only be determined when you actually send a message, and depends on the server's policies.
+
+## See Also
+
+- [Message configuration](/message/) - the message object you pass to `sendMail()`.
+- [Well-known services](/smtp/well-known-services) - use a provider name instead of host and port.
+- [Pooled connections](/smtp/pooled) - reuse connections for high-volume sending.
+- [OAuth2](/smtp/oauth2) - authenticate with tokens instead of a password.
+- [Error reference](/errors) - what each connection and authentication error means.

@@ -24,7 +24,7 @@ To request DSN for a message, add a **`dsn`** object to your [message configurat
 > Nodemailer automatically escapes special characters in DSN values according to the [xtext](https://datatracker.ietf.org/doc/html/rfc3461#section-4) encoding rules defined in RFC 3461.
 
 :::note Aliases and validation
-`ret`, `envid`, and `orcpt` are accepted as aliases of `return`, `id`, and `recipient`. `return` also accepts `'hdrs'` and `'body'` as synonyms of `'headers'` and `'full'`, and `notify` may be given as a comma-separated string. Invalid `return` or `notify` values reject the send with an `EENVELOPE` error — this validation runs even if the server does not support DSN.
+`ret`, `envid`, and `orcpt` are accepted as aliases of `return`, `id`, and `recipient`. `return` also accepts `'hdrs'` and `'body'` as synonyms of `'headers'` and `'full'`, and `notify` may be given as a comma-separated string. Invalid `return` or `notify` values reject the send with an `EENVELOPE` error - this validation runs even if the server does not support DSN.
 :::
 
 ## Examples
@@ -94,5 +94,13 @@ await transporter.sendMail({
 
 ## Troubleshooting
 
-- **Not receiving DSN reports?** Verify that your [SMTP server](/smtp/) supports the DSN extension by checking its `EHLO` response. The server must list `DSN` as one of its supported extensions. Nodemailer always sends `EHLO` first and only falls back to the legacy `HELO` command if the server rejects `EHLO` — and `HELO` does not support extensions, so DSN cannot be used with such servers.
+- **Not receiving DSN reports?** Verify that your [SMTP server](/smtp/) supports the DSN extension by checking its `EHLO` response. The server must list `DSN` as one of its supported extensions. Nodemailer always sends `EHLO` first and only falls back to the legacy `HELO` command if the server rejects `EHLO` - and `HELO` does not support extensions, so DSN cannot be used with such servers.
 - **Incomplete or missing information in reports?** Some email service providers only support a subset of DSN options or may modify certain values. Check your provider's documentation for any limitations or provider-specific behavior.
+
+## See Also
+
+- [SMTP envelope](/smtp/envelope) - the `MAIL FROM` and `RCPT TO` commands DSN parameters ride on.
+- [Addresses](/message/addresses) - the recipient forms `orcpt` accepts.
+- [Error reference](/errors) - the `EENVELOPE` error invalid DSN options raise.
+- [SMTP transport](/smtp/) - checking the `EHLO` response for DSN support.
+- [Receiving email](/guides/receiving-email) - reading the notifications once they arrive.

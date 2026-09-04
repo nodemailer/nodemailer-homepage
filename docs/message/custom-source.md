@@ -36,7 +36,7 @@ Hello world!`,
 };
 ```
 
-> Newlines in raw content are kept as-is when the message is generated. The SMTP transport normalizes bare `\n` to `\r\n` automatically while transmitting the message, but other transports (stream, SES) emit the content unchanged — set the message option `newline: 'windows'` if you need guaranteed CRLF output there.
+> Newlines in raw content are kept as-is when the message is generated. The SMTP transport normalizes bare `\n` to `\r\n` automatically while transmitting the message, but other transports (stream, SES) emit the content unchanged - set the message option `newline: 'windows'` if you need guaranteed CRLF output there.
 
 ### 2. EML file as the entire message
 
@@ -81,3 +81,11 @@ Attached text file`,
   ],
 };
 ```
+
+## See Also
+
+- [Message configuration](/message/) - the fields that are ignored when you supply your own source.
+- [Mailcomposer](/extras/mailcomposer) - generate the source you are about to send.
+- [DKIM](/dkim/) - signing a message you built yourself.
+- [SMTP envelope](/smtp/envelope) - set envelope addresses, which raw source does not provide.
+- [Stream transport](/transports/stream) - check the bytes that will go on the wire.

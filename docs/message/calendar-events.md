@@ -110,3 +110,11 @@ let message = {
 ---
 
 For a complete working example, combine the `message` object above with [`nodemailer.createTransport()`](../) and call `transporter.sendMail()`.
+
+## See Also
+
+- [Alternatives](/message/alternatives) - how the calendar part is ordered against the other bodies.
+- [Attachments](/message/attachments) - the content sources `icalEvent` shares with attachments.
+- [Message configuration](/message/) - the rest of the message object.
+- [Custom headers](/message/custom-headers) - headers some clients need for invitations.
+- [Message Playground](/message/playground) - inspect the generated MIME structure.

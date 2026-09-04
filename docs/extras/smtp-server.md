@@ -278,7 +278,7 @@ onRcptTo(address, session, callback) {
 
 ## Processing incoming messages (`onData`)
 
-The `onData` callback receives a readable stream containing the email message data. The stream contains the message with SMTP dot-escaping already decoded (the terminating `<CRLF>.<CRLF>` is not included); no other modifications are made — no headers are added or changed. To parse the received message, you can use [MailParser](./mailparser).
+The `onData` callback receives a readable stream containing the email message data. The stream contains the message with SMTP dot-escaping already decoded (the terminating `<CRLF>.<CRLF>` is not included); no other modifications are made - no headers are added or changed. To parse the received message, you can use [MailParser](./mailparser).
 
 ```javascript
 onData(stream, session, callback) {
@@ -809,3 +809,11 @@ The `CHUNKING` extension (BDAT command) is **not** implemented.
 ## License
 
 [MIT-0](https://github.com/nodemailer/smtp-server/blob/master/LICENSE)
+
+## See Also
+
+- [Receiving email](/guides/receiving-email) - how a server fits into an inbound pipeline.
+- [MailParser](/extras/mailparser) - parse the message streams this server hands you.
+- [SMTP Connection](/extras/smtp-connection) - the client side of the same protocol.
+- [SMTP envelope](/smtp/envelope) - the envelope your server receives, described from the sending side.
+- [Extra modules](/extras/) - the rest of the companion packages.
