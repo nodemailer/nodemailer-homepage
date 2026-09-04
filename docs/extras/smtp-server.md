@@ -16,9 +16,22 @@ npm install smtp-server --save
 
 ### 2. Require in your script
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const { SMTPServer } = require("smtp-server");
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { SMTPServer } from "smtp-server";
+```
+
+</TabItem>
+</Tabs>
 
 ### 3. Create a server instance
 
@@ -125,6 +138,9 @@ heloResponse: "%s greets %s"
 
 If you enable TLS (`secure: true`) or leave `STARTTLS` available (the default), you should provide a valid certificate using the `key`, `cert`, and optionally `ca` options. Without a proper certificate, _smtp-server_ uses a self-signed certificate for `localhost`, which most email clients will reject.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const fs = require("fs");
 const server = new SMTPServer({
@@ -134,6 +150,22 @@ const server = new SMTPServer({
 });
 server.listen(465);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import fs from "fs";
+const server = new SMTPServer({
+  secure: true,
+  key: fs.readFileSync("private.key"),
+  cert: fs.readFileSync("server.crt"),
+});
+server.listen(465);
+```
+
+</TabItem>
+</Tabs>
 
 ---
 
@@ -280,6 +312,9 @@ onRcptTo(address, session, callback) {
 
 The `onData` callback receives a readable stream containing the email message data. The stream contains the message with SMTP dot-escaping already decoded (the terminating `<CRLF>.<CRLF>` is not included); no other modifications are made - no headers are added or changed. To parse the received message, you can use [MailParser](./mailparser).
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 onData(stream, session, callback) {
   const fs = require("fs");
@@ -288,6 +323,21 @@ onData(stream, session, callback) {
   stream.on("end", () => callback(null, "Message queued"));
 }
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+// with `import fs from "fs";` at the top of the module
+onData(stream, session, callback) {
+  const writeStream = fs.createWriteStream("/tmp/message.eml");
+  stream.pipe(writeStream);
+  stream.on("end", () => callback(null, "Message queued"));
+}
+```
+
+</TabItem>
+</Tabs>
 
 :::note
 _smtp-server_ does not add a `Received:` header to the message. If you need RFC 5321 compliance, you must add this header yourself.
@@ -580,6 +630,9 @@ const server = new SMTPServer({
 
 The parameters above tell you *whether* to report and *where*; producing the report itself is a separate job. A delivery status notification is a [RFC 3464](https://www.rfc-editor.org/rfc/rfc3464) `multipart/report` message with a `message/delivery-status` part, and Nodemailer has no dedicated option for that structure, so build the report body yourself and hand the finished message to [`raw`](/message/custom-source).
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
@@ -618,6 +671,51 @@ function buildDsn({ from, to, reportingMta, envid, finalRecipient, action, statu
   ].join("\r\n");
 }
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+import crypto from "crypto";
+
+const transporter = nodemailer.createTransport({ host: "smtp.example.com", port: 587 });
+
+function buildDsn({ from, to, reportingMta, envid, finalRecipient, action, status, diagnosticCode }) {
+  const boundary = "dsn-" + crypto.randomBytes(12).toString("hex");
+  return [
+    `From: ${from}`,
+    `To: ${to}`,
+    "Subject: Delivery Status Notification",
+    "Auto-Submitted: auto-generated",
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/report; report-type=delivery-status; boundary="${boundary}"`,
+    "",
+    `--${boundary}`,
+    "Content-Type: text/plain; charset=utf-8",
+    "",
+    `Delivery to ${finalRecipient} resulted in: ${action} (${status}).`,
+    "",
+    `--${boundary}`,
+    "Content-Type: message/delivery-status",
+    "",
+    `Reporting-MTA: dns; ${reportingMta}`,
+    ...(envid ? [`Original-Envelope-Id: ${envid}`] : []),
+    `Arrival-Date: ${new Date().toUTCString()}`,
+    "",
+    `Final-Recipient: rfc822; ${finalRecipient}`,
+    `Action: ${action}`,
+    `Status: ${status}`,
+    `Diagnostic-Code: ${diagnosticCode}`,
+    "",
+    `--${boundary}--`,
+    "",
+  ].join("\r\n");
+}
+```
+
+</TabItem>
+</Tabs>
 
 Send it only when the sender asked for that class of report, and never to an empty return path, which is what stops two servers from bouncing at each other forever:
 

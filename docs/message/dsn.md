@@ -33,6 +33,9 @@ To request DSN for a message, add a **`dsn`** object to your [message configurat
 
 This example requests a success notification, so you will receive an email confirmation when the recipient's mail server accepts the message for final delivery.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -59,6 +62,39 @@ await transporter.sendMail({
   },
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: "smtp-user",
+    pass: "smtp-pass",
+  },
+});
+
+await transporter.sendMail({
+  from: "sender@example.com",
+  to: "recipient@example.com",
+  subject: "Message",
+  text: "I hope this message gets read!",
+  dsn: {
+    id: "msg-123",
+    return: "headers",
+    notify: "success",
+    recipient: "sender@example.com",
+  },
+});
+```
+
+</TabItem>
+</Tabs>
 
 ### 2. Request notifications for failures and delays
 

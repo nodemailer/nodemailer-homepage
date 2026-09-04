@@ -125,6 +125,9 @@ Modifying `mail.data` at this stage usually has **no effect** because the MIME t
 
 ### Example: Replace all tabs with spaces in the outgoing stream
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const { Transform } = require("stream");
 
@@ -151,6 +154,39 @@ transporter.use("stream", (mail, done) => {
   done();
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { Transform } from "stream";
+
+// Pass a factory function so every message gets a fresh Transform instance.
+// A single stream instance cannot be reused once it has ended, so registering
+// the same Transform object would break the second message sent through
+// the transporter.
+const createTabToSpace = () => {
+  const tabToSpace = new Transform();
+
+  tabToSpace._transform = function (chunk, _enc, cb) {
+    for (let i = 0; i < chunk.length; ++i) {
+      if (chunk[i] === 0x09) chunk[i] = 0x20; // 0x09 = TAB, 0x20 = space
+    }
+    this.push(chunk);
+    cb();
+  };
+
+  return tabToSpace;
+};
+
+transporter.use("stream", (mail, done) => {
+  mail.message.transform(createTabToSpace);
+  done();
+});
+```
+
+</TabItem>
+</Tabs>
 
 ### Example: Log all address fields
 
@@ -184,6 +220,9 @@ Returns an object containing parsed email addresses from the **From**, **Sender*
 ## Writing a custom transport {#transports}
 
 A transport is an object that defines how messages are actually delivered. For built-in options, see [SMTP transport](/smtp/) and [other transports](/transports/). To create your own, implement an object with three properties: **`name`**, **`version`**, and a **`send(mail, done)`** method. Pass this object to `nodemailer.createTransport()` to create a working transporter.
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -250,6 +289,82 @@ transporter.sendMail(
   console.log
 );
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+import { readFileSync } from "fs";
+
+// ESM has no require() for JSON, so read package.json relative to this module
+const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf-8"));
+
+const transport = {
+  name: pkg.name, // e.g. "SMTP"
+  version: pkg.version, // e.g. "1.0.0"
+
+  /**
+   * Sends the message.
+   * @param {Object} mail - The same `mail` object that plugins receive
+   * @param {Function} done - Callback with signature `(err, info)`
+   */
+  send(mail, done) {
+    const input = mail.message.createReadStream();
+    const envelope = mail.message.getEnvelope();
+    const messageId = mail.message.messageId();
+
+    // For demonstration, we pipe the message to stdout
+    input.pipe(process.stdout);
+    input.on("end", () => {
+      done(null, {
+        envelope,
+        messageId,
+      });
+    });
+  },
+
+  /**
+   * Optional: Clean up resources when the transporter is closed.
+   * Useful for closing long-lived connections (e.g., pooled SMTP).
+   */
+  close() {
+    // Release resources here
+  },
+
+  /**
+   * Optional: Report whether the transport is idle.
+   * Used by connection pooling. Return `true` when the transport
+   * has capacity to send more messages immediately.
+   */
+  isIdle() {
+    return true;
+  },
+
+  /**
+   * Optional: Back `transporter.verify()`. Check that the transport
+   * is able to deliver messages (e.g. test the connection or credentials).
+   */
+  verify(callback) {
+    callback(null, true);
+  },
+};
+
+const transporter = nodemailer.createTransport(transport);
+
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: "receiver@example.com",
+    subject: "Hello",
+    text: "Hello world!",
+  },
+  console.log
+);
+```
+
+</TabItem>
+</Tabs>
 
 :::tip
 For API-based transports that need the message as structured data rather than a raw MIME stream, call `mail.normalize(callback)` inside `send()`. It resolves all content parts and returns `(err, data)` where `data` contains the envelope, messageId, resolved `html`/`text`, attachments, and normalized headers. This is what the built-in JSON, SES, and stream transports use.

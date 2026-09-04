@@ -14,9 +14,22 @@ SMTPConnection is included with Nodemailer. No additional packages need to be in
 
 ### 1. Import the module
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const SMTPConnection = require("nodemailer/lib/smtp-connection");
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import SMTPConnection from "nodemailer/lib/smtp-connection";
+```
+
+</TabItem>
+</Tabs>
 
 ### 2. Create a connection instance
 
@@ -236,6 +249,9 @@ const envelope = {
 
 This example demonstrates the full workflow: connecting, authenticating, sending a message, and closing the connection.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const SMTPConnection = require("nodemailer/lib/smtp-connection");
 
@@ -293,6 +309,70 @@ Hello from SMTPConnection!`;
   );
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import SMTPConnection from "nodemailer/lib/smtp-connection";
+
+const connection = new SMTPConnection({
+  host: "smtp.example.com",
+  port: 587,
+  secure: false,
+  debug: true,
+  logger: true,
+});
+
+connection.on("error", (err) => {
+  // Connection failures (DNS, TCP, TLS, greeting) arrive here
+  console.error("Connection error:", err);
+});
+
+connection.connect(() => {
+  connection.login(
+    {
+      user: "username",
+      pass: "password",
+    },
+    (err) => {
+      if (err) {
+        console.error("Authentication failed:", err);
+        connection.close();
+        return;
+      }
+
+      const envelope = {
+        from: "sender@example.com",
+        to: ["recipient@example.com"],
+      };
+
+      const message = `From: sender@example.com
+To: recipient@example.com
+Subject: Test Message
+Content-Type: text/plain; charset=utf-8
+
+Hello from SMTPConnection!`;
+
+      connection.send(envelope, message, (err, info) => {
+        if (err) {
+          console.error("Failed to send:", err);
+        } else {
+          console.log("Message sent!");
+          console.log("Accepted:", info.accepted);
+          console.log("Rejected:", info.rejected);
+          console.log("Response:", info.response);
+        }
+
+        connection.quit();
+      });
+    }
+  );
+});
+```
+
+</TabItem>
+</Tabs>
 
 ---
 

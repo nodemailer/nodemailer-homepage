@@ -19,6 +19,9 @@ For extremely high-volume email sending, consider using the [SES transport](/tra
 
 ## Quick example
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -46,6 +49,40 @@ await transporter.sendMail({
   text: "Hi Alice!",
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+// Create ONE transporter instance and reuse it throughout your application.
+// The transporter manages up to `maxConnections` persistent connections internally.
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  pool: true, // Enable connection pooling
+  maxConnections: 5, // Maximum number of simultaneous connections (default: 5)
+  maxMessages: 100, // Messages per connection before reconnecting (default: 100)
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// Send emails using the shared transporter.
+// Do NOT create a new transporter for each message - that defeats the purpose of pooling.
+await transporter.sendMail({
+  from: "Newsletters <noreply@example.com>",
+  to: "alice@example.com",
+  subject: "Hello pooled world",
+  text: "Hi Alice!",
+});
+```
+
+</TabItem>
+</Tabs>
 
 :::info
 Pooled connections work with all authentication methods, including [OAuth2](./oauth2.md). This is particularly useful when sending through services like Gmail or Outlook that support OAuth2.
@@ -90,6 +127,9 @@ process.on("SIGTERM", () => {
 
 The transporter emits an `idle` event whenever it regains capacity to accept more messages (the queue has room and a connection is free or can be opened). This enables a pull-based approach where you fetch messages from an external queue only when Nodemailer is ready to handle them, rather than loading everything into memory upfront:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const { getNextMessage } = require("./messageQueue");
 
@@ -107,6 +147,30 @@ transporter.on("idle", async () => {
   }
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { getNextMessage } from "./messageQueue.js";
+
+transporter.on("idle", async () => {
+  // Keep sending while the transporter can accept more messages
+  while (transporter.isIdle()) {
+    const message = await getNextMessage();
+    if (!message) return; // External queue is empty
+
+    // Do not await the send here - dispatching without waiting lets the
+    // pool fill all available connections instead of sending one at a time
+    transporter.sendMail(message).catch((err) => {
+      console.error("Failed to send:", err);
+    });
+  }
+});
+```
+
+</TabItem>
+</Tabs>
 
 ## Event: `clear`
 

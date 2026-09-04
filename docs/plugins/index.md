@@ -20,8 +20,10 @@ Use _compile_ and _stream_ plugins when you want your plugin to work with any tr
 
 A plugin is a function that receives a mail object and a callback. Here is an example that automatically generates a plain-text version of your email when only HTML is provided:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```js
-// CommonJS module format
 module.exports = function myCompilePlugin(mail, callback) {
   // The mail object contains a `data` property with your message options
   // You can read and modify these properties before the message is compiled
@@ -37,7 +39,34 @@ module.exports = function myCompilePlugin(mail, callback) {
 };
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import { htmlToText } from "html-to-text";
+
+export default function myCompilePlugin(mail, callback) {
+  // The mail object contains a `data` property with your message options
+  // You can read and modify these properties before the message is compiled
+
+  if (!mail.data.text && mail.data.html) {
+    // Generate plain-text from HTML using the html-to-text package
+    mail.data.text = htmlToText(mail.data.html);
+  }
+
+  // Always call the callback when done
+  // Pass no arguments for success, or pass an Error to abort sending
+  callback();
+}
+```
+
+</TabItem>
+</Tabs>
+
 To use the plugin, register it on a transport instance with the `use()` method:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```js
 const nodemailer = require("nodemailer");
@@ -46,6 +75,22 @@ const transport = nodemailer.createTransport({ sendmail: true });
 // Register a compile plugin - it will run before MIME generation
 transport.use("compile", require("./myCompilePlugin"));
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import nodemailer from "nodemailer";
+import myCompilePlugin from "./myCompilePlugin.js";
+
+const transport = nodemailer.createTransport({ sendmail: true });
+
+// Register a compile plugin - it will run before MIME generation
+transport.use("compile", myCompilePlugin);
+```
+
+</TabItem>
+</Tabs>
 
 ### Error handling
 

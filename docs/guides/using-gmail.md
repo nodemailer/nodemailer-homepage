@@ -24,6 +24,9 @@ This guide covers the supported authentication methods, Gmail's sending limits, 
 
 OAuth 2.0 is the most secure and reliable method for authenticating with Gmail. Instead of storing passwords, you complete a one-time authorization flow and store a `refreshToken`. Nodemailer then automatically refreshes access tokens as needed.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```js
 const nodemailer = require("nodemailer");
 
@@ -38,6 +41,27 @@ const transporter = nodemailer.createTransport({
   },
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  service: "gmail", // Shortcut for Gmail's SMTP settings - see Well-Known Services
+  auth: {
+    type: "OAuth2",
+    user: "me@gmail.com",
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+  },
+});
+```
+
+</TabItem>
+</Tabs>
 
 The `service: "gmail"` option is a convenient shortcut that automatically configures Gmail's SMTP server settings. See [Well-Known Services](/smtp/well-known-services) for more details and a full list of supported providers.
 

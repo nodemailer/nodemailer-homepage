@@ -17,6 +17,9 @@ npm install @aws-sdk/client-sesv2
 
 ## Quick start
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
@@ -47,6 +50,43 @@ const info = await transporter.sendMail({
 console.log(info.envelope); // { from: "sender@example.com", to: ["recipient@example.com"] }
 console.log(info.messageId); // The SES Message ID
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+
+// 1. Create an AWS SES client
+//    If you omit credentials, the SDK uses the default credential chain
+//    (environment variables, shared credentials file, IAM role, etc.)
+const sesClient = new SESv2Client({ region: "us-east-1" });
+
+// 2. Create a Nodemailer transport configured to use SES
+const transporter = nodemailer.createTransport({
+  SES: { sesClient, SendEmailCommand },
+});
+
+// 3. Send the message
+const info = await transporter.sendMail({
+  from: "sender@example.com",
+  to: "recipient@example.com",
+  subject: "Hello from Nodemailer + SES",
+  text: "I hope this message gets sent!",
+  // You can pass additional SES-specific options under the `ses` key:
+  ses: {
+    ConfigurationSetName: "my-config-set",
+    EmailTags: [{ Name: "tag_name", Value: "tag_value" }],
+  },
+});
+
+console.log(info.envelope); // { from: "sender@example.com", to: ["recipient@example.com"] }
+console.log(info.messageId); // The SES Message ID
+```
+
+</TabItem>
+</Tabs>
 
 :::tip
 You can also use the callback style if you prefer: `transporter.sendMail(mailOptions, callback)`.
@@ -156,6 +196,9 @@ console.log("SES configuration is valid:", isValid);
 
 This example shows how to send an email using the callback style, which is useful when you are not using async/await:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
@@ -191,6 +234,48 @@ transporter.sendMail(
   }
 );
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+
+// Create the SES client using the AWS_REGION environment variable
+const sesClient = new SESv2Client({ region: process.env.AWS_REGION });
+
+// Create the Nodemailer transport
+const transporter = nodemailer.createTransport({
+  SES: { sesClient, SendEmailCommand },
+});
+
+// Send the email
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: ["recipient@example.com"],
+    subject: "Message via SES transport",
+    text: "I hope this message gets sent!",
+    ses: {
+      // Add tags for tracking and analytics
+      EmailTags: [{ Name: "tag_name", Value: "tag_value" }],
+    },
+  },
+  (err, info) => {
+    if (err) {
+      console.error("Failed to send email:", err);
+      return;
+    }
+    console.log("Email sent successfully!");
+    console.log("Envelope:", info.envelope);
+    console.log("Message ID:", info.messageId);
+  }
+);
+```
+
+</TabItem>
+</Tabs>
 
 ### 2. Minimal IAM policy {#example-2}
 

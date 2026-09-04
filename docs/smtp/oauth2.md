@@ -4,9 +4,6 @@ sidebar_position: 2
 description: Use OAuth2 access tokens instead of passwords for secure SMTP authentication.
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 OAuth2 allows your application to authenticate with email servers using short-lived access tokens instead of storing passwords. This approach is more secure because tokens are scoped to specific permissions, can be revoked at any time, and can be regenerated if compromised. If a token is leaked, the potential damage is limited and contained, unlike a leaked password which could grant broader access.
 
 1. [Provider-agnostic OAuth2 authentication](#oauth-token)

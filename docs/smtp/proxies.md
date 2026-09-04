@@ -8,12 +8,15 @@ Nodemailer can route [SMTP](./index.md) connections **through an outbound proxy 
 
 Nodemailer includes built-in support for **HTTP CONNECT** proxies. For **SOCKS4/4a/5** proxies or other protocols, you have two options:
 
-1. Install the [`socks`](https://www.npmjs.com/package/socks) package and register it with the transporter via `transporter.set("proxy_socks_module", require("socks"))`.
+1. Install the [`socks`](https://www.npmjs.com/package/socks) package and register it with the transporter via `transporter.set("proxy_socks_module", socks)`.
 2. Write a custom proxy handler function for specialized requirements.
 
 ## Quick start
 
 To use a proxy, set the `proxy` option to a URL string when creating your transporter. Nodemailer parses the URL and automatically determines how to establish the tunnel.
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -25,6 +28,23 @@ const transporter = nodemailer.createTransport({
   proxy: "http://proxy.example.test:3128", // HTTP proxy URL
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  proxy: "http://proxy.example.test:3128", // HTTP proxy URL
+});
+```
+
+</TabItem>
+</Tabs>
 
 ## HTTP CONNECT proxies
 
@@ -51,6 +71,9 @@ npm install socks --save
 
 Then configure the transporter and register the SOCKS module:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
@@ -62,6 +85,26 @@ const transporter = nodemailer.createTransport({
 // Register the socks module so Nodemailer can use it
 transporter.set("proxy_socks_module", require("socks"));
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import * as socks from "socks";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  proxy: "socks5://127.0.0.1:1080",
+});
+
+// Register the socks module so Nodemailer can use it
+transporter.set("proxy_socks_module", socks);
+```
+
+</TabItem>
+</Tabs>
 
 ### Supported URL protocols
 
@@ -100,6 +143,9 @@ If you need special authentication, a proprietary protocol, or any other custom 
 
 To register a custom handler, use `transporter.set()` with a key in the format `proxy_handler_<protocol>`, where `<protocol>` matches the URL scheme you use in the `proxy` option.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const transporter = nodemailer.createTransport({
   host: "smtp.example.com",
@@ -123,6 +169,35 @@ transporter.set("proxy_handler_myproxy", (proxy, options, done) => {
 });
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import net from "net";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  proxy: "myproxy://127.0.0.1:9999",
+});
+
+// Register a handler for the "myproxy:" URL scheme
+transporter.set("proxy_handler_myproxy", (proxy, options, done) => {
+  console.log("Connecting to proxy at %s:%s", proxy.hostname, proxy.port);
+
+  const socket = net.connect(proxy.port, proxy.hostname, () => {
+    // Perform any custom handshake with your proxy here...
+
+    // Return the established socket to Nodemailer
+    done(null, { connection: socket });
+  });
+});
+```
+
+</TabItem>
+</Tabs>
+
 The handler function receives three arguments:
 - `proxy` - A parsed URL object containing the proxy address details
 - `options` - Connection options including the target `host` and `port`
@@ -131,6 +206,9 @@ The handler function receives three arguments:
 ### Pre-encrypted connections
 
 If your proxy connection is **already encrypted** (for example, you used `tls.connect()` instead of `net.connect()`), you must set `secured: true` in the result object. This tells Nodemailer that the socket is already TLS-encrypted, so it skips wrapping the socket in TLS again (the implicit upgrade normally performed when `secure: true` is set). Use this together with `secure: true` in the transport options.
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const tls = require("tls");
@@ -142,6 +220,23 @@ transporter.set("proxy_handler_myproxys", (proxy, options, done) => {
   });
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import tls from "tls";
+
+transporter.set("proxy_handler_myproxys", (proxy, options, done) => {
+  const socket = tls.connect(proxy.port, proxy.hostname, () => {
+    // The secured flag indicates the connection is already TLS-encrypted
+    done(null, { connection: socket, secured: true });
+  });
+});
+```
+
+</TabItem>
+</Tabs>
 
 ## See Also
 

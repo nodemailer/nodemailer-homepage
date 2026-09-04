@@ -20,9 +20,22 @@ npm install nodemailer
 
 ### 2. Import MailComposer in your code
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```js
 const MailComposer = require("nodemailer/lib/mail-composer");
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import MailComposer from "nodemailer/lib/mail-composer";
+```
+
+</TabItem>
+</Tabs>
 
 ### 3. Create a MailComposer instance
 
@@ -129,6 +142,9 @@ Each attachment is defined as an object with the following properties:
 
 ### Example
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```js
 const fs = require("fs");
 
@@ -164,6 +180,48 @@ const mailOptions = {
   ],
 };
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import fs from "fs";
+
+const mailOptions = {
+  // ...other fields...
+  attachments: [
+    // Plain text string as attachment content
+    { filename: "hello.txt", content: "hello world!" },
+
+    // Binary Buffer as attachment content
+    { filename: "buffer.txt", content: Buffer.from("hello world!", "utf-8") },
+
+    // Stream content from a file on disk
+    { filename: "file.txt", path: "/path/to/file.txt" },
+
+    // Let filename and content type be inferred from the path
+    { path: "/path/to/logo.png" },
+
+    // Use a readable stream as the content source
+    { filename: "stream.txt", content: fs.createReadStream("file.txt") },
+
+    // Explicitly set the content type
+    { filename: "data.bin", content: "hello world!", contentType: "application/octet-stream" },
+
+    // Fetch attachment content from a remote URL
+    { filename: "license.txt", path: "https://raw.githubusercontent.com/nodemailer/nodemailer/master/LICENSE" },
+
+    // Decode a base64-encoded string into attachment content
+    { filename: "base64.txt", content: "aGVsbG8gd29ybGQh", encoding: "base64" },
+
+    // Use a data URI as the content source
+    { path: "data:text/plain;base64,aGVsbG8gd29ybGQ=" },
+  ],
+};
+```
+
+</TabItem>
+</Tabs>
 
 ---
 

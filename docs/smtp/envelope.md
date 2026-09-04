@@ -44,6 +44,9 @@ Nodemailer accepts any [address format](../message/addresses) it supports: plain
 
 ### Complete example
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```js
 const nodemailer = require("nodemailer");
 
@@ -74,6 +77,43 @@ async function main() {
 
 main().catch(console.error);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import nodemailer from "nodemailer";
+
+async function main() {
+  // Create a transport (replace with your own transport options)
+  const transport = nodemailer.createTransport({
+    sendmail: true,
+  });
+
+  const info = await transport.sendMail({
+    from: "Mailer <mailer@example.com>", // Visible From: header
+    to: "Daemon <daemon@example.com>",   // Visible To: header
+    envelope: {
+      from: "bounce+12345@example.com",  // Actual MAIL FROM (for bounces)
+      to: [
+        // Actual RCPT TO recipients (who really receive the email)
+        "daemon@example.com",
+        "mailer@example.com",
+      ],
+    },
+    subject: "Custom SMTP envelope",
+    text: "Hello!",
+  });
+
+  console.log("Envelope used:", info.envelope);
+  // => { from: 'bounce+12345@example.com', to: [ 'daemon@example.com', 'mailer@example.com' ] }
+}
+
+main().catch(console.error);
+```
+
+</TabItem>
+</Tabs>
 
 :::tip
 The object returned by `sendMail()` always includes an `envelope` property showing what was actually sent. It contains `from` (a string with the sender address) and `to` (an array of all recipient addresses). When building the envelope, Nodemailer merges **all** recipients from `to`, `cc`, and `bcc` into that single `to` array.

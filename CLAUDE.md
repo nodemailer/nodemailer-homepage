@@ -42,3 +42,36 @@ docs/
 - Algolia search is enabled (config in `docusaurus.config.js`)
 - Client-side redirects configured for `/about` → `/`
 - Prism syntax highlighting includes PHP support
+
+## Code examples: CommonJS / ESM tabs
+
+Nodemailer ships both a CommonJS and an ES module build, so every example that
+loads a module is shown twice, in a tab pair:
+
+````markdown
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
+```javascript
+const nodemailer = require("nodemailer");
+```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+```
+
+</TabItem>
+</Tabs>
+````
+
+Notes:
+
+- `Tabs` and `TabItem` are registered globally in `src/theme/MDXComponents.js`, so
+  docs pages use them without an import block.
+- Always use `groupId="module-system"`. Docusaurus syncs and persists the choice,
+  so picking ESM once switches every example on the site.
+- Examples with no `require`/`import` line are identical in both module systems
+  and stay as a plain code block.

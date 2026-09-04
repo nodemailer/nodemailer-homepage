@@ -48,6 +48,9 @@ const message = {
 
 Instead of specifying a file path, you can provide the image data directly as a Buffer. This is useful when the image is generated dynamically or already loaded in memory.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const fs = require("fs");
 
@@ -65,6 +68,30 @@ const message = {
   ],
 };
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import fs from "fs";
+
+const message = {
+  from: "Alice <alice@example.com>",
+  to: "Bob <bob@example.com>",
+  subject: "Screenshot attached",
+  html: '<img src="cid:screenshot@example.com" alt="Screenshot"/>',
+  attachments: [
+    {
+      filename: "screenshot.png",
+      content: fs.readFileSync("/tmp/screenshot.png"), // Buffer containing the image data
+      cid: "screenshot@example.com",
+    },
+  ],
+};
+```
+
+</TabItem>
+</Tabs>
 
 #### Embedding multiple images
 

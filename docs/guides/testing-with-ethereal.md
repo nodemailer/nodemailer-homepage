@@ -19,6 +19,9 @@ description: Use Ethereal.email to test email sending without delivering to real
 
 Nodemailer includes built-in support for creating Ethereal test accounts on the fly. Call `nodemailer.createTestAccount()` to generate temporary credentials:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -36,6 +39,30 @@ const transporter = nodemailer.createTransport({
   },
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+// Create a test account automatically
+const testAccount = await nodemailer.createTestAccount();
+
+// Create a transporter using the test account
+const transporter = nodemailer.createTransport({
+  host: testAccount.smtp.host,
+  port: testAccount.smtp.port,
+  secure: testAccount.smtp.secure,
+  auth: {
+    user: testAccount.user,
+    pass: testAccount.pass,
+  },
+});
+```
+
+</TabItem>
+</Tabs>
 
 The returned `testAccount` object contains:
 
@@ -89,6 +116,9 @@ Open the preview URL in your browser to see exactly how your email looks, includ
 
 Here is a complete example that creates a test account, sends an email, and outputs a preview link:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -127,6 +157,50 @@ async function sendTestEmail() {
 sendTestEmail().catch(console.error);
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+async function sendTestEmail() {
+  // Generate a test account
+  const testAccount = await nodemailer.createTestAccount();
+
+  console.log("Test account created:");
+  console.log("  User: %s", testAccount.user);
+  console.log("  Pass: %s", testAccount.pass);
+
+  // Create a transporter
+  const transporter = nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
+
+  // Send a test message
+  const info = await transporter.sendMail({
+    from: `"Test App" <${testAccount.user}>`,
+    to: "recipient@example.com",
+    subject: "Hello from Ethereal!",
+    text: "This message was sent using Ethereal.",
+    html: "<p>This message was sent using <b>Ethereal</b>.</p>",
+  });
+
+  console.log("Message sent: %s", info.messageId);
+  console.log("Preview: %s", nodemailer.getTestMessageUrl(info));
+}
+
+sendTestEmail().catch(console.error);
+```
+
+</TabItem>
+</Tabs>
+
 Running this script outputs something like:
 
 ```
@@ -154,6 +228,9 @@ const transporter = nodemailer.createTransport({
 ## Integrating with test frameworks
 
 Ethereal works well with testing frameworks like Jest or Mocha. Create a test account once in your test setup and reuse it:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -190,9 +267,53 @@ test("sends welcome email", async () => {
 });
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+let transporter;
+let testAccount;
+
+beforeAll(async () => {
+  testAccount = await nodemailer.createTestAccount();
+  transporter = nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
+});
+
+test("sends welcome email", async () => {
+  const info = await transporter.sendMail({
+    from: "app@example.com",
+    to: "newuser@example.com",
+    subject: "Welcome!",
+    text: "Thanks for signing up.",
+  });
+
+  expect(info.messageId).toBeDefined();
+  expect(info.accepted).toContain("newuser@example.com");
+
+  // Optionally log the preview URL for manual inspection
+  console.log("Preview:", nodemailer.getTestMessageUrl(info));
+});
+```
+
+</TabItem>
+</Tabs>
+
 ## Switch transports based on environment
 
 A common pattern is to centralize your transport configuration in one place. This makes it easy to use Ethereal during development and testing while using a production email service in production:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -225,6 +346,44 @@ function createTransport() {
 
 module.exports = createTransport;
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+function createTransport() {
+  if (process.env.NODE_ENV === "production") {
+    // Production: send real emails
+    return nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USERNAME,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
+
+  // Development/Testing: capture emails with Ethereal
+  return nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.ETHEREAL_USERNAME,
+      pass: process.env.ETHEREAL_PASSWORD,
+    },
+  });
+}
+
+export default createTransport;
+```
+
+</TabItem>
+</Tabs>
 
 For alternative testing approaches, you can also use the [stream transport](/transports/stream) to capture generated messages without any network connection, or run your own local mail server using [smtp-server](/extras/smtp-server).
 

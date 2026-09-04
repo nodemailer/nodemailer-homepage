@@ -26,6 +26,9 @@ Nodemailer only auto-selects from the methods it recognizes (PLAIN, LOGIN, CRAM-
 
 To create a custom authentication handler, add a `customAuth` object to your transporter options. Each key in this object is the authentication method name (case-insensitive, but uppercase is conventional), and each value is a function that performs the authentication exchange.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -59,6 +62,46 @@ const transporter = nodemailer.createTransport({
   },
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+// Define the custom authentication handler
+async function myCustomMethod(ctx) {
+  // Build and send the AUTH command with your custom data
+  // This example sends a base64-encoded password (adapt to your server's requirements)
+  const response = await ctx.sendCommand(
+    "AUTH MY-CUSTOM-METHOD " + Buffer.from(ctx.auth.credentials.pass).toString("base64")
+  );
+
+  // Check if the server accepted the authentication
+  // SMTP success codes are in the 2xx range (typically 235 for successful auth)
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error("Authentication failed: " + response.text);
+  }
+}
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 465,
+  secure: true,
+  auth: {
+    type: "custom",                // any value other than "OAuth2" works; the handler is selected via "method" below
+    method: "MY-CUSTOM-METHOD",    // specifies which handler to use
+    user: "username",
+    pass: "verysecret",
+  },
+  customAuth: {
+    "MY-CUSTOM-METHOD": myCustomMethod,
+  },
+});
+```
+
+</TabItem>
+</Tabs>
 
 ### Handler signature
 

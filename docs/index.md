@@ -39,15 +39,26 @@ Nodemailer 10 requires **Node.js 20 or later**. If you are on an older Node.js v
 
 The package ships both an ES module and a CommonJS build, so either import style works:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
-import nodemailer from "nodemailer";
-// or
 const nodemailer = require("nodemailer");
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+```
+
+</TabItem>
+</Tabs>
+
 TypeScript definitions are bundled with the package. `@types/nodemailer` is only for Nodemailer 9 and earlier, and installing it alongside Nodemailer 10 causes conflicting declarations, so remove it when you upgrade.
 
-The examples throughout this documentation use `require()`. Replace those lines with the `import` form above if your project is an ES module.
+Every code example on this site has a **CommonJS** and an **ESM** tab. Pick the one that matches your project and the rest of the site follows that choice.
 
 ## Quick start
 
@@ -60,6 +71,9 @@ Sending an email with Nodemailer takes three steps:
 ## Create a transporter
 
 A **transporter** is an object that handles the connection to your email service and sends messages on your behalf. You create one transporter and reuse it for all your emails.
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -75,6 +89,27 @@ const transporter = nodemailer.createTransport({
   },
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+// Create a transporter using SMTP
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 587,
+  secure: false, // use STARTTLS (upgrade connection to TLS after connecting)
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+```
+
+</TabItem>
+</Tabs>
 
 The `createTransport(transport[, defaults])` function returns a reusable transporter instance.
 

@@ -23,6 +23,9 @@ npm install mailparser
 
 ## `simpleParser()`
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const { simpleParser } = require("mailparser");
 
@@ -40,6 +43,30 @@ simpleParser(source, options)
 // async/await
 const mail = await simpleParser(source, options);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { simpleParser } from "mailparser";
+
+// Callback style
+simpleParser(source, options, (err, mail) => {
+  if (err) throw err;
+  console.log(mail.subject);
+});
+
+// Promise style
+simpleParser(source, options)
+  .then((mail) => console.log(mail.subject))
+  .catch(console.error);
+
+// async/await
+const mail = await simpleParser(source, options);
+```
+
+</TabItem>
+</Tabs>
 
 ### Parameters
 
@@ -133,12 +160,28 @@ Each attachment in the `attachments` array has the following properties. For com
 
 For processing large messages without loading everything into memory, use the `MailParser` class directly:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const { MailParser } = require("mailparser");
 
 const parser = new MailParser(options);
 sourceStream.pipe(parser);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { MailParser } from "mailparser";
+
+const parser = new MailParser(options);
+sourceStream.pipe(parser);
+```
+
+</TabItem>
+</Tabs>
 
 `MailParser` is a `Transform` stream in **object mode** that emits two types of objects via the `'data'` event:
 
@@ -184,6 +227,9 @@ When using the `MailParser` stream API, attachment objects have the same propert
 - **You must call `attachment.release()`** when you are finished processing the attachment. Parsing is paused until every attachment is released, which prevents memory from growing unbounded.
 - **`checksum`** and **`size`** are populated only after the `content` stream has been fully consumed - read them after the stream's `'end'` event.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const fs = require("fs");
 
@@ -207,6 +253,35 @@ parser.on("end", () => {
 });
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import fs from "fs";
+
+parser.on("data", (part) => {
+  if (part.type === "attachment") {
+    console.log("Saving attachment:", part.filename);
+
+    // Pipe the attachment stream to a file
+    const output = fs.createWriteStream(part.filename);
+    part.content.pipe(output);
+
+    // Release the attachment when the stream finishes
+    output.on("finish", () => {
+      part.release();
+    });
+  }
+});
+
+parser.on("end", () => {
+  console.log("Parsing complete");
+});
+```
+
+</TabItem>
+</Tabs>
+
 ---
 
 ## Character set decoding
@@ -214,6 +289,9 @@ parser.on("end", () => {
 MailParser uses [iconv-lite](https://www.npmjs.com/package/iconv-lite) for converting character encodings to UTF-8. The exceptions are charsets labelled `ISO-2022-JP`, `JIS*`, or `EUCJP` (without a hyphen), which are handled by [encoding-japanese](https://www.npmjs.com/package/encoding-japanese) for better accuracy. Note that the standard hyphenated `EUC-JP` label currently falls through to iconv-lite.
 
 If you prefer to use [`node-iconv`](https://www.npmjs.com/package/iconv) instead of iconv-lite (for example, to support additional encodings), you can inject it via the `Iconv` option:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const { Iconv } = require("iconv");
@@ -224,6 +302,22 @@ simpleParser(rfc822Message, { Iconv })
     console.log(mail.subject);
   });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { Iconv } from "iconv";
+import { simpleParser } from "mailparser";
+
+simpleParser(rfc822Message, { Iconv })
+  .then((mail) => {
+    console.log(mail.subject);
+  });
+```
+
+</TabItem>
+</Tabs>
 
 ---
 

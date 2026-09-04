@@ -19,6 +19,9 @@ Both paths have solid, actively maintained options in the Nodemailer ecosystem.
 
 The [smtp-server](/extras/smtp-server) package gives you an SMTP interface that other mail servers can connect to and deliver mail through. Combined with [mailparser](/extras/mailparser), a few lines are enough to accept and parse incoming messages:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const { SMTPServer } = require("smtp-server");
 const { simpleParser } = require("mailparser");
@@ -40,11 +43,41 @@ const server = new SMTPServer({
 server.listen(25);
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { SMTPServer } from "smtp-server";
+import { simpleParser } from "mailparser";
+
+const server = new SMTPServer({
+  // Inbound MX traffic is not authenticated
+  authOptional: true,
+  onData(stream, session, callback) {
+    simpleParser(stream)
+      .then((parsed) => {
+        console.log("Received: %s", parsed.subject);
+        console.log("From: %s", parsed.from.text);
+        callback();
+      })
+      .catch(callback);
+  },
+});
+
+server.listen(25);
+```
+
+</TabItem>
+</Tabs>
+
 Keep in mind what this makes you: the mail server for your domain. For messages to arrive, the domain's MX records must point at your host, port 25 must be reachable, and you are now responsible for TLS, spam filtering, greylisting retries, and staying available, because sending servers give up after a few days of failed delivery. This is the right approach for things like reply-catcher addresses, inbound webhooks on your own domain, and test environments. It is a serious commitment as a general mailbox replacement.
 
 ## Reading a mailbox with ImapFlow
 
 If the mail already arrives at an existing account, you do not need to run a server. [ImapFlow](https://imapflow.com/) is a modern, Promise-based IMAP client from the Nodemailer team that connects to any IMAP provider:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const { ImapFlow } = require("imapflow");
@@ -83,6 +116,50 @@ const main = async () => {
 
 main().catch(console.error);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import { ImapFlow } from "imapflow";
+import { simpleParser } from "mailparser";
+
+const client = new ImapFlow({
+  host: "imap.example.com",
+  port: 993,
+  secure: true,
+  auth: {
+    user: "user@example.com",
+    pass: "password",
+  },
+});
+
+const main = async () => {
+  await client.connect();
+
+  const lock = await client.getMailboxLock("INBOX");
+  try {
+    // Find unread messages
+    const uids = await client.search({ seen: false }, { uid: true });
+
+    for (const uid of uids) {
+      // Download and parse the full message
+      const { content } = await client.download(uid, undefined, { uid: true });
+      const parsed = await simpleParser(content);
+      console.log("%s: %s", parsed.from.text, parsed.subject);
+    }
+  } finally {
+    lock.release();
+  }
+
+  await client.logout();
+};
+
+main().catch(console.error);
+```
+
+</TabItem>
+</Tabs>
 
 ImapFlow also supports IDLE, so you can react to new messages in near real time instead of polling, and it handles IMAP protocol extensions automatically. See the [ImapFlow documentation](https://imapflow.com/docs/) for guides and the full API.
 

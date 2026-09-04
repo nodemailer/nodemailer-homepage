@@ -6,6 +6,9 @@ description: Built-in connection presets for popular SMTP providers such as Gmai
 
 Nodemailer includes built-in connection presets for many popular email providers. Instead of manually looking up each provider's SMTP server hostname, port number, and security settings, you can specify a **`service`** name when creating a transport. Nodemailer automatically configures all the connection details for you.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```js
 const nodemailer = require("nodemailer");
 
@@ -17,6 +20,24 @@ const transporter = nodemailer.createTransport({
   },
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```js
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail", // Use any Service ID from the table below (matching is case-insensitive)
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+```
+
+</TabItem>
+</Tabs>
 
 The `service` option is a shortcut. You can always specify `host`, `port`, `secure`, and other connection options manually if you prefer. If your provider is not listed or if connection settings have changed, you have two options: submit a pull request to update the [services.json](https://github.com/nodemailer/nodemailer/blob/master/src/well-known/services.json) file, or bypass the presets entirely and configure the connection details yourself.
 

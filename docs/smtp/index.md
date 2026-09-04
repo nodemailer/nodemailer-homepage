@@ -10,11 +10,26 @@ SMTP is the main transport in Nodemailer for delivering messages. SMTP (Simple M
 
 To send emails via SMTP, create a transporter object by calling `nodemailer.createTransport()`:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport(options[, defaults]);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport(options[, defaults]);
+```
+
+</TabItem>
+</Tabs>
 
 - **`options`** - an object that defines the SMTP connection settings (detailed in the sections below).
 - **`defaults`** - an optional object whose properties are merged into every [message](/message/) you send. This is useful for setting a common **from** address or other repeated values.

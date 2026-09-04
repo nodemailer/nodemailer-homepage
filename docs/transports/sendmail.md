@@ -8,14 +8,30 @@ The **Sendmail transport** delivers email by passing the generated RFC 822 messa
 
 ## Usage
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
-// CommonJS
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   sendmail: true, // enable Sendmail transport
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  sendmail: true, // enable Sendmail transport
+});
+```
+
+</TabItem>
+</Tabs>
 
 Setting `sendmail: true` activates the Sendmail transport. Nodemailer looks for a `sendmail` executable in your system's `PATH` by default. If your sendmail binary is located elsewhere, you can specify the full path using the `path` option described below.
 
@@ -73,6 +89,9 @@ For installation instructions, consult your operating system's documentation or 
 
 Use the `path` option when the sendmail binary is not in your `PATH` or you want to use a specific location:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -98,6 +117,38 @@ transporter.sendMail(
   }
 );
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  sendmail: true,
+  path: "/usr/sbin/sendmail",
+});
+
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: "recipient@example.com",
+    subject: "Test message",
+    text: "I hope this message gets delivered!",
+  },
+  (err, info) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(info.envelope);
+    console.log(info.messageId);
+  }
+);
+```
+
+</TabItem>
+</Tabs>
 
 #### Passing custom command-line arguments
 

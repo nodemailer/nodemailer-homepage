@@ -52,12 +52,26 @@ The option `cacheTreshold` is intentionally misspelled (missing the "h" in "Thre
 
 ## Usage examples
 
-The following examples use CommonJS syntax:
+Both examples below build on this setup:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+import fs from "fs";
+```
+
+</TabItem>
+</Tabs>
 
 ### 1. Sign every message
 

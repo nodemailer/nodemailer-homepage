@@ -20,6 +20,9 @@ The following example shows how to send email through [Amazon SES](https://aws.a
 npm install nodemailer @aws-sdk/client-sesv2
 ```
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript title="send-with-ses.js"
 const nodemailer = require("nodemailer");
 const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
@@ -45,6 +48,38 @@ const transporter = nodemailer.createTransport({
   });
 })();
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript title="send-with-ses.js"
+import nodemailer from "nodemailer";
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+
+// Create an SES client. Configure your AWS credentials and region
+// using environment variables, shared credentials file, or IAM roles.
+const sesClient = new SESv2Client({});
+
+// Create a Nodemailer transporter that uses the SES client.
+// The property must be named "SES" (case-sensitive) and must include
+// both the sesClient instance and the SendEmailCommand class.
+const transporter = nodemailer.createTransport({
+  SES: { sesClient, SendEmailCommand },
+});
+
+// Send an email using the standard Nodemailer sendMail interface
+(async () => {
+  await transporter.sendMail({
+    from: "you@example.com",
+    to: "friend@example.net",
+    subject: "Hello from SES",
+    text: "This message was sent with Nodemailer and Amazon SES!",
+  });
+})();
+```
+
+</TabItem>
+</Tabs>
 
 ---
 

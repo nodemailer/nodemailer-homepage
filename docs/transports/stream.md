@@ -17,6 +17,9 @@ For an overview of all available transports, see the [transports documentation](
 
 To use Stream transport, create a transporter with `streamTransport: true` in the options object:
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -25,6 +28,21 @@ const transporter = nodemailer.createTransport({
   // See additional options below
 });
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  streamTransport: true,
+  // See additional options below
+});
+```
+
+</TabItem>
+</Tabs>
 
 ### Options
 
@@ -65,6 +83,9 @@ For details on configuring the message object passed to `sendMail()`, see the [m
 
 This example generates an email as a readable stream using Windows-style CRLF line endings. The stream can be piped to any writable destination.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -90,9 +111,43 @@ transporter.sendMail(
 );
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  streamTransport: true,
+});
+
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: "recipient@example.com",
+    subject: "Streamed message",
+    text: "This message is streamed using CRLF line endings.",
+    newline: "windows", // Use CRLF (\r\n) line endings
+  },
+  (err, info) => {
+    if (err) throw err;
+    console.log(info.envelope);   // { from: '...', to: ['...'] }
+    console.log(info.messageId);  // '<unique-id@example.com>'
+    // Pipe the raw RFC 822 message to stdout
+    info.message.pipe(process.stdout);
+  }
+);
+```
+
+</TabItem>
+</Tabs>
+
 ### 2. Return a Buffer with Unix-style line endings
 
 When you need the entire message in memory at once, set `buffer: true`. This example also explicitly forces Unix-style LF line endings via the message-level `newline` option.
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -120,11 +175,46 @@ transporter.sendMail(
 );
 ```
 
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  streamTransport: true,
+  buffer: true, // Return a Buffer instead of a stream
+});
+
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: "recipient@example.com",
+    subject: "Buffered message",
+    text: "This message is buffered using LF line endings.",
+    newline: "unix", // Force LF (\n) line endings
+  },
+  (err, info) => {
+    if (err) throw err;
+    console.log(info.envelope);
+    console.log(info.messageId);
+    // The complete message is available as a Buffer
+    console.log(info.message.toString());
+  }
+);
+```
+
+</TabItem>
+</Tabs>
+
 ### 3. Generate a JSON-encoded message object (>= v3.1.0) {#json-transport}
 
 **JSON transport** is a separate transport type, not an option of Stream transport. To use it, set `jsonTransport: true` instead of `streamTransport`. The resulting `info.message` will be a JSON string representing the message structure. This format is useful for storing messages, inspecting them in tests, or passing them to other systems. Binary data such as attachments is automatically base64-encoded.
 
 If you prefer to work with a JavaScript object rather than a JSON string, set `skipEncoding: true` to receive the raw data object directly.
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
 
 ```javascript
 const nodemailer = require("nodemailer");
@@ -148,6 +238,35 @@ transporter.sendMail(
   }
 );
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  jsonTransport: true,
+});
+
+transporter.sendMail(
+  {
+    from: "sender@example.com",
+    to: "recipient@example.com",
+    subject: "JSON message",
+    text: "I hope this message gets JSON-ified!",
+  },
+  (err, info) => {
+    if (err) throw err;
+    console.log(info.envelope);
+    console.log(info.messageId);
+    console.log(info.message); // JSON string
+  }
+);
+```
+
+</TabItem>
+</Tabs>
 
 Here is an example of what the JSON output looks like:
 

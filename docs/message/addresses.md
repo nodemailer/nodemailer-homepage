@@ -113,6 +113,9 @@ If the server does not support SMTPUTF8, Nodemailer still attempts delivery with
 
 The following example demonstrates how to send an email using multiple address formats together. For more information about configuring SMTP transport options, see [SMTP transport](../smtp/index.md).
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -141,6 +144,41 @@ async function sendEmail() {
 
 sendEmail().catch(console.error);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+async function sendEmail() {
+  // Create a transport with your SMTP server settings
+  const transport = nodemailer.createTransport({
+    host: "smtp.example.com",
+    port: 587,
+    auth: {
+      user: "smtp-user",
+      pass: "smtp-pass"
+    }
+  });
+
+  // Send an email using mixed address formats
+  await transport.sendMail({
+    from: '"Example Sender" <sender@example.com>',
+    to: [
+      "recipient@example.com",                              // Plain address
+      { name: "Nodemailer User", address: "user@example.com" }  // Address object
+    ],
+    subject: "Hello from Nodemailer",
+    text: "This demonstrates the different address formats."
+  });
+}
+
+sendEmail().catch(console.error);
+```
+
+</TabItem>
+</Tabs>
 
 ## See Also
 

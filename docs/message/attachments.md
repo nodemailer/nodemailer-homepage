@@ -32,6 +32,9 @@ For large files, prefer using `path`, `href`, or a readable stream for the `cont
 
 The following examples demonstrate different ways to attach files to an email message.
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const fs = require("fs");
 
@@ -118,6 +121,99 @@ attachments: [
   },
 ];
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import fs from "fs";
+
+// The attachments array goes inside your message object
+attachments: [
+  // 1. Plain text string
+  // The simplest way to create an attachment from a string
+  {
+    filename: "hello.txt",
+    content: "Hello world!",
+  },
+
+  // 2. Buffer content
+  // Useful when you have binary data in memory
+  {
+    filename: "buffer.txt",
+    content: Buffer.from("Hello world!", "utf8"),
+  },
+
+  // 3. File from the filesystem
+  // Uses streaming, which is memory-efficient for large files
+  {
+    filename: "report.pdf",
+    path: "/absolute/path/to/report.pdf",
+  },
+
+  // 4. File path only
+  // When you omit filename, Nodemailer derives it from the path
+  // The content type is also automatically detected from the file extension
+  {
+    path: "/absolute/path/to/image.png",
+  },
+
+  // 5. Readable stream
+  // Provides full control over how content is read.
+  // This must be a Node.js stream.Readable. To use a WHATWG ReadableStream
+  // (for example the body returned by fetch()), convert it first:
+  //   import { Readable } from "node:stream";
+  //   const response = await fetch("https://example.com/file.bin");
+  //   content: Readable.fromWeb(response.body)
+  {
+    filename: "notes.txt",
+    content: fs.createReadStream("./notes.txt"),
+  },
+
+  // 6. Explicit content type
+  // Override automatic MIME type detection when needed
+  {
+    filename: "data.bin",
+    content: Buffer.from("deadbeef", "hex"),
+    contentType: "application/octet-stream",
+  },
+
+  // 7. Remote URL
+  // Nodemailer fetches the content from the URL when sending
+  {
+    filename: "license.txt",
+    href: "https://raw.githubusercontent.com/nodemailer/nodemailer/master/LICENSE",
+  },
+
+  // 8. Base64-encoded string
+  // Specify the encoding when your content string is not plain text
+  {
+    filename: "photo.jpg",
+    content: "/9j/4AAQSkZJRgABAQAAAQABAAD...", // base64 image data (truncated)
+    encoding: "base64",
+  },
+
+  // 9. Data URI
+  // Useful for inline data or content from canvas elements
+  {
+    path: "data:text/plain;base64,SGVsbG8gd29ybGQ=",
+  },
+
+  // 10. Pre-built MIME node (advanced)
+  // Provides complete control over the attachment's MIME structure
+  {
+    raw: [
+      "Content-Type: text/plain; charset=utf-8",
+      'Content-Disposition: attachment; filename="greeting.txt"',
+      "",
+      "Hello world!"
+    ].join("\r\n"),
+  },
+];
+```
+
+</TabItem>
+</Tabs>
 
 ## Fetching over HTTPS
 

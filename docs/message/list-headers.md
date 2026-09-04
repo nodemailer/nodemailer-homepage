@@ -49,6 +49,9 @@ Compare this with any other key, where the same input keeps the scheme and appen
 
 ## Complete example
 
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
 ```javascript
 const nodemailer = require("nodemailer");
 
@@ -109,6 +112,73 @@ async function sendListMessage() {
 
 sendListMessage().catch(console.error);
 ```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import nodemailer from "nodemailer";
+
+// 1. Create a transport (replace with your configuration)
+const transporter = nodemailer.createTransport({
+  host: "smtp.example.com",
+  port: 587,
+  auth: {
+    user: "username",
+    pass: "password",
+  },
+});
+
+// 2. Send a message with various List-* headers
+async function sendListMessage() {
+  await transporter.sendMail({
+    from: "sender@example.com",
+    to: "recipient@example.com",
+    subject: "List Message",
+    text: "I hope no one unsubscribes from this list!",
+    list: {
+      // List-Help: <mailto:admin@example.com?subject=help>
+      help: "admin@example.com?subject=help",
+
+      // List-Unsubscribe: <http://example.com> (Comment)
+      unsubscribe: {
+        url: "http://example.com",
+        comment: "Comment",
+      },
+
+      // Two separate List-Subscribe header lines:
+      // List-Subscribe: <mailto:admin@example.com?subject=subscribe>
+      // List-Subscribe: <http://example.com> (Subscribe)
+      subscribe: [
+        "admin@example.com?subject=subscribe",
+        {
+          url: "http://example.com",
+          comment: "Subscribe",
+        },
+      ],
+
+      // Multiple URLs in a single List-Post header line:
+      // List-Post: <http://example.com/post>, <mailto:admin@example.com?subject=post> (Post)
+      post: [
+        [
+          "http://example.com/post",
+          {
+            url: "admin@example.com?subject=post",
+            comment: "Post",
+          },
+        ],
+      ],
+    },
+  });
+
+  console.log("List message sent");
+}
+
+sendListMessage().catch(console.error);
+```
+
+</TabItem>
+</Tabs>
 
 ### Resulting headers
 
