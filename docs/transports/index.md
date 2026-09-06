@@ -103,6 +103,7 @@ These transports are maintained by the community in separate npm packages. Insta
 
 - **Mailtrap** - Deliver messages to your Mailtrap inbox for safe email testing without sending to real recipients ([GitHub](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport))
 - **Mailgun** - Send email through Mailgun's HTTP API ([npm](https://www.npmjs.com/package/nodemailer-mailgun-transport))
+- **SuperSend TX** - Send transactional email through the SuperSend TX HTTP API ([npm](https://www.npmjs.com/package/supersendtx-nodemailer))
 - **Custom** - Build your own transport to implement business-specific logic. See [creating custom transports](../plugins/create/#transports).
 
 :::note
