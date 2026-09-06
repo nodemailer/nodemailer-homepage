@@ -1,5 +1,6 @@
 const lightCodeTheme = require("prism-react-renderer").themes.github;
 const darkCodeTheme = require("prism-react-renderer").themes.dracula;
+const rehypeNofollowExternal = require("./src/plugins/rehype-nofollow-external");
 
 export default {
   title: "Nodemailer",
@@ -37,7 +38,13 @@ export default {
     [
       "@docusaurus/preset-classic",
       {
-        docs: { path: "docs", routeBasePath: "/", sidebarPath: "sidebars.js" },
+        docs: {
+          path: "docs",
+          routeBasePath: "/",
+          sidebarPath: "sidebars.js",
+          // Outbound links get rel="nofollow"; our own properties are exempt.
+          rehypePlugins: [rehypeNofollowExternal],
+        },
         blog: false,
         pages: false,
       },
