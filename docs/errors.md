@@ -60,6 +60,7 @@ Nodemailer uses specific error codes to categorize different types of failures. 
 | `EFETCH` | Content | HTTP fetch error |
 | `ESENDMAIL` | Transport | Sendmail command error |
 | `ESES` | Transport | AWS SES error |
+| `ERR_ACCESS_DENIED` | Runtime | Denied by the Node.js permission model |
 
 ### Connection errors
 
@@ -528,6 +529,23 @@ const transporter = nodemailer.createTransport({
 #### ESES
 
 Reserved for AWS SES transport errors. In practice, errors from the SES transport are raw AWS SDK errors passed through unchanged - inspect `err.name` (or `err.Code`) for AWS error identifiers rather than `err.code`.
+
+### Runtime permission errors
+
+#### ERR_ACCESS_DENIED
+
+The [Node.js permission model](/guides/node-permission-model) denied an operation. This is the code Node.js sets, and Nodemailer keeps it instead of the code of the step that failed (`EDNS`, `ESOCKET`, `EFETCH`, `ESTREAM`), so a missing grant is easy to tell apart from a real network or file problem.
+
+**Common causes:**
+- The process runs with `--permission` on Node.js 25 or later without `--allow-net`, and Nodemailer tries to connect to an SMTP server or fetch a URL
+- An attachment or other content is loaded with `path` from a file that `--allow-fs-read` does not cover
+- The sendmail transport is used without `--allow-child-process`
+
+**Troubleshooting:**
+- Read `err.message`, it names the flag that is missing
+- Add the grant listed for the feature in the [permission model guide](/guides/node-permission-model#permissions)
+
+Nodemailer 10.0.16 and earlier report these errors with the code of the step that failed. The message contains `ERR_ACCESS_DENIED` there as well.
 
 ## SMTP response codes
 

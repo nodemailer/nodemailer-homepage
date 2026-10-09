@@ -16,6 +16,8 @@ Step-by-step guides for common email sending scenarios.
 
 - **[Using Deno](/guides/using-deno)** - Run Nodemailer in Deno through npm specifiers. Covers the permission flags each feature needs and the small differences from Node.js.
 
+- **[Node.js permission model](/guides/node-permission-model)** - Run Nodemailer with `node --permission`. Covers the grants each feature needs, how the model differs between Node.js versions, and how to recognize a denied operation.
+
 ## See Also
 
 - [Nodemailer](/) - installation, requirements, and a first message.

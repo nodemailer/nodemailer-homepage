@@ -35,7 +35,7 @@ npm install nodemailer
 
 ## Requirements
 
-Nodemailer 10 requires **Node.js 20 or later**. If you are on an older Node.js version, stay on the 9.x line. No additional system libraries, services, or build tools are needed. Nodemailer also runs in Deno 2, see [Using Deno](./guides/using-deno).
+Nodemailer 10 requires **Node.js 20 or later**. If you are on an older Node.js version, stay on the 9.x line. No additional system libraries, services, or build tools are needed. Nodemailer also runs in Deno 2, see [Using Deno](./guides/using-deno). To run it under the Node.js permission model (`node --permission`), see [Node.js permission model](./guides/node-permission-model).
 
 The package ships both an ES module and a CommonJS build, so either import style works:
 
