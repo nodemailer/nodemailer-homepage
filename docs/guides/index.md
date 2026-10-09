@@ -14,6 +14,8 @@ Step-by-step guides for common email sending scenarios.
 
 - **[Receiving email](/guides/receiving-email)** - Nodemailer only sends email. Learn how to accept inbound mail with smtp-server or read existing mailboxes with ImapFlow and mailparser.
 
+- **[Using Deno](/guides/using-deno)** - Run Nodemailer in Deno through npm specifiers. Covers the permission flags each feature needs and the small differences from Node.js.
+
 ## See Also
 
 - [Nodemailer](/) - installation, requirements, and a first message.
