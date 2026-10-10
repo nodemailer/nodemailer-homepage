@@ -73,10 +73,10 @@ connection.quit(); // or connection.close()
 | **servername**                  | `String`            | hostname               | The TLS server name for SNI (Server Name Indication). Automatically set to `host` value unless `host` is an IP address. |
 | **name**                        | `String`            | `os.hostname()`        | The hostname to identify as when sending EHLO/HELO commands. Falls back to `[127.0.0.1]` if the system hostname is not a valid FQDN. |
 | **localAddress**                | `String`            | -                      | The local network interface to bind to for outgoing connections.                                 |
-| **connectionTimeout**           | `Number`            | `120000`               | Maximum time in milliseconds to wait for the connection to be established (2 minutes).           |
-| **greetingTimeout**             | `Number`            | `30000`                | Maximum time in milliseconds to wait for the server greeting after the connection is established (30 seconds). |
+| **connectionTimeout**           | `Number`            | `120000`               | Maximum time in milliseconds setting up the connection may take as a whole, from the DNS lookup to the server greeting and a STARTTLS upgrade (2 minutes). |
+| **greetingTimeout**             | `Number`            | `30000`                | Maximum time in milliseconds to wait for the server greeting, and for a STARTTLS handshake, within what `connectionTimeout` leaves (30 seconds). |
 | **socketTimeout**               | `Number`            | `600000`               | Maximum time in milliseconds of inactivity before the connection is automatically closed (10 minutes). |
-| **dnsTimeout**                  | `Number`            | `30000`                | Maximum time in milliseconds to wait for DNS resolution (30 seconds).                            |
+| **dnsTimeout**                  | `Number`            | `30000`                | Maximum time in milliseconds for the DNS lookup as a whole (30 seconds).                         |
 | **logger**                      | `Boolean \| Object` | `false`                | Set to `true` to enable logging to the console, or provide a Bunyan-compatible logger instance for custom logging. |
 | **debug**                       | `Boolean`           | `false`                | If true, logs all SMTP traffic (commands and responses) to the logger.                           |
 | **lmtp**                        | `Boolean`           | `false`                | If true, uses the LMTP (Local Mail Transfer Protocol) protocol instead of SMTP.                  |

@@ -17,6 +17,8 @@ When Nodemailer encounters an error, it creates an Error object with additional 
 | `command`      | `string` | The SMTP command that was being executed when the error occurred (such as `CONN`, `AUTH LOGIN`).     |
 | `response`     | `string` | The raw response string from the SMTP server, if available.                                          |
 | `responseCode` | `number` | The numeric SMTP response code from the server (such as `535` for authentication failure).           |
+| `originalCode` | `string` | The code of the system error that Nodemailer replaced with its own (such as `ECONNREFUSED` for an `ESOCKET` error). |
+| `timeoutType`  | `string` | For `ETIMEDOUT` errors, which wait ran out: `CONNECT_TIMEOUT`, `GREETING_TIMEOUT`, `UPGRADE_TIMEOUT` or `SOCKET_TIMEOUT`. |
 
 Example error object:
 
@@ -89,9 +91,10 @@ A general connection error occurred. This typically happens when:
 
 The operation timed out. This can occur in several scenarios:
 
-- Connection timeout: Failed to establish TCP connection within the allowed time
-- Greeting timeout: Server did not send initial greeting after connection was established
-- Socket timeout: No activity on the connection for too long
+- Connection timeout (`timeoutType: 'CONNECT_TIMEOUT'`): setting up the connection, from the DNS lookup and any proxy handshake to the TCP and TLS connection, took longer than `connectionTimeout`
+- Greeting timeout (`timeoutType: 'GREETING_TIMEOUT'`): the server did not send its greeting within `greetingTimeout`, or within what was left of `connectionTimeout`
+- Upgrade timeout (`timeoutType: 'UPGRADE_TIMEOUT'`): a STARTTLS handshake did not finish within the same limits
+- Socket timeout (`timeoutType: 'SOCKET_TIMEOUT'`): no activity on the connection for too long
 
 **Default timeout values:**
 - Connection timeout: 2 minutes (120000 ms)
@@ -337,6 +340,8 @@ An error occurred while reading the message stream. This typically happens when 
 
 **Common causes:**
 - Source stream emitted an error
+- A content stream was already read to the end or destroyed before Nodemailer got to it. A stream can be used for one message only
+- A content stream was destroyed before it ended
 - File not found when using file path for attachment
 - Network error when fetching URL content
 

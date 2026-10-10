@@ -89,13 +89,13 @@ Setting **`secure: false`** does **not** mean your emails are sent unencrypted. 
 | ------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`              | local hostname | The hostname sent in the `EHLO` (or `HELO`) greeting. The server uses this to identify your client. Defaults to your machine's hostname if it is a fully-qualified domain name; otherwise `[127.0.0.1]` is used.      |
 | `localAddress`      | --             | The local network interface to bind when making the connection. Useful when your machine has multiple network interfaces.                      |
-| `connectionTimeout` | 120000 ms      | How long to wait (in milliseconds) for the TCP connection to be established before giving up.                                                  |
-| `greetingTimeout`   | 30000 ms       | How long to wait (in milliseconds) for the server to send its initial greeting after the connection is established.                            |
+| `connectionTimeout` | 120000 ms      | How long (in milliseconds) setting up the connection may take as a whole: the DNS lookup, a proxy handshake, the TCP connection, TLS, the server greeting and a STARTTLS upgrade. |
+| `greetingTimeout`   | 30000 ms       | How long to wait (in milliseconds) for the server greeting, and for a STARTTLS handshake, within the time `connectionTimeout` leaves.            |
 | `socketTimeout`     | 600000 ms      | How long a connection can remain idle (in milliseconds) before Nodemailer closes it. The default is 10 minutes.                                |
-| `dnsTimeout`        | 30000 ms       | Maximum time (in milliseconds) to wait for DNS lookups to complete.                                                                            |
+| `dnsTimeout`        | 30000 ms       | Maximum time (in milliseconds) for the DNS lookup as a whole. The IPv4 and IPv6 lookups run at the same time.                                  |
 | `dnsTtl`            | 300000 ms      | DNS lookup results are cached for 5 minutes. This TTL is currently not configurable for the SMTP transport.                                    |
 | `lmtp`              | `false`        | If `true`, use the LMTP (Local Mail Transfer Protocol) instead of SMTP. LMTP is typically used for local mail delivery.                        |
-| `opportunisticTLS`               | `false`        | If `true`, Nodemailer continues with an unencrypted connection when STARTTLS upgrade fails, instead of aborting.                               |
+| `opportunisticTLS`               | `false`        | If `true`, Nodemailer continues with an unencrypted connection when STARTTLS upgrade fails, instead of aborting. Authentication is then skipped over the unencrypted connection unless `forceAuth` is set. |
 | `forceAuth`                      | `false`        | If `true`, attempt authentication even when the server does not advertise AUTH capability. Some misconfigured servers require this.            |
 | `allowInternalNetworkInterfaces` | `false`        | If `true`, internal (loopback) network interfaces are also counted when Nodemailer determines whether the machine supports IPv4/IPv6 lookups. By default, an address family is only resolved if the machine has at least one non-internal interface of that family (relevant for offline or loopback-only environments). |
 

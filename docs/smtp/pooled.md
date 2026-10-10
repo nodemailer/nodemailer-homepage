@@ -97,9 +97,16 @@ Pooled connections work with all authentication methods, including [OAuth2](./oa
 | `pool`           | `boolean` | `false` | Set to `true` to enable connection pooling.                                                                                                     |
 | `maxConnections` | `number`  | `5`     | The maximum number of SMTP connections to open simultaneously. Messages are queued when all connections are busy.                               |
 | `maxMessages`    | `number`  | `100`   | How many messages to send on a single connection before closing and reopening it. This helps prevent long-lived connections from becoming stale.|
-| `maxRequeues`    | `number`  | unlimited | How many times a message can be re-added to the queue if its connection closes unexpectedly mid-send. Set to `-1` (or omit) to allow unlimited retry attempts, or set to `0` to disable re-queuing entirely. |
+| `maxRequeues`    | `number`  | `5`     | How many times a message can be re-added to the queue if its connection closes before the message was sent. Set to `-1` to allow unlimited retry attempts, or to `0` to disable re-queuing entirely. |
+| `idleTimeout`    | `number`  | `240000` | Time in milliseconds a connection may stay idle before the pool closes it with `QUIT`. The default of 4 minutes is below the 5 minutes RFC 5321 asks servers to wait. Set to `0` to keep idle connections open until the server closes them. |
 | `rateDelta`      | `number`  | `1000`  | The time window in milliseconds used for rate limiting.                                                                                          |
 | `rateLimit`      | `number`  | `0`     | The maximum number of messages that can be sent within one `rateDelta` window. This limit applies across all pooled connections combined, not per connection. Set to `0` (or omit) to disable rate limiting. |
+
+### How the pool reuses connections
+
+- A message the server rejects (for example every recipient refused) fails on its own, the connection is reset with `RSET` and used for the next message.
+- When the server closes a reused connection before any of a message was sent (an idle timeout reply such as `421`, or a dropped connection), the message is put back in the queue and sent over a new connection, up to `maxRequeues` times.
+- A connection the server closes while it has nothing to do is removed from the pool without an error.
 
 ---
 
