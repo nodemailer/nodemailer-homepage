@@ -177,6 +177,7 @@ The callback receives an `info` object with the following properties:
 - `rejectedErrors` - Array of Error objects with details for each rejected recipient (only present if at least one recipient was rejected)
 - `ehlo` - Array of extension lines from the server's EHLO response
 - `response` - The final response string from the server
+- `serverMessageId` - The Message-ID the server gave the message, when its final reply names one in a known format (Microsoft 365 and Outlook.com, or Amazon SES, where the Message-ID domain is derived from the region in the `host` option). Not set for other replies
 - `envelopeTime` - Time in milliseconds spent sending the envelope (MAIL FROM and RCPT TO commands)
 - `messageTime` - Time in milliseconds spent sending the message data
 - `messageSize` - Size of the sent message in bytes

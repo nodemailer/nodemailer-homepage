@@ -17,6 +17,7 @@ When Nodemailer encounters an error, it creates an Error object with additional 
 | `command`      | `string` | The SMTP command that was being executed when the error occurred (such as `CONN`, `AUTH LOGIN`).     |
 | `response`     | `string` | The raw response string from the SMTP server, if available.                                          |
 | `responseCode` | `number` | The numeric SMTP response code from the server (such as `535` for authentication failure).           |
+| `permanent`    | `boolean` | Set on every error that carries `responseCode`, from the reply class: `true` when the server rejected the message for good (a `5xx` reply other than `503`), `false` when the same message may be accepted on a later attempt (a `4xx` reply, a `503`, or an unexpected `2xx` or `3xx` reply). Not set when no server reply was received, see [Permanent and transient failures](#permanent-and-transient-failures). |
 | `originalCode` | `string` | The code of the system error that Nodemailer replaced with its own (such as `ECONNREFUSED` for an `ESOCKET` error). |
 | `timeoutType`  | `string` | For `ETIMEDOUT` errors, which wait ran out: `CONNECT_TIMEOUT`, `GREETING_TIMEOUT`, `UPGRADE_TIMEOUT` or `SOCKET_TIMEOUT`. |
 
@@ -657,6 +658,30 @@ try {
   }
 }
 ```
+
+### Permanent and transient failures
+
+`EENVELOPE`, `EMESSAGE` and `EAUTH` are set whatever the reply class, so a greylisting `450` on `RCPT TO` and a `550 No such user` carry the same code. Use `err.permanent` to decide whether retrying the same message can succeed. It follows RFC 5321: a `5xx` reply is a permanent rejection and a `4xx` reply a transient one. `503` (bad sequence of commands) is treated as transient, since it reports a session in the wrong state rather than a refused message, and the same message can go through on a new connection.
+
+The property is only present when the server replied. An error without a reply, such as a refused connection, a timeout or missing credentials, has no `permanent` property, so decide those by `err.code`:
+
+```javascript
+try {
+  await transporter.sendMail(message);
+} catch (err) {
+  if (err.permanent === true) {
+    // the server refused the message, do not retry it unchanged
+  } else if (err.permanent === false) {
+    // the server deferred the message, retry later
+  } else {
+    // no server reply, look at err.code
+  }
+}
+```
+
+Each entry of `err.rejectedErrors` and `info.rejectedErrors` carries its own `permanent` value. When every recipient was rejected and at least one of them was only deferred, the error itself is marked transient.
+
+The same rule is available as `isPermanentResponseCode(code)` from `nodemailer/lib/errors`.
 
 ### Handling specific error types
 

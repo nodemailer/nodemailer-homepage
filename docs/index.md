@@ -184,6 +184,7 @@ The `info` object returned on success contains:
 | `rejected`       | An array of recipient addresses that the server rejected.                          |
 | `rejectedErrors` | An array of error objects for each rejected recipient, with details about the rejection reason (only present if at least one recipient was rejected). |
 | `response`       | The final response string received from the SMTP server.                           |
+| `serverMessageId` | The **Message-ID** the server gave the message, when its final reply names one in a known format (Microsoft 365 and Outlook.com, Amazon SES). These servers replace the Message-ID header, so the delivered copy carries this value instead of `messageId`. Not set for other replies. |
 | `ehlo`           | An array of the capability lines the server returned in its `EHLO` response, for example `['PIPELINING', '8BITMIME', 'SMTPUTF8', 'AUTH LOGIN PLAIN']`. Useful for checking whether an extension such as `DSN` is available. |
 | `envelopeTime`   | Milliseconds spent on the envelope exchange (`MAIL FROM` and `RCPT TO`).            |
 | `messageTime`    | Milliseconds spent streaming the message body after the envelope was accepted.      |

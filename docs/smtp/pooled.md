@@ -116,6 +116,19 @@ Pooled connections work with all authentication methods, including [OAuth2](./oa
 
 Returns `true` when the transporter has capacity to accept more messages. This requires both that the internal queue holds fewer than `maxConnections` pending messages and that a connection is free to send (or a new one can still be opened).
 
+### `transporter.transporter.pendingCount()` -> `number`
+
+Returns the number of messages the pool has not finished with yet: the ones waiting in the queue plus the ones a connection is sending right now. `isIdle()` only tells whether the pool can take another message, so it is already `true` while a message is still being transmitted. Check `pendingCount()` instead when you need to know that closing the pool would not cut a delivery short. A message that is put back in the queue after its connection dropped stays counted while it waits, and a message is no longer counted by the time its callback runs.
+
+The method belongs to the pool transport, which the transporter returned by `createTransport()` holds as `transporter.transporter`:
+
+```javascript
+// close a pool nothing has used for a while, but only once it has delivered everything
+if (transporter.transporter.pendingCount() === 0) {
+  transporter.close();
+}
+```
+
 ### `transporter.close()`
 
 Closes all idle connections immediately. Connections that are currently sending a message are closed once that message finishes, and any messages still waiting in the queue are rejected with a `Connection pool was closed` error. Idle connections also close automatically after `socketTimeout`, so calling `close()` manually is typically only needed during application shutdown.

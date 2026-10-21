@@ -215,6 +215,43 @@ Registers a function with the signature `fn(inputStream) => outputStream`. The f
 
 Returns an object containing parsed email addresses from the **From**, **Sender**, **Reply-To**, **To**, **Cc**, and **Bcc** headers. Each property is an **array** of objects with `{ name, address }` structure. If a header is not present in the message, that property will be omitted from the result.
 
+### `mail.message.encodeHeaderValue(key, value)`
+
+Encodes a header value the way the message encodes it when it is built: address headers (**From**, **Sender**, **To**, **Cc**, **Bcc**, **Reply-To**) are formatted with punycoded domains and encoded names, **Message-ID**, **In-Reply-To** and **References** get their angle brackets, a `Date` object for the **Date** header is formatted, and any other value is MIME encoded when it holds non-ASCII or control characters. Line breaks in the value are replaced with spaces. The key is case insensitive.
+
+The result is the value alone, on a single line. Fold `key + ': ' + value` before writing it into a message.
+
+The same method is available without a message as a static method of the `MimeNode` class, with an optional `textEncoding` of `'Q'` (the default) or `'B'`:
+
+<Tabs groupId="module-system">
+<TabItem value="cjs" label="CommonJS">
+
+```javascript
+const MimeNode = require("nodemailer/lib/mime-node");
+
+MimeNode.encodeHeaderValue("To", [{ name: "Jõgeva Küla", address: "user@example.com" }]);
+// '=?UTF-8?Q?J=C3=B5geva_K=C3=BCla?= <user@example.com>'
+
+MimeNode.encodeHeaderValue("Subject", "Tere jõgeva", { textEncoding: "B" });
+// '=?UTF-8?B?VGVyZSBqw7VnZXZh?='
+```
+
+</TabItem>
+<TabItem value="esm" label="ESM">
+
+```javascript
+import MimeNode from "nodemailer/lib/mime-node";
+
+MimeNode.encodeHeaderValue("To", [{ name: "Jõgeva Küla", address: "user@example.com" }]);
+// '=?UTF-8?Q?J=C3=B5geva_K=C3=BCla?= <user@example.com>'
+
+MimeNode.encodeHeaderValue("Subject", "Tere jõgeva", { textEncoding: "B" });
+// '=?UTF-8?B?VGVyZSBqw7VnZXZh?='
+```
+
+</TabItem>
+</Tabs>
+
 ---
 
 ## Writing a custom transport {#transports}
