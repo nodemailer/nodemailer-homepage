@@ -69,6 +69,7 @@ These options let you customize the email headers:
 - **messageId** - A custom Message-ID value for the email. If not provided, Nodemailer generates a random unique identifier automatically.
 - **date** - The date to use for the email's Date header. If not provided, the current date and time (in UTC) is used. You can pass a Date object or a date string.
 - **list** - A helper object for setting List-\* headers, commonly used for mailing list messages. See [List headers](/message/list-headers) for more details.
+- **otp** - A one-time passcode for the `OTP-Token` header, which lets mail clients and browsers offer the code for autofill on the site it belongs to. Set it as `{code: "123456", origin: "https://example.com"}`. The code must be printable ASCII, and the origin must be an `https:` URL (or `http:` on `localhost` or a loopback address); a full URL is reduced to its origin, so `https://Example.com/login` becomes `https://example.com`. Invalid values fail the send with an [`EOTP`](/errors#eotp) error. The header is included in the DKIM signature by default. Keep the code in the message body as well, since most clients do not read the header yet. The header is defined by the IETF draft [draft-goto-otp-token](https://datatracker.ietf.org/doc/draft-goto-otp-token/), so its format may still change.
 
 ##### Security options
 

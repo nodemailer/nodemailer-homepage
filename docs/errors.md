@@ -53,6 +53,7 @@ Nodemailer uses specific error codes to categorize different types of failures. 
 | `EENVELOPE` | Envelope | Invalid mail envelope |
 | `EMAXRECIPIENTS` | Envelope | Recipient count exceeds maxRecipients |
 | `EMESSAGE` | Message | Message delivery error |
+| `EOTP` | Message | Invalid `otp` message property |
 | `ESTREAM` | Stream | Stream processing error |
 | `EPROTOCOL` | Protocol | Invalid SMTP server response |
 | `EMAXLIMIT` | Pool | Pool resource limit reached |
@@ -332,6 +333,20 @@ The message content is invalid or was rejected by the server.
 - Ensure message has content (text or html body)
 - Check if message size exceeds the server's SIZE limit
 - Review message content for policy violations (spam filters, etc.)
+
+#### EOTP
+
+The [`otp`](/message/#header-options) message property can not be turned into an `OTP-Token` header. The check runs while the message is built, so nothing is sent.
+
+**Error scenarios:**
+- `The otp code must be a non-empty string of printable ASCII characters`
+- `The otp origin must be an absolute https URL`
+- `The otp origin must be an https URL, or an http URL on a loopback host`
+
+**Troubleshooting:**
+- Pass the code as a string, not a number, so leading zeros are kept.
+- Pass the origin with its scheme and without a user name or password, for example `https://example.com` rather than `example.com`.
+- Use `http:` only for local development on `localhost` or a loopback address.
 
 ### Stream errors
 

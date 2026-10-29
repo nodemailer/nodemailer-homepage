@@ -128,7 +128,7 @@ const VALID_MESSAGE_KEYS = new Set([
   'attachDataUrls', 'watchHtml', 'amp', 'icalEvent', 'alternatives',
   'encoding', 'raw', 'textEncoding',
   // Header options
-  'priority', 'headers', 'messageId', 'date', 'list',
+  'priority', 'headers', 'messageId', 'date', 'list', 'otp',
   // Security options
   'disableFileAccess', 'disableUrlAccess',
   // Advanced options

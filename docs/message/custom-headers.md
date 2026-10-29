@@ -10,6 +10,7 @@ Nodemailer automatically generates all required email headers, so you typically 
 
   - Keys are automatically converted to their standard capitalized form (for example, `x-my-key` becomes `X-My-Key`).
   - Values are automatically encoded for non-ASCII characters using MIME word encoding, and long lines are wrapped to comply with the 78-character line limit. You can disable this automatic processing by using the `prepared` option.
+  - An `OTP-Token` header is never MIME word encoded, because its value is a structured field that encoding would break. Line breaks and control characters are removed and long lines are still wrapped at whitespace. The [`otp`](/message/#header-options) message property builds this header for you and replaces one set in `headers`.
 
 :::warning
 Do **not** set protected headers such as `From`, `Sender`, `To`, `Cc`, `Bcc`, `Reply-To`, `In-Reply-To`, `References`, `Subject`, `Message-ID`, or `Date` using the `headers` property. Whenever the corresponding message property (for example, `from`, `to`, `subject`) is set, Nodemailer overwrites the matching header from `headers`. Always use the dedicated [message properties](./) to set these values.
