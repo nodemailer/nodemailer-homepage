@@ -91,6 +91,7 @@ The resolved `mail` object contains all parsed parts of the message:
 | `messageId`     | `String` - unique message identifier                          |
 | `inReplyTo`     | `String` - message ID this email is replying to               |
 | `references`    | `String` or `String[]` - related message IDs in the thread    |
+| `otp`           | `{ code, origin }` - one-time passcode from the `OTP-Token` header, when present and valid (see [One-time passcodes](#otp)) |
 | `html`          | HTML body with embedded images converted to **data URIs**     |
 | `text`          | Plain text body                                               |
 | `textAsHtml`    | Plain text body converted to basic HTML                       |
@@ -134,6 +135,24 @@ The following headers are automatically parsed into richer structures:
 - **`references`** - Parsed as `String` or `String[]` of message IDs.
 - **`date`** - Parsed as a JavaScript `Date` object.
 - **Structured headers** (`content-type`, `content-disposition`, `dkim-signature`) - Parsed as `{ value: String, params: Object }`.
+
+#### One-time passcodes {#otp}
+
+A message with an `OTP-Token` header (IETF draft [draft-goto-otp-token](https://datatracker.ietf.org/doc/draft-goto-otp-token/), the header Nodemailer sets with its [`otp`](/message/#header-options) message option) gets an `otp` property with the passcode and the origin it is bound to:
+
+```javascript
+const mail = await simpleParser(source);
+// OTP-Token: "123456"; origin="https://example.com"
+console.log(mail.otp); // { code: '123456', origin: 'https://example.com' }
+```
+
+`otp` is set only when the message header has exactly one `OTP-Token` header and its value is valid: a structured field string with an `origin` parameter holding a canonical `https:` origin, or an `http:` origin on a loopback host. An `OTP-Token` header of a MIME part or a forwarded message is ignored. The raw value stays available as `headers.get('otp-token')`.
+
+:::warning Security note
+The `OTP-Token` header is not authenticated. Before offering the code, check that the message carries a valid DKIM signature from the domain of the origin.
+:::
+
+The header is defined by an Internet-Draft, so `otp` is experimental and may change in a minor release when the draft does. Available since mailparser v3.13.0.
 
 ---
 
@@ -194,6 +213,8 @@ sourceStream.pipe(parser);
 
 1. **`'headers'`** - Emits a `Map` of parsed header keys to their values. Fired once when headers are fully parsed.
 2. **`'headerLines'`** - Emits an `Array` of objects with `key` and `line` properties containing the raw header data.
+
+Once the headers are parsed, a valid `OTP-Token` header is also available as `parser.otp` (see [One-time passcodes](#otp)).
 
 ```javascript
 parser.on("headers", (headers) => {
