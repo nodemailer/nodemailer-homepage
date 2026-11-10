@@ -89,6 +89,7 @@ These options are rarely needed but provide fine-grained control over the genera
 - **newline** - Controls the line ending style in the generated message. Set to `'windows'` (or `'dos'`, `'win'`, `'\r\n'`) for Windows-style CRLF line endings, or `'unix'` (or `'linux'`, `'\n'`) for Unix-style LF line endings.
 - **xMailer** - A custom value for the X-Mailer header, which typically identifies the software that generated the email. Nodemailer does not add an X-Mailer header unless this option is set; setting it to `false` only matters for cancelling a value inherited from the transport `defaults`.
 - **dkim** - Per-message DKIM signing configuration that overrides the transport-level settings. See [DKIM signing](/dkim/) for details.
+- **signal** - An `AbortSignal` that cancels this one send, for example `AbortSignal.timeout(30_000)`. On SMTP and pooled SMTP an abort removes a queued message or closes the connection delivering it, and the send fails with an [`EABORT`](/errors#eabort) error. Other transports honor the signal only until the message is handed to them. An abort does not prove that the server did not accept the message. Added in v10.5.0. See [Cancelling a send](/guides/cancelling-a-send).
 
 The following example demonstrates setting a custom header and a specific date:
 

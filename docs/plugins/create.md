@@ -409,6 +409,10 @@ For API-based transports that need the message as structured data rather than a 
 If the transport object is an EventEmitter, its `'error'` and `'idle'` events are re-emitted by the transporter, which is how pooling transports signal readiness.
 :::
 
+### Cancellation
+
+A message sent with a [`signal`](/guides/cancelling-a-send) is cancelled by Nodemailer itself until your `send()` is called; after that the signal is ignored and your transport delivers the message as usual. To cancel a send that is already in progress, set `supportsAbortSignal: true` on the transport object and handle `mail.data.signal` in `send()`. The [cancellation guide](/guides/cancelling-a-send#custom-transports) lists what such a transport must do.
+
 ---
 
 ## Summary

@@ -53,6 +53,7 @@ Nodemailer uses specific error codes to categorize different types of failures. 
 | `EENVELOPE` | Envelope | Invalid mail envelope |
 | `EMAXRECIPIENTS` | Envelope | Recipient count exceeds maxRecipients |
 | `EMESSAGE` | Message | Message delivery error |
+| `EABORT` | Message | Send cancelled through its `signal` |
 | `EOTP` | Message | Invalid `otp` message property |
 | `ESTREAM` | Stream | Stream processing error |
 | `EPROTOCOL` | Protocol | Invalid SMTP server response |
@@ -348,6 +349,17 @@ The [`otp`](/message/#header-options) message property can not be turned into an
 - Pass the origin with its scheme and without a user name or password, for example `https://example.com` rather than `example.com`.
 - Use `http:` only for local development on `localhost` or a loopback address.
 
+#### EABORT
+
+The send was cancelled because the [`signal`](/guides/cancelling-a-send) passed in the message options aborted. The error is named `AbortError`, and its `cause` is the signal's `reason`. Added in v10.5.0.
+
+**Error scenarios:**
+- `Message sending aborted`
+
+**Troubleshooting:**
+- Check `err.cause` to see why the signal aborted, for example a `TimeoutError` from `AbortSignal.timeout()`.
+- Do not resend the message automatically. An abort that lands while the message data is being sent, or while waiting for the server's final reply, does not mean the server rejected the message, so a resend may deliver it twice.
+
 ### Stream errors
 
 #### ESTREAM
@@ -403,6 +415,7 @@ The transport configuration is invalid or uses a deprecated format.
 **Common causes:**
 - Using legacy SES configuration format (pre-v7.0.0)
 - Invalid transport options
+- A `signal` message option that is not an `AbortSignal` (`The signal option must be an AbortSignal`)
 
 **Troubleshooting:**
 - Update your configuration to use the current API format
