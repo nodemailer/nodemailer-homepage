@@ -101,6 +101,7 @@ These transports are included with Nodemailer and require no additional packages
 
 These transports are maintained by the community in separate npm packages. Install them with `npm install` and pass their exported function to `nodemailer.createTransport()`.
 
+- **coss.com** - Send email through coss.com's HTTP API ([Docs](https://coss.com/docs/integrations/nodemailer))
 - **Mailtrap** - Deliver messages to your Mailtrap inbox for safe email testing without sending to real recipients ([GitHub](https://github.com/railsware/mailtrap-nodejs#nodemailer-transport))
 - **Mailgun** - Send email through Mailgun's HTTP API ([npm](https://www.npmjs.com/package/nodemailer-mailgun-transport))
 - **Oveyon** - Send email through Oveyon's HTTP API ([npm](https://www.npmjs.com/package/@oveyon/nodemailer-transport))
